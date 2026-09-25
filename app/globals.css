@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0B0B0F;
+  --color-foreground: #E5E5E5;
+  --color-gold: #D4AF37;
+  --font-sans: 'Poppins', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+}
+
+body {
+  background: #0B0B0F;
+  color: #E5E5E5;
+  font-family: 'Poppins', sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'Playfair Display', serif;
+}
+
+.gold-text { color: #D4AF37; }
+
+.btn-gold {
+  background: linear-gradient(to right, #ca8a04, #fbbf24);
+  color: black;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 300ms;
+}
+.btn-gold:hover { transform: scale(1.05); }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeInUp 0.8s ease-out forwards; }
