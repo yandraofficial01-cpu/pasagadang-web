@@ -14,13 +14,17 @@ export default function LoginPage(){
     e.preventDefault()
     setLoading(true)
     try{
+      const formData = new URLSearchParams()
+      formData.append('username', email)
+      formData.append('password', password)
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`,{
         method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email, password })
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body: formData
       })
       const data = await res.json()
-      if(!res.ok) throw new Error(data.message || 'Login gagal')
+      if(!res.ok) throw new Error(data.detail || data.message || 'Login gagal')
       document.cookie = `admin_token=${data.token || data.access_token}; path=/; max-age=86400; SameSite=Lax`
       router.push('/admin')
     }catch(err){
