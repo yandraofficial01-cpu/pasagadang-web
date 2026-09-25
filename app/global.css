@@ -9,38 +9,27 @@
   --font-serif: 'Playfair Display', serif;
 }
 
-/* DEFAULT BUAT PUBLIC (DARK - OTOPADANG STYLE) */
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
+  background: #0B0B0F;
+  color: #E5E5E5;
+  font-family: 'Poppins', sans-serif;
 }
 
 h1, h2, h3 {
-  font-family: var(--font-serif);
+  font-family: 'Playfair Display', serif;
 }
 
-/* KHUSUS ADMIN - OVERRIDE JADI LIGHT KREM */
-body:has(.admin-light) {
-  background: #FAF7F2 !important;
-  color: #0B0B0F !important;
-}
-
-.gold-text { color: var(--color-gold); }
+.gold-text { color: #D4AF37; }
 
 .btn-gold {
-  background-image: linear-gradient(to right, #ca8a04, #fbbf24);
+  background: linear-gradient(to right, #ca8a04, #fbbf24);
   color: black;
   font-weight: 700;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   transition: all 300ms;
 }
-.btn-gold:hover {
-  box-shadow: 0 0 20px 0 rgb(234 179 8 / 0.5);
-  transform: scale(1.05);
-}
+.btn-gold:hover { transform: scale(1.05); }
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
