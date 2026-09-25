@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const ALLOWED_ORIGIN = 'https://otopadang-frontend.vercel.app'
+const ALLOWED_ORIGINS = [
+  'https://pasagadang-web.vercel.app',
+  'https://pasagadang.com',
+  'https://www.pasagadang.com',
+  'http://localhost:3000',
+  'http://localhost:3001'
+]
 
-function setCorsHeaders(response: NextResponse) {
-  response.headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN)
+function setCorsHeaders(request: NextRequest, response: NextResponse) {
+  const origin = request.headers.get('origin') || ''
+  // Kalo origin ada di whitelist, pakai origin itu. Kalo gak, pakai domain utama
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin)? origin : ALLOWED_ORIGINS[0]
+
+  response.headers.set('Access-Control-Allow-Origin', allowedOrigin)
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   response.headers.set('Access-Control-Allow-Credentials', 'true')
@@ -12,9 +22,9 @@ function setCorsHeaders(response: NextResponse) {
 }
 
 export function middleware(request: NextRequest) {
-  // HANDLE PREFLIGHT
+  // HANDLE PREFLIGHT - WAJIB UNTUK API
   if (request.method === 'OPTIONS') {
-    return setCorsHeaders(new NextResponse(null, { status: 200 }))
+    return setCorsHeaders(request, new NextResponse(null, { status: 200 }))
   }
 
   const adminToken = request.cookies.get('admin_token')?.value
@@ -23,53 +33,53 @@ export function middleware(request: NextRequest) {
 
   let response: NextResponse
 
-  // RULE 1: KALAU MASUK /admin TAPI BAWA TOKEN SHOWROOM -> HAPUS & TENDANG
+  // RULE 1: MASUK /admin TAPI BAWA TOKEN SHOWROOM -> TENDANG
   if (pathname.startsWith('/admin') && showroomToken) {
     response = NextResponse.redirect(new URL('/login-admin', request.url))
     response.cookies.delete('showroom_token')
     response.cookies.delete('showroom_id')
-    return setCorsHeaders(response)
+    return setCorsHeaders(request, response)
   }
 
-  // RULE 2: KALAU MASUK /dashboard TAPI BAWA TOKEN ADMIN -> HAPUS & TENDANG
+  // RULE 2: MASUK /dashboard TAPI BAWA TOKEN ADMIN -> TENDANG
   if (pathname.startsWith('/dashboard') && adminToken) {
     response = NextResponse.redirect(new URL('/login-showroom', request.url))
     response.cookies.delete('admin_token')
-    return setCorsHeaders(response)
+    return setCorsHeaders(request, response)
   }
 
-  // RULE 3: PROTEKSI /admin - CUKUP CEK ADA TOKEN, JANGAN CEK ROLE
-  if (pathname.startsWith('/admin')) {
-    if (!adminToken) { // HAPUS CEK ROLE DI SINI
+  // RULE 3: PROTEKSI /admin
+  if (pathname.startsWith('/admin') &&!pathname.startsWith('/admin/login')) {
+    if (!adminToken) {
       response = NextResponse.redirect(new URL('/login-admin', request.url))
       response.cookies.delete('admin_token')
-      return setCorsHeaders(response)
+      return setCorsHeaders(request, response)
     }
   }
 
-  // RULE 4: PROTEKSI /dashboard - CUKUP CEK ADA TOKEN
+  // RULE 4: PROTEKSI /dashboard
   if (pathname.startsWith('/dashboard')) {
-    if (!showroomToken) { // HAPUS CEK ROLE DI SINI
+    if (!showroomToken) {
       response = NextResponse.redirect(new URL('/login-showroom', request.url))
       response.cookies.delete('showroom_token')
       response.cookies.delete('showroom_id')
-      return setCorsHeaders(response)
+      return setCorsHeaders(request, response)
     }
   }
 
   // RULE 5: UDAH LOGIN JANGAN KE LOGIN LAGI
   if (pathname === '/login-admin' && adminToken) {
     response = NextResponse.redirect(new URL('/admin', request.url))
-    return setCorsHeaders(response)
+    return setCorsHeaders(request, response)
   }
 
   if (pathname === '/login-showroom' && showroomToken) {
     response = NextResponse.redirect(new URL('/dashboard', request.url))
-    return setCorsHeaders(response)
+    return setCorsHeaders(request, response)
   }
 
   response = NextResponse.next()
-  return setCorsHeaders(response)
+  return setCorsHeaders(request, response)
 }
 
 export const config = {
