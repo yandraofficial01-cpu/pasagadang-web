@@ -1,1 +1,1 @@
-
+export default function Home(){return <main className="p-6 max-w-7xl mx-auto"><h1 className="text-4xl font-black">PASAGADANG.COM</h1><p className="text-gray-500 mt-2">Pasa Material & Rumah Gadang #1 di Padang</p><div className="grid grid-cols-2 gap-4 mt-6"><a href="/properties" className="bg-black text-white p-6 rounded-2xl font-black">Lihat Properti</a><a href="/calculator" className="bg-white p-6 rounded-2xl font-black border">Hitung KPR</a></div></main>}
