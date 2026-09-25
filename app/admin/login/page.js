@@ -31,23 +31,22 @@ export default function LoginPage(){
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2] p-4 relative overflow-hidden">
-      {/* Back Button */}
-      <Link href="/" className="absolute top-6 left-6 z-10 bg-white border border-black/5 rounded-full px-5 py-2.5 text-[11px] font-bold tracking-widest hover:bg-black hover:text-white transition-all flex items-center gap-2">
+    <div className="admin-light min-h-screen flex items-center justify-center bg-[#FAF7F2] p-4 relative overflow-hidden">
+      <Link href="/" className="absolute top-6 left-6 z-20 bg-white border border-black/10 rounded-full px-5 py-2.5 text-[11px] font-black tracking-widest hover:bg-black hover:text-white transition-all">
         ← KEMBALI
       </Link>
 
-      <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-[#E8DCCF] rounded-full blur-[120px] opacity-60" />
-      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-[#D6CFC4] rounded-full blur-[120px] opacity-50" />
+      <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-[#E8DCCF] rounded-full blur-[120px] opacity-60 pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-[#D6CFC4] rounded-full blur-[120px] opacity-50 pointer-events-none" />
 
       <div className="bg-white/90 backdrop-blur-xl p-[32px] rounded-[32px] border border-black/[0.06] shadow-[0_32px_64px_rgba(0,0,0,0.08)] w-full max-w-[400px] relative mt-10">
         <div className="flex justify-between items-start">
           <div className="w-12 h-12 bg-black rounded-[14px] flex items-center justify-center text-white font-black text-[20px]">P</div>
-          <div className="text-[10px] font-bold tracking-[0.2em] bg-[#F9F5F0] border px-3 py-1.5 rounded-full">CMS v2.0</div>
+          <div className="text-[10px] font-bold tracking-[0.2em] bg-[#F9F5F0] border px-3 py-1.5 rounded-full text-black">CMS v2.0</div>
         </div>
 
-        <h1 className="text-[28px] font-black tracking-tighter leading-none mt-8">LOGIN ADMIN</h1>
-        <p className="text-[12px] text-zinc-500 mt-2 font-medium tracking-wide">Pasa Gadang • Management System</p>
+        <h1 className="text-[28px] font-black tracking-tighter leading-none mt-8 text-black font-serif">LOGIN ADMIN</h1>
+        <p className="text-[12px] text-zinc-500 mt-2 font-medium tracking-wide font-sans">Pasa Gadang • Management System</p>
 
         <form onSubmit={handleLogin} className="mt-8">
           <div className="space-y-3.5">
@@ -57,7 +56,7 @@ export default function LoginPage(){
               placeholder="Email"
               type="email"
               required
-              className="w-full bg-[#F9F6F1] border border-black/[0.04] p-4 px-6 rounded-[16px] text-[14px] font-medium outline-none focus:bg-white focus:border-black focus:ring-[3px] focus:ring-black/5 transition-all"
+              className="w-full bg-[#F9F6F1] border border-black/[0.04] p-4 px-6 rounded-[16px] text-[14px] font-medium outline-none focus:bg-white focus:border-black focus:ring-[3px] focus:ring-black/5 transition-all text-black"
             />
             <div className="relative">
               <input
@@ -66,19 +65,26 @@ export default function LoginPage(){
                 placeholder="Password"
                 type={show? "text" : "password"}
                 required
-                className="w-full bg-[#F9F6F1] border border-black/[0.04] p-4 px-6 pr-16 rounded-[16px] text-[14px] font-medium outline-none focus:bg-white focus:border-black focus:ring-[3px] focus:ring-black/5 transition-all"
+                className="w-full bg-[#F9F6F1] border border-black/[0.04] p-4 px-6 pr-16 rounded-[16px] text-[14px] font-medium outline-none focus:bg-white focus:border-black focus:ring-[3px] focus:ring-black/5 transition-all text-black"
               />
-              <button type="button" onClick={()=>setShow(!show)} className="absolute right-2 top-2 bottom-2 px-4 text-[11px] font-black text-zinc-400 hover:text-black">
+              <button type="button" onClick={()=>setShow(!show)} className="absolute right-2 top-2 bottom-2 px-4 text-[11px] font-black text-zinc-400 hover:text-black transition">
                 {show? 'HIDE' : 'SHOW'}
               </button>
             </div>
           </div>
 
-          <button disabled={loading} className="w-full mt-6 bg-black text-white py-[16px] rounded-[16px] font-black text-[13px] tracking-[0.15em] hover:bg-zinc-900 active:scale-[0.98] transition-all shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
+          <button disabled={loading} className="w-full mt-6 bg-black text-white py-[16px] rounded-[16px] font-black text-[13px] tracking-[0.15em] hover:bg-zinc-900 active:scale-[0.98] transition-all shadow-[0_10px_20px_rgba(0,0,0,0.15)] disabled:opacity-50">
             {loading? 'MEMPROSES...' : 'MASUK →'}
           </button>
+
+          <div className="flex items-center gap-3 my-6">
+            <div className="h-[1px] flex-1 bg-black/5"></div>
+            <span className="text-[9px] tracking-[0.2em] text-zinc-400 font-bold">SECURE ACCESS</span>
+            <div className="h-[1px] flex-1 bg-black/5"></div>
+          </div>
+          <p className="text-center text-[10px] text-zinc-400">© 2026 Pasa Gadang Sultan</p>
         </form>
       </div>
     </div>
   )
-    }
+}
