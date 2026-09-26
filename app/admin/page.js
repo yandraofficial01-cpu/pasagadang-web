@@ -1,8 +1,10 @@
 'use client'
 import { useRouter } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 
 export default function AdminDashboard(){
   const router = useRouter()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const menus = [
     { label: 'PROPERTI', desc: 'Rumah, Tanah, Ruko', path: '/admin/properti', icon: '🏠' },
@@ -12,15 +14,38 @@ export default function AdminDashboard(){
     { label: 'PENGUNJUNG', desc: 'Inquiry & Leads', path: '/admin/pengunjung', icon: '👥' },
   ]
 
+  const doLogout = () => {
+    document.cookie='admin_token=; path=/; max-age=0'
+    localStorage.removeItem('token')
+    router.push('/admin/login')
+  }
+
+  useEffect(() => {
+    const resetTimer = () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      // 30 menit = 30 * 60 * 1000
+      timeoutRef.current = setTimeout(() => {
+        alert('Sesi habis, login lagi bro')
+        doLogout()
+      }, 30 * 60 * 1000)
+    }
+
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart']
+    events.forEach(e => window.addEventListener(e, resetTimer))
+    resetTimer() // mulai timer pas masuk admin
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      events.forEach(e => window.removeEventListener(e, resetTimer))
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-[#0B0B0F] text-[#E5E5E5] p-6">
       <div className="max-w-4xl mx-auto">
         <div className="bg-[#16161E] p-5 rounded-[20px] border border-white/10 flex justify-between items-center">
           <p className="font-black tracking-widest text-sm">PASA GADANG <span className="text-[#D4AF37]">ADMIN</span></p>
-          <button onClick={()=>{
-            document.cookie='admin_token=; path=/; max-age=0'
-            router.push('/login')
-          }} className="bg-white text-black px-5 py-2 rounded-full text-xs font-black">LOGOUT</button>
+          <button onClick={doLogout} className="bg-white text-black px-5 py-2 rounded-full text-xs font-black">LOGOUT</button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4 mt-8">
@@ -36,4 +61,4 @@ export default function AdminDashboard(){
       </div>
     </div>
   )
-}
+  }
