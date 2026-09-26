@@ -25,7 +25,7 @@ export default function AdminDashboard(){
   }
 
   useEffect(() => {
-    let t: any
+    let t
     const resetTimer = () => {
       clearTimeout(t)
       t = setTimeout(() => {
