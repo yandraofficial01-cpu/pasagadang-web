@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 
 export default function AdminDashboard(){
   const router = useRouter()
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<any>(null)
 
   const menus = [
     { label: 'PROPERTI', desc: 'Rumah, Tanah, Ruko', path: '/admin/properti', icon: '🏠' },
@@ -23,16 +23,15 @@ export default function AdminDashboard(){
   useEffect(() => {
     const resetTimer = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      // 30 menit = 30 * 60 * 1000
       timeoutRef.current = setTimeout(() => {
-        alert('Sesi habis, login lagi bro')
+        alert('Sesi habis 15 menit, login lagi bro')
         doLogout()
-      }, 30 * 60 * 1000)
+      }, 15 * 60 * 1000)
     }
 
     const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart']
     events.forEach(e => window.addEventListener(e, resetTimer))
-    resetTimer() // mulai timer pas masuk admin
+    resetTimer()
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
