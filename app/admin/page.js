@@ -1,10 +1,13 @@
 'use client'
+
+export const dynamic = 'force-dynamic'
+
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 export default function AdminDashboard(){
   const router = useRouter()
-  const timeoutRef = useRef<any>(null)
+  const timeoutRef = useRef(null)
 
   const menus = [
     { label: 'PROPERTI', desc: 'Rumah, Tanah, Ruko', path: '/admin/properti', icon: '🏠' },
@@ -16,14 +19,17 @@ export default function AdminDashboard(){
 
   const doLogout = () => {
     document.cookie='admin_token=; path=/; max-age=0'
-    localStorage.removeItem('token')
+    if (typeof window!== 'undefined') {
+      localStorage.removeItem('token')
+    }
     router.push('/admin/login')
   }
 
   useEffect(() => {
+    let t
     const resetTimer = () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(() => {
+      clearTimeout(t)
+      t = setTimeout(() => {
         alert('Sesi habis 15 menit, login lagi bro')
         doLogout()
       }, 15 * 60 * 1000)
@@ -34,7 +40,7 @@ export default function AdminDashboard(){
     resetTimer()
 
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      clearTimeout(t)
       events.forEach(e => window.removeEventListener(e, resetTimer))
     }
   }, [])
@@ -60,4 +66,4 @@ export default function AdminDashboard(){
       </div>
     </div>
   )
-  }
+              }
