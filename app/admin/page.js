@@ -3,11 +3,10 @@
 export const dynamic = 'force-dynamic'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 
 export default function AdminDashboard(){
   const router = useRouter()
-  const timeoutRef = useRef(null)
 
   const menus = [
     { label: 'PROPERTI', desc: 'Rumah, Tanah, Ruko', path: '/admin/properti', icon: '🏠' },
@@ -26,7 +25,7 @@ export default function AdminDashboard(){
   }
 
   useEffect(() => {
-    let t
+    let t: any
     const resetTimer = () => {
       clearTimeout(t)
       t = setTimeout(() => {
@@ -66,4 +65,4 @@ export default function AdminDashboard(){
       </div>
     </div>
   )
-              }
+}
