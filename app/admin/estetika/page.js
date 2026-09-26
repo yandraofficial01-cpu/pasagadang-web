@@ -1,1 +1,16 @@
-
+'use client'
+import {useEffect,useState} from 'react'
+import AdminLayout from '../components/AdminLayout'
+const API=process.env.NEXT_PUBLIC_API_URL
+export default function Page(){
+  const [data,setData]=useState([]);const [form,setForm]=useState({nama:'',kategori:'',harga:0,satuan:'pcs',ukuran:'',deskripsi:'',foto_bahan_1:'',foto_jadi_1:'',wa_number:'',badge:''});const [editId,setEditId]=useState(null)
+  const tok=()=>document.cookie.split('admin_token=')[1]?.split(';')[0]
+  const load=async()=>{const r=await fetch(`${API}/estetikas`,{headers:{Authorization:`Bearer ${tok()}`}});const j=await r.json();setData(Array.isArray(j)?j:j.data||[])}
+  useEffect(()=>{load()},[])
+  const submit=async(e)=>{e.preventDefault();await fetch(editId?`${API}/estetikas/${editId}`:`${API}/estetikas`,{method:editId?'PUT':'POST',headers:{Authorization:`Bearer ${tok()}`, 'Content-Type':'application/json'},body:JSON.stringify(form)});load();setEditId(null)}
+  return(<AdminLayout title={`ESTETIKA (${data.length})`}><div className="grid lg:grid-cols-[380px_1fr] gap-6 mt-4"><form onSubmit={submit} className="bg-[#16161E] border border-white/10 p-5 rounded-[24px] space-y-2 h-fit">
+  <input value={form.nama} onChange={e=>setForm({...form,nama:e.target.value})} placeholder="Nama Estetika" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm" required/>
+  <div className="grid grid-cols-2 gap-2"><input value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} placeholder="Kategori" className="bg-black/50 border border-white/10 p-3 rounded-xl text-sm" required/><input type="number" value={form.harga} onChange={e=>setForm({...form,harga:parseInt(e.target.value)||0})} placeholder="Harga" className="bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/></div>
+  <input value={form.foto_bahan_1} onChange={e=>setForm({...form,foto_bahan_1:e.target.value})} placeholder="Foto Bahan 1 URL" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/><input value={form.foto_jadi_1} onChange={e=>setForm({...form,foto_jadi_1:e.target.value})} placeholder="Foto Jadi 1 URL" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/><textarea value={form.deskripsi} onChange={e=>setForm({...form,deskripsi:e.target.value})} placeholder="Deskripsi" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm h-20"/><button className="w-full bg-[#D4AF37] text-black py-3 rounded-xl font-black text-xs">{editId?'UPDATE':'SIMPAN'}</button></form>
+  <div className="bg-[#16161E] border border-white/10 p-5 rounded-[24px] space-y-2">{data.map(i=><div key={i.id} className="bg-black/40 border border-white/5 p-3 rounded-xl flex justify-between"><div><p className="text-sm font-bold">{i.nama}</p><p className="text-[11px] text-zinc-500">{i.kategori} - Rp{i.harga}</p></div><div className="flex gap-1"><button onClick={()=>{setForm(i);setEditId(i.id)}} className="bg-white/10 px-3 py-1 rounded-full text-[10px]">EDIT</button><button onClick={async()=>{await fetch(`${API}/estetikas/${i.id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok()}`}});load()}} className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-[10px]">HAPUS</button></div></div>)}</div></div></AdminLayout>)
+  }
