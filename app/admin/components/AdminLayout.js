@@ -1,6 +1,5 @@
 'use client'
 import { useRouter } from 'next/navigation'
-
 export default function AdminLayout({ title, children }){
   const router = useRouter()
   return (
@@ -12,4 +11,4 @@ export default function AdminLayout({ title, children }){
       {children}
     </div>
   )
-
+}
