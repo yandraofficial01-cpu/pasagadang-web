@@ -34,14 +34,12 @@ export default function MaterialsPage(){
   const waLink=(m,qty,total)=>{
     const wa62=getWA62(m.wa_number)
     const harga=m.harga_promo && m.harga_promo < m.harga? m.harga_promo : m.harga
-    // FIX: link sekarang pakai slug biar SEO & gak 404
-    const url = typeof window!=='undefined'? `${window.location.origin}/material/${m.slug||m.id}` : ''
+    const url = typeof window!=='undefined'? `${window.location.origin}/materials/${m.slug||m.id}` : ''
     return `https://wa.me/${wa62}?text=Halo%20Pasa%20Gadang%20saya%20mau%20pesan%20${encodeURIComponent(m.nama)}%0AJumlah:%20${qty}%20${m.satuan}%0ATotal:%20Rp%20${Number(total).toLocaleString('id-ID')}%0ALink:%20${encodeURIComponent(url)}`
   }
 
   const handleShare=async(m)=>{
-    // FIX: sekarang pakai slug, sudah tidak 404 karena lu sudah punya app/material/[slug]/page.js
-    const url = `${window.location.origin}/material/${m.slug||m.id}`
+    const url = `${window.location.origin}/materials/${m.slug||m.id}`
     const text = `${m.nama} - Rp ${Number(m.harga).toLocaleString('id-ID')}/${m.satuan} - ${m.brand}`
     if(navigator.share){
       try{ await navigator.share({title:m.nama, text, url}) }catch{}
@@ -68,7 +66,7 @@ export default function MaterialsPage(){
         <div className="flex gap-2">
           <Link href="/" className="px-5 py-2.5 rounded-full font-black text-[11px] bg-[#FFFBF0] border border-[#D4AF37]/30 text-black">BERANDA</Link>
           <Link href="/properties" className="px-5 py-2.5 rounded-full font-black text-[11px] bg-[#FFFBF0] border border-[#D4AF37]/30 text-black">PROPERTI</Link>
-          <Link href="/material" className="px-5 py-2.5 rounded-full font-black text-[11px] bg-black text-white">MATERIAL</Link>
+          <Link href="/materials" className="px-5 py-2.5 rounded-full font-black text-[11px] bg-black text-white">MATERIAL</Link>
         </div>
       </nav>
 
@@ -109,13 +107,13 @@ export default function MaterialsPage(){
           const total = hargaAktif * qty
           return(
           <div key={m.id} className="bg-white rounded-[28px] overflow-hidden border-[2px] border-[#D4AF37] shadow-[0_10px_40px_rgba(212,175,55,0.18)] flex flex-col">
-            <Link href={`/material/${m.slug||m.id}`} className="h-[260px] relative bg-white flex items-center justify-center p-6 cursor-pointer">
+            <Link href={`/materials/${m.slug||m.id}`} className="h-[260px] relative bg-white flex items-center justify-center p-6 cursor-pointer">
               <img src={m.foto_1} alt={m.nama} className="w-full h-full object-contain"/>
               {m.badge && <span className={`absolute top-4 left-4 text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest ${m.badge.toLowerCase()==='promo'?'bg-red-500 text-white':'bg-[#D4AF37] text-black'}`}>{m.badge.toUpperCase()}</span>}
               <div className="absolute bottom-4 left-4 bg-black text-white text-[11px] font-bold px-4 py-2 rounded-full">{m.kategori?.toUpperCase()} • {m.brand?.toUpperCase()}</div>
             </Link>
             <div className="p-6 flex flex-col flex-1">
-              <Link href={`/material/${m.slug||m.id}`}><h3 className="font-black text-[18px] text-black leading-tight hover:text-[#B8960C]">{m.nama}</h3></Link>
+              <Link href={`/materials/${m.slug||m.id}`}><h3 className="font-black text-[18px] text-black leading-tight hover:text-[#B8960C]">{m.nama}</h3></Link>
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="bg-[#FFFBF0] border border-[#D4AF37]/30 p-3 rounded-2xl"><div className="text-[10px] font-bold text-black/50 uppercase tracking-widest">Satuan</div><div className="text-[15px] font-black text-black mt-1">{m.satuan}</div></div>
                 <div className="bg-[#FFFBF0] border border-[#D4AF37]/30 p-3 rounded-2xl"><div className="text-[10px] font-bold text-black/50 uppercase tracking-widest">Ukuran</div><div className="text-[15px] font-black text-black mt-1">{m.ukuran||'-'}</div></div>
