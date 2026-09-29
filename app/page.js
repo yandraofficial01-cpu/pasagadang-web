@@ -9,7 +9,8 @@ export default function Home(){
   const [materials, setMaterials] = useState([])
   const [estetikas, setEstetikas] = useState([])
   const [blogs, setBlogs] = useState([])
-  const [zoom, setZoom] = useState(null)
+  const [zoomList, setZoomList] = useState([])
+  const [zoomIdx, setZoomIdx] = useState(0)
   const API = process.env.NEXT_PUBLIC_API_URL
 
   const COLORS = { gold: '#D4AF37', cream: '#FFFBF0', dark: '#0B0B0F' }
@@ -30,12 +31,40 @@ export default function Home(){
   }
   const isDark = theme==='dark'
 
+  // WA LINKS
   const waLink = (p)=>{
     const raw = String(p.wa_number||'08979879518').replace(/[^0-9]/g,'')
     const wa62 = raw.startsWith('0')? '62'+raw.slice(1) : raw
     const text = encodeURIComponent(`Halo Pasa Gadang, saya mau tanya ${p.judul} - ${p.kecamatan||''} - LT ${p.luas_tanah}m² LB ${p.luas_bangunan}m² - Rp ${Number(p.harga_cash||0).toLocaleString('id-ID')}\nLink: https://pasagadang.com/properties/${p.slug}`)
     return `https://wa.me/${wa62}?text=${text}`
   }
+  const waEstetika = (e)=>{
+    const raw = '08979879518'.replace(/[^0-9]/g,'')
+    const wa62 = raw.startsWith('0')? '62'+raw.slice(1) : raw
+    const text = encodeURIComponent(`Halo Pasa Gadang, saya mau tanya ${e.nama} - ${e.kategori} ${e.ukuran} - Rp ${Number(e.harga||0).toLocaleString('id-ID')} / ${e.satuan}\nLink: https://pasagadang-web.vercel.app/estetika/${e.slug||e.id}`)
+    return `https://wa.me/${wa62}?text=${text}`
+  }
+  const waMaterial = (m)=>{
+    const raw = '08979879518'.replace(/[^0-9]/g,'')
+    const wa62 = raw.startsWith('0')? '62'+raw.slice(1) : raw
+    const text = encodeURIComponent(`Halo Pasa Gadang, saya mau tanya ${m.nama} - ${m.brand} - Rp ${Number(m.harga||0).toLocaleString('id-ID')}\nLink: https://pasagadang-web.vercel.app/materials/${m.slug||m.id}`)
+    return `https://wa.me/${wa62}?text=${text}`
+  }
+  const shareLink = (url, title)=>{
+    if(navigator.share){ navigator.share({title, url}).catch(()=>{}) }
+    else { navigator.clipboard.writeText(url); alert('Link disalin! '+url) }
+  }
+
+  // ZOOM SLIDE LOGIC
+  const openZoom = (imgs, idx=0)=>{
+    const clean = imgs.filter(Boolean)
+    if(clean.length===0) return
+    setZoomList(clean)
+    setZoomIdx(idx)
+  }
+  const closeZoom = ()=>{ setZoomList([]); setZoomIdx(0) }
+  const nextZoom = (e)=>{ e?.stopPropagation(); setZoomIdx(i=> (i+1)%zoomList.length ) }
+  const prevZoom = (e)=>{ e?.stopPropagation(); setZoomIdx(i=> (i-1+zoomList.length)%zoomList.length ) }
 
   return (
     <main className={`${isDark? 'bg-[#0B0B0F] text-white' : 'bg-[#FFFBF0] text-black'} min-h-screen transition-colors duration-300`}>
@@ -56,7 +85,6 @@ export default function Home(){
       {open && (
         <div className={`px-6 py-4 space-y-0 shadow-xl border-b ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/5'}`}>
           <Link href="/properties" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>01 • PROPERTI</Link>
-          {/* FIX: /estetika tanpa S */}
           <Link href="/estetika" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>02 • ESTETIKA</Link>
           <Link href="/materials" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>03 • MATERIAL</Link>
           <Link href="/blogs" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>04 • BLOG</Link>
@@ -73,31 +101,24 @@ export default function Home(){
             <line x1="170" y1="290" x2="45" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.5s'}}/>
             <line x1="170" y1="290" x2="295" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.7s'}}/>
           </svg>
-
-          {/* FIX: bulatan tengah dikecilin + z-index 10 biar gak nutupin tombol, tombol di atasnya */}
           <div className="absolute top-1/2 left-1/2 w-[82px] h-[82px] rounded-full flex flex-col items-center justify-center text-black font-black z-10" style={{background:COLORS.gold, transform:'translate(-50%,-50%)', animation:'float 3s ease-in-out infinite', boxShadow: isDark? '0 0 0 8px #0B0B0F, 0 8px 30px rgba(212,175,55,0.5)' : '0 0 0 8px #FFFBF0, 0 8px 24px rgba(212,175,55,0.4)'}}>
             <div className="text-[8px] tracking-widest opacity-60">PASA</div><div className="text-[13px]">GADANG</div><div className="text-[6px] tracking-[0.3em]">.COM</div>
           </div>
-
           <Link href="/properties" className="absolute top-[12px] left-1/2 -translate-x-1/2 w-[200px] z-20">
             <div className={`p-3.5 rounded-[20px] flex justify-between items-center border shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${isDark?'bg-white text-black border-white':'bg-white text-black border-black/5'}`}>
               <div><div className="text-[10px] font-black opacity-50">01 • {properties.length} UNIT</div><div className="font-black text-[14px] mt-0.5">PROPERTI</div></div><div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
-
-          {/* FIX: posisi kiri kanan dijauhin biar gak ketutup bulatan */}
           <Link href="/blogs" className="absolute top-1/2 left-0 -translate-y-1/2 w-[140px] z-30">
             <div className={`p-3.5 rounded-[18px] flex justify-between items-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] ${isDark?'bg-[#1A1A1F] text-white border border-white/10':'bg-black text-white'}`}>
               <div><div className="text-[10px] font-bold opacity-60">04 • TIPS</div><div className="font-black text-[14px] mt-0.5">BLOG</div></div><div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
-
           <Link href="/estetika" className="absolute top-1/2 right-0 -translate-y-1/2 w-[140px] z-30">
             <div className={`p-3.5 rounded-[18px] flex justify-between items-center border shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${isDark?'bg-white text-black border-white':'bg-white text-black border-black/5'}`}>
               <div><div className="text-[10px] font-bold opacity-50">02 • ROSTER</div><div className="font-black text-[13px] mt-0.5">ESTETIKA</div></div><div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
-
           <Link href="/materials" className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[200px] z-20">
             <div className="p-3.5 rounded-[20px] flex justify-between items-center shadow-[0_8px_24px_rgba(0,0,0,0.2)]" style={{background:COLORS.gold}}>
               <div><div className="text-[10px] font-black opacity-70">03 • SEMEN, BESI</div><div className="font-black text-[14px] mt-0.5 text-black">MATERIAL</div></div><div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-[12px]">→</div>
@@ -107,18 +128,20 @@ export default function Home(){
       </div>
 
       <div className="max-w-[400px] mx-auto px-6 pb-20 space-y-8 mt-2">
-        {/* PROPERTI - TETAP 210px TINGGI */}
+        {/* PROPERTI */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[16px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2">
             {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[260px] h-[380px] border rounded-[22px] animate-pulse ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
-            properties.map(p=>(
+            properties.map(p=>{
+              const imgs = [p.thumbnail, p.foto_1, p.foto_2, p.foto_3, p.foto_4].filter(Boolean)
+              return(
               <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
-                <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" onClick={()=>setZoom(p.thumbnail||p.foto_1||p.foto_2)}>
-                  <img src={p.thumbnail||p.foto_1||p.foto_2} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
-                  <div className="absolute top-3 left-3 bg-[#D4AF37] text-black text-[10px] font-black px-3 py-1 rounded-full">{p.tipe_transaksi?.toUpperCase()||'JUAL'} {p.badge?`• ${p.badge}`:''}</div>
+                <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" onClick={()=>openZoom(imgs,0)}>
+                  <img src={imgs[0]} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
+                  <div className="absolute top-3 left-3 bg-[#D4AF37] text-black text-[10px] font-black px-3 py-1 rounded-full">{p.tipe_transaksi?.toUpperCase()||'JUAL'}</div>
                   <div className="absolute bottom-3 left-3 bg-black/75 backdrop-blur text-white text-[10px] px-3 py-1.5 rounded-full border border-white/10">{p.kecamatan||'Padang'} • {p.sertifikat||'SHM'}</div>
-                  <div className="absolute top-3 right-3 bg-black/60 text-white text-[9px] px-2 py-1 rounded-full">🔍</div>
+                  <div className="absolute top-3 right-3 bg-black/60 text-white text-[9px] px-2 py-1 rounded-full">🔍 {imgs.length}</div>
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <div className="font-bold text-[14px] leading-tight line-clamp-2 min-h-[36px]">{p.judul}</div>
@@ -135,49 +158,81 @@ export default function Home(){
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
-        {/* FIX: ESTETIKA - DITINGGIKAN SAMA KAYAK PROPERTI 210px + BAHAN | TERPASANG */}
+        {/* ESTETIKA - ZOOM + SLIDE + WA + BAGIKAN */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">ESTETIKA <span style={{color:COLORS.gold}}>ROSTER • GRANIT</span></h2><Link href="/estetika" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2">
-            {estetikas.map(e=>(
-              <Link key={e.id} href={`/estetika/${e.slug||e.id}`} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
-                <div className="h-[210px] grid grid-cols-2">
+            {estetikas.map(e=>{
+              const imgs = [e.foto_bahan_1, e.foto_bahan_2, e.foto_jadi_1, e.foto_jadi_2, e.foto_jadi_3].filter(Boolean)
+              return(
+              <div key={e.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
+                <div className="h-[210px] grid grid-cols-2 cursor-zoom-in" onClick={()=>openZoom(imgs,0)}>
                   <div className="relative bg-[#FAF7F0]"><img src={e.foto_bahan_1} className="w-full h-full object-cover"/><span className="absolute bottom-2 left-2 bg-black text-white text-[8px] font-black px-2 py-1 rounded-full">BAHAN</span></div>
-                  <div className="relative bg-black"><img src={e.foto_jadi_1||e.foto_bahan_1} className="w-full h-full object-cover"/><span className="absolute bottom-2 left-2 bg-[#D4AF37] text-black text-[8px] font-black px-2 py-1 rounded-full">TERPASANG</span></div>
+                  <div className="relative bg-black"><img src={e.foto_jadi_1||e.foto_bahan_1} className="w-full h-full object-cover"/><span className="absolute bottom-2 left-2 bg-[#D4AF37] text-black text-[8px] font-black px-2 py-1 rounded-full">TERPASANG</span><span className="absolute top-2 right-2 bg-black/60 text-white text-[8px] px-2 py-1 rounded-full">🔍 {imgs.length}</span></div>
                 </div>
-                <div className="p-4">
-                  <div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{e.nama}</div>
+                <div className="p-4 flex flex-col flex-1">
+                  <Link href={`/estetika/${e.slug||e.id}`}><div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{e.nama}</div></Link>
                   <div className="text-[10px] font-bold opacity-60 mt-1 uppercase">{e.kategori} • {e.ukuran}</div>
                   <div className="font-black text-[16px] mt-2" style={{color:COLORS.gold}}>Rp {Number(e.harga||0).toLocaleString('id-ID')} / {e.satuan}</div>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <a href={waEstetika(e)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
+                    <button onClick={()=>shareLink(`https://pasagadang-web.vercel.app/estetika/${e.slug||e.id}`, e.nama)} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>↗ BAGIKAN</button>
+                  </div>
                 </div>
-              </Link>
-            ))}
+              </div>
+            )})}
           </div>
         </div>
 
-        {/* FIX: MATERIAL - DITINGGIKAN SAMA 210px */}
+        {/* MATERIAL - ZOOM + SLIDE + WA + BAGIKAN */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">MATERIAL <span style={{color:COLORS.gold}}>BANGUNAN</span></h2><Link href="/materials" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2">
-            {materials.map(m=>(
-              <Link key={m.id} href={`/materials/${m.slug||m.id}`} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37'}}>
-                <div className="h-[210px] bg-white relative flex items-center justify-center p-4"><img src={m.foto_1} className="w-full h-full object-contain"/><div className="absolute top-3 left-3 bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full">{m.kategori?.toUpperCase()} • {m.brand?.toUpperCase()}</div></div>
-                <div className="p-4">
-                  <div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{m.nama}</div>
+            {materials.map(m=>{
+              const imgs = [m.foto_1, m.foto_2, m.foto_3].filter(Boolean)
+              return(
+              <div key={m.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37'}}>
+                <div className="h-[210px] bg-white relative flex items-center justify-center p-4 cursor-zoom-in" onClick={()=>openZoom(imgs,0)}>
+                  <img src={imgs[0]} className="w-full h-full object-contain"/>
+                  <div className="absolute top-3 left-3 bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full">{m.kategori?.toUpperCase()} • {m.brand?.toUpperCase()}</div>
+                  <div className="absolute top-3 right-3 bg-black/60 text-white text-[9px] px-2 py-1 rounded-full">🔍 {imgs.length}</div>
+                </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <Link href={`/materials/${m.slug||m.id}`}><div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{m.nama}</div></Link>
                   <div className="text-[10px] font-bold opacity-60 mt-1">{m.brand}</div>
                   <div className="font-black text-[15px] mt-2" style={{color:COLORS.gold}}>Rp {Number(m.harga||0).toLocaleString('id-ID')}</div>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <a href={waMaterial(m)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
+                    <button onClick={()=>shareLink(`https://pasagadang-web.vercel.app/materials/${m.slug||m.id}`, m.nama)} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>↗ BAGIKAN</button>
+                  </div>
                 </div>
-              </Link>
-            ))}
+              </div>
+            )})}
           </div>
         </div>
       </div>
 
-      {zoom && (<div onClick={()=>setZoom(null)} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-4"><img src={zoom} className="max-w-full max-h-[85vh] rounded-2xl object-contain border-2 border-[#D4AF37]"/><button className="absolute top-6 right-6 bg-white text-black w-10 h-10 rounded-full font-black">X</button></div>)}
+      {/* ZOOM MODAL - SUPPORT SLIDE */}
+      {zoomList.length>0 && (
+        <div onClick={closeZoom} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-4">
+          <button onClick={closeZoom} className="absolute top-6 right-6 bg-white text-black w-10 h-10 rounded-full font-black z-10">X</button>
+          <button onClick={prevZoom} className="absolute left-3 md:left-8 bg-white/20 hover:bg-white text-white hover:text-black w-10 h-10 rounded-full font-black text-[20px] backdrop-blur z-10">‹</button>
+          <div className="relative max-w-full max-h-[85vh] flex flex-col items-center" onClick={e=>e.stopPropagation()}>
+            <img src={zoomList[zoomIdx]} className="max-w-full max-h-[75vh] rounded-2xl object-contain border-2 border-[#D4AF37]"/>
+            <div className="flex items-center gap-2 mt-4">
+              <span className="text-white text-[12px] font-bold tracking-widest">{zoomIdx+1} / {zoomList.length}</span>
+              <div className="flex gap-1.5 ml-2">
+                {zoomList.map((_,i)=><div key={i} className={`w-1.5 h-1.5 rounded-full ${i===zoomIdx?'bg-[#D4AF37] w-6':'bg-white/40'}`}></div>)}
+              </div>
+            </div>
+          </div>
+          <button onClick={nextZoom} className="absolute right-3 md:right-8 bg-white/20 hover:bg-white text-white hover:text-black w-10 h-10 rounded-full font-black text-[20px] backdrop-blur z-10">›</button>
+        </div>
+      )}
     </main>
   )
 }
