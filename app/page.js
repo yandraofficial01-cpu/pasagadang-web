@@ -56,7 +56,8 @@ export default function Home(){
       {open && (
         <div className={`px-6 py-4 space-y-0 shadow-xl border-b ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/5'}`}>
           <Link href="/properties" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>01 • PROPERTI</Link>
-          <Link href="/estetikas" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>02 • ESTETIKA</Link>
+          {/* FIX: /estetika tanpa S */}
+          <Link href="/estetika" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>02 • ESTETIKA</Link>
           <Link href="/materials" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>03 • MATERIAL</Link>
           <Link href="/blogs" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>04 • BLOG</Link>
           <Link href="/admin/login" onClick={()=>setOpen(false)} className="w-full bg-black text-white py-4 rounded-full font-black text-[12px] tracking-widest flex items-center justify-center mt-4">LOGIN ADMIN</Link>
@@ -65,32 +66,39 @@ export default function Home(){
 
       <div className="max-w-[400px] mx-auto px-6 pt-4">
         <p className={`text-[14px] ${isDark?'text-zinc-400':'text-zinc-500'}`}>Klik diagram di bawah - konsumen bisa pilih jalur pencarian langsung!</p>
-        <div className="relative w-full h-[540px] mt-4">
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 540">
-            <line x1="170" y1="270" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
-            <line x1="170" y1="270" x2="170" y2="455" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.3s'}}/>
-            <line x1="170" y1="270" x2="55" y2="270" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.5s'}}/>
-            <line x1="170" y1="270" x2="285" y2="270" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.7s'}}/>
+        <div className="relative w-full h-[580px] mt-4">
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
+            <line x1="170" y1="290" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
+            <line x1="170" y1="290" x2="170" y2="495" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.3s'}}/>
+            <line x1="170" y1="290" x2="45" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.5s'}}/>
+            <line x1="170" y1="290" x2="295" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.7s'}}/>
           </svg>
-          <div className="absolute top-1/2 left-1/2 w-[88px] h-[88px] rounded-full flex flex-col items-center justify-center text-black font-black z-30" style={{background:COLORS.gold, transform:'translate(-50%,-50%)', animation:'float 3s ease-in-out infinite', boxShadow: isDark? '0 0 0 8px #0B0B0F, 0 8px 30px rgba(212,175,55,0.5)' : '0 0 0 8px #FFFBF0, 0 8px 24px rgba(212,175,55,0.4)'}}>
-            <div className="text-[8px] tracking-widest opacity-60">PASA</div><div className="text-[14px]">GADANG</div><div className="text-[6px] tracking-[0.3em]">.COM</div>
+
+          {/* FIX: bulatan tengah dikecilin + z-index 10 biar gak nutupin tombol, tombol di atasnya */}
+          <div className="absolute top-1/2 left-1/2 w-[82px] h-[82px] rounded-full flex flex-col items-center justify-center text-black font-black z-10" style={{background:COLORS.gold, transform:'translate(-50%,-50%)', animation:'float 3s ease-in-out infinite', boxShadow: isDark? '0 0 0 8px #0B0B0F, 0 8px 30px rgba(212,175,55,0.5)' : '0 0 0 8px #FFFBF0, 0 8px 24px rgba(212,175,55,0.4)'}}>
+            <div className="text-[8px] tracking-widest opacity-60">PASA</div><div className="text-[13px]">GADANG</div><div className="text-[6px] tracking-[0.3em]">.COM</div>
           </div>
-          <Link href="/properties" className="absolute top-[12px] left-1/2 -translate-x-1/2 w-[190px] z-20">
+
+          <Link href="/properties" className="absolute top-[12px] left-1/2 -translate-x-1/2 w-[200px] z-20">
             <div className={`p-3.5 rounded-[20px] flex justify-between items-center border shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${isDark?'bg-white text-black border-white':'bg-white text-black border-black/5'}`}>
               <div><div className="text-[10px] font-black opacity-50">01 • {properties.length} UNIT</div><div className="font-black text-[14px] mt-0.5">PROPERTI</div></div><div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
-          <Link href="/blogs" className="absolute top-1/2 left-0 -translate-y-1/2 w-[152px] z-20">
+
+          {/* FIX: posisi kiri kanan dijauhin biar gak ketutup bulatan */}
+          <Link href="/blogs" className="absolute top-1/2 left-0 -translate-y-1/2 w-[140px] z-30">
             <div className={`p-3.5 rounded-[18px] flex justify-between items-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] ${isDark?'bg-[#1A1A1F] text-white border border-white/10':'bg-black text-white'}`}>
               <div><div className="text-[10px] font-bold opacity-60">04 • TIPS</div><div className="font-black text-[14px] mt-0.5">BLOG</div></div><div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
-          <Link href="/estetikas" className="absolute top-1/2 right-0 -translate-y-1/2 w-[152px] z-20">
+
+          <Link href="/estetika" className="absolute top-1/2 right-0 -translate-y-1/2 w-[140px] z-30">
             <div className={`p-3.5 rounded-[18px] flex justify-between items-center border shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${isDark?'bg-white text-black border-white':'bg-white text-black border-black/5'}`}>
               <div><div className="text-[10px] font-bold opacity-50">02 • ROSTER</div><div className="font-black text-[13px] mt-0.5">ESTETIKA</div></div><div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
-          <Link href="/materials" className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[190px] z-20">
+
+          <Link href="/materials" className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[200px] z-20">
             <div className="p-3.5 rounded-[20px] flex justify-between items-center shadow-[0_8px_24px_rgba(0,0,0,0.2)]" style={{background:COLORS.gold}}>
               <div><div className="text-[10px] font-black opacity-70">03 • SEMEN, BESI</div><div className="font-black text-[14px] mt-0.5 text-black">MATERIAL</div></div><div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
@@ -99,6 +107,7 @@ export default function Home(){
       </div>
 
       <div className="max-w-[400px] mx-auto px-6 pb-20 space-y-8 mt-2">
+        {/* PROPERTI - TETAP 210px TINGGI */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[16px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2">
@@ -130,20 +139,39 @@ export default function Home(){
           </div>
         </div>
 
+        {/* FIX: ESTETIKA - DITINGGIKAN SAMA KAYAK PROPERTI 210px + BAHAN | TERPASANG */}
         <div>
-          <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">ESTETIKA <span style={{color:COLORS.gold}}>ROSTER • GRANIT</span></h2><Link href="/estetikas" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-3 overflow-x-auto scroll-hide mt-3 pb-2">
+          <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">ESTETIKA <span style={{color:COLORS.gold}}>ROSTER • GRANIT</span></h2><Link href="/estetika" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2">
             {estetikas.map(e=>(
-              <Link key={e.id} href={`/estetikas/${e.slug}`} className={`min-w-[150px] border rounded-[18px] p-2.5 ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/5'}`}><div className="h-[70px] rounded-[10px] overflow-hidden bg-zinc-800"><img src={e.foto_bahan_1} className="w-full h-full object-cover"/></div><div className="font-bold text-[11px] mt-2">{e.nama}</div><div className="text-[11px] font-black mt-1" style={{color:COLORS.gold}}>Rp {Number(e.harga||0).toLocaleString('id-ID')}</div></Link>
+              <Link key={e.id} href={`/estetika/${e.slug||e.id}`} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
+                <div className="h-[210px] grid grid-cols-2">
+                  <div className="relative bg-[#FAF7F0]"><img src={e.foto_bahan_1} className="w-full h-full object-cover"/><span className="absolute bottom-2 left-2 bg-black text-white text-[8px] font-black px-2 py-1 rounded-full">BAHAN</span></div>
+                  <div className="relative bg-black"><img src={e.foto_jadi_1||e.foto_bahan_1} className="w-full h-full object-cover"/><span className="absolute bottom-2 left-2 bg-[#D4AF37] text-black text-[8px] font-black px-2 py-1 rounded-full">TERPASANG</span></div>
+                </div>
+                <div className="p-4">
+                  <div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{e.nama}</div>
+                  <div className="text-[10px] font-bold opacity-60 mt-1 uppercase">{e.kategori} • {e.ukuran}</div>
+                  <div className="font-black text-[16px] mt-2" style={{color:COLORS.gold}}>Rp {Number(e.harga||0).toLocaleString('id-ID')} / {e.satuan}</div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
 
+        {/* FIX: MATERIAL - DITINGGIKAN SAMA 210px */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">MATERIAL <span style={{color:COLORS.gold}}>BANGUNAN</span></h2><Link href="/materials" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-3 overflow-x-auto scroll-hide mt-3 pb-2">
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2">
             {materials.map(m=>(
-              <Link key={m.id} href={`/materials/${m.slug}`} className={`min-w-[150px] border rounded-[18px] p-2.5 ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/5'}`}><div className="h-[70px] rounded-[10px] overflow-hidden bg-zinc-800"><img src={m.foto_1} className="w-full h-full object-cover"/></div><div className="font-bold text-[11px] mt-2">{m.nama}</div><div className="text-[10px] opacity-60">{m.brand}</div></Link>
+              <Link key={m.id} href={`/materials/${m.slug||m.id}`} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37'}}>
+                <div className="h-[210px] bg-white relative flex items-center justify-center p-4"><img src={m.foto_1} className="w-full h-full object-contain"/><div className="absolute top-3 left-3 bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full">{m.kategori?.toUpperCase()} • {m.brand?.toUpperCase()}</div></div>
+                <div className="p-4">
+                  <div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{m.nama}</div>
+                  <div className="text-[10px] font-bold opacity-60 mt-1">{m.brand}</div>
+                  <div className="font-black text-[15px] mt-2" style={{color:COLORS.gold}}>Rp {Number(m.harga||0).toLocaleString('id-ID')}</div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -152,4 +180,4 @@ export default function Home(){
       {zoom && (<div onClick={()=>setZoom(null)} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-4"><img src={zoom} className="max-w-full max-h-[85vh] rounded-2xl object-contain border-2 border-[#D4AF37]"/><button className="absolute top-6 right-6 bg-white text-black w-10 h-10 rounded-full font-black">X</button></div>)}
     </main>
   )
-        }
+}
