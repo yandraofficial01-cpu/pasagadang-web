@@ -13,7 +13,7 @@ export default function Home(){
   const [zoomIdx, setZoomIdx] = useState(0)
   const API = process.env.NEXT_PUBLIC_API_URL
 
-  const COLORS = { gold: '#D4AF37', cream: '#FFFBF0', dark: '#0B0B0F' }
+  const COLORS = { gold: '#D4AF37', red: '#B22222', cream: '#FFFBF0', dark: '#0B0B0F' }
 
   useEffect(()=>{
     const saved = localStorage.getItem('theme') || 'light'
@@ -70,8 +70,23 @@ export default function Home(){
     <main className={`${isDark? 'bg-[#0B0B0F] text-white' : 'bg-[#FFFBF0] text-black'} min-h-screen transition-colors duration-300`}>
       <style>{`@keyframes float{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}@keyframes dash{0%{stroke-dashoffset:24}100%{stroke-dashoffset:0}}.scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
-      <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-4 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
-        <Link href="/" className="font-black text-[22px]">PASA<span style={{color:COLORS.gold}}>GADANG</span><span className="text-[10px] ml-2 tracking-[0.3em] opacity-50">.COM</span></Link>
+      {/* NAVBAR - LOGO V2 MODERN BOLD - PA & DANG MERAH, SAGA EMAS */}
+      <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
+        <Link href="/" className="flex flex-col leading-none">
+          <div className="flex font-black text-[24px] tracking-tight">
+            <span style={{color:COLORS.red}}>PA</span>
+            <span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGA</span>
+            <span style={{color:COLORS.red}}>DANG</span>
+            <span className="text-[10px] ml-1 mt-1 tracking-widest" style={{color:COLORS.red}}>.COM</span>
+          </div>
+          {/* Wave emas double premium ala Mandiri - Versi 2 */}
+          <div className="relative w-[165px] h-[8px] mt-[2px]">
+            <svg viewBox="0 0 165 10" className="w-full h-full">
+              <path d="M0 6 Q22 0 44 4 T88 4 T132 3 T165 1 Q132 7 88 7 T44 7 T0 6" fill="#D4AF37" opacity="0.9"/>
+              <path d="M18 9 Q40 6 62 7.5 T106 7.5 T148 6 Q106 10 62 10.5 T18 9" fill="#D4AF37" opacity="0.8"/>
+            </svg>
+          </div>
+        </Link>
         <div className="flex gap-2">
           <button onClick={toggleTheme} className={`w-10 h-10 rounded-full border flex items-center justify-center ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>{isDark?'☀️':'🌙'}</button>
           <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>
@@ -101,8 +116,8 @@ export default function Home(){
             <line x1="170" y1="290" x2="45" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.5s'}}/>
             <line x1="170" y1="290" x2="295" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.7s'}}/>
           </svg>
-          <div className="absolute top-1/2 left-1/2 w-[82px] h-[82px] rounded-full flex flex-col items-center justify-center text-black font-black z-10" style={{background:COLORS.gold, transform:'translate(-50%,-50%)', animation:'float 3s ease-in-out infinite', boxShadow: isDark? '0 0 0 8px #0B0B0F, 0 8px 30px rgba(212,175,55,0.5)' : '0 0 0 8px #FFFBF0, 0 8px 24px rgba(212,175,55,0.4)'}}>
-            <div className="text-[8px] tracking-widest opacity-60">PASA</div><div className="text-[13px]">GADANG</div><div className="text-[6px] tracking-[0.3em]">.COM</div>
+          <div className="absolute top-1/2 left-1/2 w-[82px] h-[82px] rounded-full flex flex-col items-center justify-center text-white font-black z-10" style={{background:COLORS.red, transform:'translate(-50%,-50%)', animation:'float 3s ease-in-out infinite', boxShadow: isDark? '0 0 0 8px #0B0B0F, 0 8px 30px rgba(178,34,34,0.5)' : '0 0 0 8px #FFFBF0, 0 8px 24px rgba(178,34,34,0.4)'}}>
+            <div className="text-[8px] tracking-widest opacity-80">PA</div><div className="text-[13px] text-[#FFD700]">SAGA</div><div className="text-[8px]">DANG</div><div className="text-[6px] tracking-[0.3em] opacity-80">.COM</div>
           </div>
           <Link href="/properties" className="absolute top-[12px] left-1/2 -translate-x-1/2 w-[200px] z-20">
             <div className={`p-3.5 rounded-[20px] flex justify-between items-center border shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${isDark?'bg-white text-black border-white':'bg-white text-black border-black/5'}`}>
@@ -235,4 +250,4 @@ export default function Home(){
       )}
     </main>
   )
-}
+        }
