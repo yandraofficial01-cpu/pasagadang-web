@@ -1,128 +1,136 @@
 'use client'
-import {useEffect,useState, useRef} from 'react'
+import {useEffect,useState} from 'react'
 import AdminLayout from '../components/AdminLayout'
-const API=process.env.NEXT_PUBLIC_API_URL
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.app'
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET
 
 export default function Page(){
-  const [data,setData]=useState([]);
-  const [form,setForm]=useState({judul:'',kategori:'',thumbnail:'',excerpt:'',konten:'',tags:'',is_published:false, meta_title:'', meta_description:''});
+  const [data,setData]=useState([])
+  const [form,setForm]=useState({
+    judul:'', kategori:'', thumbnail:'', excerpt:'', konten:'', tags:'',
+    is_published:false, meta_title:'', meta_description:''
+  })
   const [editId,setEditId]=useState(null)
-  const [uploading,setUploading]=useState(false)
-  const kontenRef = useRef(null)
-  const tok=()=>document.cookie.split('admin_token=')[1]?.split(';')[0]
+  const [loading,setLoading]=useState(false)
+  const [up,setUp]=useState('')
+  const tok=()=>document.cookie.match(/admin_token=([^;]+)/)?.[1]||''
 
   const load=async()=>{
-    // FIX: pakai?all=true biar draft & published semua keliatan di admin
-    const r=await fetch(`${API}/blogs?all=true`,{headers:{Authorization:`Bearer ${tok()}`}});
-    const j=await r.json();
-    setData(Array.isArray(j)?j:j.blogs||j.data||[])
+    const r=await fetch(`${API}/blogs?all=true`,{headers:{Authorization:`Bearer ${tok()}`}, cache:'no-store'})
+    const j=await r.json()
+    setData(Array.isArray(j)?j:j.blogs||j.data||j||[])
   }
   useEffect(()=>{load()},[])
 
-  const uploadImg = async (file) => {
-    setUploading(true)
-    const fd = new FormData()
-    fd.append('file', file)
-    const r = await fetch(`${API}/blogs/upload-image`, {method:'POST', body: fd, headers:{Authorization:`Bearer ${tok()}`}})
-    const j = await r.json()
-    setUploading(false)
-    if(!j.url) { alert('Upload gagal: '+JSON.stringify(j)); return null }
-    return j.url
+  const upload=async(field,file)=>{
+    if(!file) return
+    setUp(field)
+    const fd=new FormData()
+    fd.append('file',file)
+    fd.append('upload_preset',PRESET)
+    fd.append('folder',`pasa-gadang/blog/${field}`)
+    const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd})
+    const d=await res.json()
+    if(d.secure_url){
+      if(field==='konten_img'){
+        const tag = `\n<img src="${d.secure_url}" alt="${form.judul}" class="rounded-xl my-4 w-full" />\n`
+        setForm(f=>({...f, konten: f.konten + tag}))
+      } else {
+        setForm(f=>({...f,[field]:d.secure_url}))
+      }
+    } else alert('Gagal upload: '+JSON.stringify(d))
+    setUp('')
   }
 
-  const handleThumb = async (e)=>{
-    const file = e.target.files[0]
-    if(!file) return
-    const url = await uploadImg(file)
-    if(url) setForm({...form, thumbnail: url})
-  }
-
-  const handleKontenImg = async (e)=>{
-    const file = e.target.files[0]
-    if(!file) return
-    const url = await uploadImg(file)
-    if(!url) return
-    const tag = `\n<img src="${API}${url}" alt="${form.judul}" class="rounded-xl my-4 w-full" />\n`
-    setForm({...form, konten: form.konten + tag})
+  const resetForm=()=>{
+    setForm({judul:'',kategori:'',thumbnail:'',excerpt:'',konten:'',tags:'',is_published:false, meta_title:'', meta_description:''})
+    setEditId(null)
   }
 
   const submit=async(e)=>{
-    e.preventDefault();
-    const payload = {...form}
-    if(!payload.meta_title) payload.meta_title = payload.judul
-    if(!payload.meta_description) payload.meta_description = payload.excerpt || payload.konten.substring(0,160)
-    const res = await fetch(editId?`${API}/blogs/${editId}`:`${API}/blogs`,{
+    e.preventDefault()
+    if(!form.judul ||!form.thumbnail) return alert('Judul & Thumbnail wajib!')
+    if(!form.konten) return alert('Konten wajib!')
+    setLoading(true)
+    const payload={...form, meta_title: form.meta_title || form.judul, meta_description: form.meta_description || form.excerpt || form.konten.substring(0,160)}
+    const res=await fetch(editId?`${API}/blogs/${editId}`:`${API}/blogs`,{
       method:editId?'PUT':'POST',
       headers:{Authorization:`Bearer ${tok()}`, 'Content-Type':'application/json'},
       body:JSON.stringify(payload)
-    });
-    if(!res.ok){ const err = await res.text(); alert('Gagal simpan: '+err); return }
-    load();setEditId(null)
-    setForm({judul:'',kategori:'',thumbnail:'',excerpt:'',konten:'',tags:'',is_published:false, meta_title:'', meta_description:''})
-    window.scrollTo(0,0)
+    })
+    if(!res.ok){ alert(await res.text()); setLoading(false); return }
+    resetForm(); load(); setLoading(false)
   }
+
+  const inp="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm text-white outline-none focus:border-[#D4AF37]"
+  const label="text-[10px] font-black tracking-widest text-white/40 mb-1"
 
   return(
   <AdminLayout title={`BLOG STUDIO (${data.length})`}>
+    <div className="flex gap-2 mb-4">
+      <a href="/admin" className="bg-white/10 border border-white/20 text-white px-4 py-2 rounded-full font-black text-[11px]">← DASHBOARD</a>
+      <a href="/blog" target="_blank" className="bg-[#D4AF37] text-black px-4 py-2 rounded-full font-black text-[11px]">LIHAT WEB ↗</a>
+      {editId && <button onClick={resetForm} className="bg-red-500/20 border border-red-500/30 text-red-400 px-4 py-2 rounded-full font-black text-[11px]">BATAL EDIT</button>}
+    </div>
+
     <div className="grid lg:grid-cols-[450px_1fr] gap-6 mt-4">
-      <form onSubmit={submit} className="bg-[#16161E] border border-white/10 p-5 rounded-[24px] space-y-3 h-fit sticky top-4">
-        <h3 className="font-black text-[#D4AF37] text-xs tracking-widest">TULIS ARTIKEL</h3>
-        <input value={form.judul} onChange={e=>setForm({...form,judul:e.target.value})} placeholder="Judul Blog (Topik)" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm" required/>
+      <form onSubmit={submit} className="bg-[#16161E] border border-[#D4AF37]/20 p-5 rounded-[24px] space-y-3 h-fit sticky top-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center">
+          <p className="text-[11px] font-black tracking-[0.3em] text-[#D4AF37]">{editId?`EDIT #${editId}`:'TULIS BARU'}</p>
+          <label className="text-[10px] font-black text-white flex gap-2"><input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/>PUBLISH</label>
+        </div>
+
+        <div><div className={label}>JUDUL *</div><input value={form.judul} onChange={e=>setForm({...form,judul:e.target.value})} className={inp} placeholder="Judul Blog" required/></div>
         <div className="grid grid-cols-2 gap-2">
-          <input value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} placeholder="Kategori (ex: Kuliner)" className="bg-black/50 border border-white/10 p-3 rounded-xl text-sm" required/>
-          <input value={form.tags} onChange={e=>setForm({...form,tags:e.target.value})} placeholder="Tags (rendang, padang)" className="bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
+          <div><div className={label}>KATEGORI *</div><input value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} className={inp} placeholder="kuliner" required/></div>
+          <div><div className={label}>TAGS</div><input value={form.tags} onChange={e=>setForm({...form,tags:e.target.value})} className={inp} placeholder="rendang, padang"/></div>
         </div>
 
-        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-          <p className="text-[10px] text-zinc-400 mb-2">GAMBAR UTAMA (Thumbnail) - INI TEMPAT FOTO THUMBNAIL</p>
-          <input type="file" accept="image/*" onChange={handleThumb} className="text-[11px] w-full text-white" />
-          {form.thumbnail? (
-            <div className="mt-3">
-              <p className="text-[10px] text-green-400">✅ Thumbnail Terpasang:</p>
-              <img src={form.thumbnail.startsWith('http')?form.thumbnail:`${API}${form.thumbnail}`} className="mt-2 rounded-xl w-full h-40 object-cover border border-[#D4AF37]/30" />
-              <p className="text-[9px] text-zinc-500 mt-1 break-all">{form.thumbnail}</p>
-            </div>
-          ) : <p className="text-[9px] text-zinc-600 mt-2">Belum ada thumbnail, pilih file di atas</p>}
-          <input value={form.thumbnail} onChange={e=>setForm({...form,thumbnail:e.target.value})} placeholder="atau paste URL https://" className="w-full mt-2 bg-black/50 border border-white/10 p-2 rounded-xl text-[11px]" />
+        <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-3 rounded-xl space-y-3">
+          <p className="text-[11px] font-black text-[#D4AF37] tracking-widest">🖼️ GAMBAR UTAMA (Thumbnail) *</p>
+          <input type="file" accept="image/*" onChange={e=>upload('thumbnail',e.target.files[0])} className="w-full text-[11px] text-zinc-400 file:mr-2 file:bg-[#D4AF37] file:text-black file:border-0 file:rounded-full file:px-3 file:py-1 file:font-black file:text-[10px]"/>
+          {up==='thumbnail' && <p className="text-[10px] text-[#D4AF37] animate-pulse">UPLOADING...</p>}
+          {form.thumbnail && <img src={form.thumbnail} className="w-full h-40 object-cover rounded-xl border border-[#D4AF37]/20"/>}
+          <input value={form.thumbnail} onChange={e=>setForm({...form,thumbnail:e.target.value})} className={inp} placeholder="URL Cloudinary"/>
         </div>
 
-        <input value={form.excerpt} onChange={e=>setForm({...form,excerpt:e.target.value})} placeholder="Excerpt (ringkasan 1 kalimat buat Google)" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
+        <div><div className={label}>EXCERPT</div><input value={form.excerpt} onChange={e=>setForm({...form,excerpt:e.target.value})} className={inp} placeholder="Ringkasan 1 kalimat"/></div>
 
-        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-[10px] text-zinc-400">KONTEN + GAMBAR PENDUKUNG</p>
-            <label className="bg-[#D4AF37]/20 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] cursor-pointer">
-              {uploading?'Uploading...':'+ Upload Gambar Isi'}
-              <input type="file" accept="image/*" className="hidden" onChange={handleKontenImg} />
+        <div className="bg-white/5 border border-white/10 p-3 rounded-xl space-y-3">
+          <div className="flex justify-between items-center">
+            <p className="text-[11px] font-black text-white tracking-widest">📝 KONTEN</p>
+            <label className="bg-[#D4AF37]/20 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] font-black cursor-pointer">
+              {up==='konten_img'?'Uploading...':'+ Gambar Isi'}
+              <input type="file" accept="image/*" className="hidden" onChange={e=>upload('konten_img',e.target.files[0])}/>
             </label>
           </div>
-          <textarea ref={kontenRef} value={form.konten} onChange={e=>setForm({...form,konten:e.target.value})} placeholder="Tulis artikel... Gambar isi otomatis masuk sebagai <img>" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm h-64 font-mono"/>
+          <textarea value={form.konten} onChange={e=>setForm({...form,konten:e.target.value})} className={`${inp} h-64 font-mono text-xs`} placeholder="Tulis artikel..."/>
         </div>
 
-        <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-xl">
-          <p className="text-[10px] text-yellow-400 font-bold">SPACE IKLAN AKTIF ✅ - Top/Middle/Sidebar</p>
-        </div>
-
-        <label className="flex gap-2 text-xs items-center"><input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/> Publish (muncul di Google)</label>
-        <button className="w-full bg-[#D4AF37] text-black py-3 rounded-xl font-black text-xs">{editId?'UPDATE ARTIKEL':'SIMPAN & PUBLISH'}</button>
-        {editId && <button type="button" onClick={()=>{setEditId(null); setForm({judul:'',kategori:'',thumbnail:'',excerpt:'',konten:'',tags:'',is_published:false, meta_title:'', meta_description:''})}} className="w-full bg-white/10 text-white py-2 rounded-xl text-[10px]">BATAL EDIT</button>}
+        <button disabled={loading} className="w-full bg-[#D4AF37] text-black py-3 rounded-xl font-black text-xs">{loading?'SIMPAN...':editId?'UPDATE ARTIKEL':'SIMPAN & PUBLISH'}</button>
       </form>
 
       <div className="bg-[#16161E] border border-white/10 p-5 rounded-[24px] space-y-2">
-        <div className="flex justify-between text-[10px] text-zinc-500 mb-2"><span>ARTIKEL TERBIT ({data.length})</span><span>{API}/blogs/sitemap.xml</span></div>
-        {data.length===0 && <p className="text-xs text-zinc-500">Belum ada artikel. Coba ganti fetch ke?all=true</p>}
-        {data.map(i=><div key={i.id} className="bg-black/40 border border-white/5 p-3 rounded-xl flex justify-between items-center gap-2">
-          <div className="flex gap-3 items-center flex-1 min-w-0">
-            {i.thumbnail? <img src={i.thumbnail.startsWith('http')?i.thumbnail:`${API}${i.thumbnail}`} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" /> : <div className="w-12 h-12 bg-white/5 rounded-lg flex-shrink-0" />}
-            <div className="min-w-0"><p className="text-sm font-bold truncate">{i.judul}</p><p className="text-[11px] text-zinc-500 truncate">{i.kategori} • {i.is_published?'Published ✅':'Draft'} • {i.views} views</p></div>
+        <p className="text-[11px] font-black tracking-widest text-white/40">DAFTAR ARTIKEL ({data.length})</p>
+        <div className="space-y-2 max-h-[80vh] overflow-y-auto">
+        {data.map(i=>(
+          <div key={i.id} className="bg-black/60 border border-white/5 p-3 rounded-2xl flex gap-3 items-center">
+            <img src={i.thumbnail} className="w-14 h-14 rounded-xl object-cover bg-white shrink-0"/>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-black text-white truncate">{i.judul}</p>
+              <p className="text-[11px] text-zinc-500">{i.kategori} • {i.is_published?'✅':'⛔'} • {i.views||0} views</p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <button onClick={()=>{setForm({...i}); setEditId(i.id); window.scrollTo({top:0,behavior:'smooth'})}} className="bg-white/10 px-3 py-1.5 rounded-full text-[10px] font-black text-white">EDIT</button>
+              <button onClick={async()=>{if(!confirm('Hapus?'))return; await fetch(`${API}/blogs/${i.id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok()}`}});load()}} className="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-[10px] font-black">HAPUS</button>
+            </div>
           </div>
-          <div className="flex gap-1 flex-shrink-0">
-            <button onClick={()=>{setForm(i);setEditId(i.id); window.scrollTo(0,0)}} className="bg-white/10 px-3 py-1 rounded-full text-[10px]">EDIT</button>
-            <button onClick={async()=>{if(!confirm('Hapus '+i.judul+'?'))return; await fetch(`${API}/blogs/${i.id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok()}`}});load()}} className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-[10px]">HAPUS</button>
-          </div>
-        </div>)}
+        ))}
+        </div>
       </div>
     </div>
   </AdminLayout>
   )
-}
+        }
