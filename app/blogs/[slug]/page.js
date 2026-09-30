@@ -1,4 +1,4 @@
-'use client'
+r'use client'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 
@@ -89,4 +89,4 @@ export default function DetailBlog(){
       </div>
     </div>
   )
-              }
+              
