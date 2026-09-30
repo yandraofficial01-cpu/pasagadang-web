@@ -11,11 +11,9 @@ export default function BlogPage(){
   useEffect(()=>{
     const load = async()=>{
       try{
-        // FIX: pakai?all=true biar sama kayak admin, jadi draft juga kebaca
-        const r = await fetch(`${API}/blogs/?all=true`, { cache: 'no-store' })
+        const r = await fetch(`${API}/blogs`, { cache: 'no-store' })
         const j = await r.json()
         const list = Array.isArray(j)? j : j.blogs || j.data || []
-        console.log("BLOG API:", list)
         setBlogs(list)
       }catch(e){
         console.error("GAGAL FETCH BLOG:", e)
@@ -49,18 +47,17 @@ export default function BlogPage(){
         {filtered.length===0? (
           <div className="bg-[#16161E] border border-white/10 p-10 rounded-[24px] text-center">
             <p className="text-white/40">Belum ada artikel. Total dari API: {blogs.length}</p>
-            <p className="text-[11px] text-white/20 mt-2">Cek console.log BLOG API atau publish dari /admin/blog dulu bro.</p>
+            <p className="text-[11px] text-white/20 mt-2">Publish dari /admin/blogs dulu bro.</p>
           </div>
         ):(
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map(b=>(
-              <a key={b.id} href={`/blog/${b.slug}`} className="group bg-[#16161E] border border-white/10 rounded-[24px] overflow-hidden hover:border-[#D4AF37]/50 transition">
+              <a key={b.id} href={`/blogs/${b.slug}`} className="group bg-[#16161E] border border-white/10 rounded-[24px] overflow-hidden hover:border-[#D4AF37]/50 transition">
                 <img src={b.thumbnail} alt={b.judul} className="w-full h-48 object-cover group-hover:scale-105 transition duration-500 bg-zinc-900"/>
                 <div className="p-5">
                   <div className="flex gap-2 mb-2 items-center">
                     <span className="bg-[#D4AF37]/20 text-[#D4AF37] text-[9px] font-black px-2 py-1 rounded-full uppercase">{b.kategori||'tanpa kategori'}</span>
                     <span className="text-white/30 text-[10px]">{b.created_at? new Date(b.created_at).toLocaleDateString('id-ID') : ''}</span>
-                    <span className="text-[9px]">{b.is_published? '✅':'⛔'}</span>
                   </div>
                   <h3 className="font-black text-[15px] leading-tight mb-2 group-hover:text-[#D4AF37]">{b.judul}</h3>
                   <p className="text-[12px] text-white/50 line-clamp-2">{b.excerpt || b.konten?.replace(/<[^>]+>/g,'').substring(0,100)}</p>
@@ -73,4 +70,4 @@ export default function BlogPage(){
       </div>
     </div>
   )
-              }
+          }
