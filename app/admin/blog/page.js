@@ -18,9 +18,15 @@ export default function Page(){
   const tok=()=>document.cookie.match(/admin_token=([^;]+)/)?.[1]||''
 
   const load=async()=>{
-    const r=await fetch(`${API}/blogs?all=true`,{headers:{Authorization:`Bearer ${tok()}`}, cache:'no-store'})
-    const j=await r.json()
-    setData(Array.isArray(j)?j:j.blogs||j.data||j||[])
+    try{
+      // FIX 1: Tambah slash / sebelum? biar gak 405
+      const r=await fetch(`${API}/blogs/?all=true`,{
+        headers:{Authorization:`Bearer ${tok()}`},
+        cache:'no-store'
+      })
+      const j=await r.json()
+      setData(Array.isArray(j)?j:j.blogs||j.data||[])
+    }catch(e){ console.error(e) }
   }
   useEffect(()=>{load()},[])
 
@@ -55,7 +61,9 @@ export default function Page(){
     if(!form.konten) return alert('Konten wajib!')
     setLoading(true)
     const payload={...form, meta_title: form.meta_title || form.judul, meta_description: form.meta_description || form.excerpt || form.konten.substring(0,160)}
-    const res=await fetch(editId?`${API}/blogs/${editId}`:`${API}/blogs`,{
+    // FIX 2: URL POST/PUT juga pakai trailing slash konsisten
+    const url = editId? `${API}/blogs/${editId}` : `${API}/blogs/`
+    const res=await fetch(url,{
       method:editId?'PUT':'POST',
       headers:{Authorization:`Bearer ${tok()}`, 'Content-Type':'application/json'},
       body:JSON.stringify(payload)
@@ -133,4 +141,4 @@ export default function Page(){
     </div>
   </AdminLayout>
   )
-        }
+}
