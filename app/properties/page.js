@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 
 export default function PropertiesPage(){
@@ -7,15 +7,20 @@ export default function PropertiesPage(){
   const [zoomFotos,setZoomFotos]=useState([])
   const [zoomIdx,setZoomIdx]=useState(0)
   const [theme,setTheme]=useState('light')
+  const [open,setOpen]=useState(false)
+  const [search,setSearch]=useState('')
+  const [filterStatus,setFilterStatus]=useState('Semua')
   const API=process.env.NEXT_PUBLIC_API_URL
   const COLORS = { gold: '#D4AF37', red: '#B22222', cream: '#FFFBF0', dark: '#0B0B0F' }
   const isDark = theme==='dark'
+
+  const STATUS_LIST = ['Semua','Ready','On Progress','Indent','Terjual']
 
   useEffect(()=>{
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
     fetch(`${API}/properties?is_published=true`)
-   .then(r=>r.json()).then(j=>setData(j.data||j||[]))
+  .then(r=>r.json()).then(j=>setData(j.data||j||[]))
   },[API])
 
   const toggleTheme = ()=>{
@@ -24,6 +29,15 @@ export default function PropertiesPage(){
   }
 
   const getFotos=(p)=>[p.thumbnail,p.foto_1,p.foto_2,p.foto_3,p.foto_4,p.foto_5,p.foto_6,p.foto_7,p.foto_8].filter(Boolean)
+
+  const filteredData = useMemo(()=>{
+    return data.filter(p=>{
+      const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase())
+      const status = (p.status_properti || p.status || 'Ready').toLowerCase()
+      const matchStatus = filterStatus==='Semua' || status.includes(filterStatus.toLowerCase())
+      return matchSearch && matchStatus
+    })
+  },[data, search, filterStatus])
 
   const waLink=(p)=>{
     const raw=String(p.wa_number||'08979879518').replace(/[^0-9]/g,'')
@@ -34,7 +48,7 @@ export default function PropertiesPage(){
 
   return (
     <main className={`${isDark?'bg-[#0B0B0F] text-white':'bg-[#FFFBF0] text-black'} min-h-screen transition-colors pb-24`}>
-      {/* NAVBAR - SAMA PERSIS HOMEPAGE */}
+      {/* NAVBAR */}
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/" className="flex flex-col leading-none">
           <div className="flex font-black text-[24px] tracking-tight">
@@ -52,24 +66,62 @@ export default function PropertiesPage(){
         </Link>
         <div className="flex gap-2">
           <button onClick={toggleTheme} className={`w-10 h-10 rounded-full border flex items-center justify-center ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>{isDark?'☀️':'🌙'}</button>
-          <Link href="/" className={`w-10 h-10 rounded-full border flex items-center justify-center font-black ${isDark?'bg-white text-black':'bg-black text-white'}`}>⌂</Link>
+          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>
+            <span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span>
+            <span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span>
+            <span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span>
+          </button>
         </div>
       </nav>
 
+      {/* MENU - SAMA KAYAK HOMEPAGE */}
+      {open && (
+        <div className={`px-6 py-4 space-y-0 shadow-xl border-b ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/5'}`}>
+          <Link href="/properties" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>01 • PROPERTI <span className="opacity-40">→</span></Link>
+          <Link href="/estetika" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>02 • ESTETIKA <span className="opacity-40">→</span></Link>
+          <Link href="/materials" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>03 • MATERIAL <span className="opacity-40">→</span></Link>
+          <Link href="/blogs" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>04 • BLOG <span className="opacity-40">→</span></Link>
+          <Link href="/" onClick={()=>setOpen(false)} className="w-full bg-black text-white py-4 rounded-full font-black text-[12px] tracking-widest flex items-center justify-center mt-4">← KEMBALI KE BERANDA</Link>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto p-4 md:p-6">
         <h1 className="text-3xl font-black tracking-tighter mt-2">PROPERTI<span style={{color:COLORS.gold}}> GADANG</span></h1>
-        <p className={`${isDark?'text-white/50':'text-black/50'} text-[13px] mt-1`}>{data.length} unit ready di Padang</p>
+        <p className={`${isDark?'text-white/50':'text-black/50'} text-[13px] mt-1`}>{filteredData.length} dari {data.length} unit ready di Padang</p>
+
+        {/* SEARCH BOX */}
+        <div className={`mt-5 flex items-center gap-3 px-5 py-3.5 rounded-full border ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/10 shadow-sm'}`}>
+          <span className="text-[18px] opacity-40">🔍</span>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Cari lokasi, Manggis, Kuranji, Balai Baru..." className="flex-1 bg-transparent outline-none text-[14px] font-medium placeholder:opacity-40"/>
+          {search && <button onClick={()=>setSearch('')} className="w-6 h-6 bg-black/10 rounded-full flex items-center justify-center text-[12px]">✕</button>}
+        </div>
+
+        {/* FILTER STATUS - READY / ON PROGRESS / INDENT / TERJUAL */}
+        <div className="flex gap-2 overflow-x-auto mt-4 pb-2 scrollbar-hide">
+          {STATUS_LIST.map(s=>{
+            const active = filterStatus===s
+            return(
+              <button key={s} onClick={()=>setFilterStatus(s)} className={`px-5 py-2.5 rounded-full text-[12px] font-black tracking-widest whitespace-nowrap border transition ${active?'bg-[#D4AF37] text-black border-[#D4AF37]':'bg-transparent border-black/10 opacity-70 hover:opacity-100'} ${isDark &&!active?'bg-white/10 border-white/10 text-white':''}`}>
+                {s.toUpperCase()}
+              </button>
+            )
+          })}
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {data.map(p=>{
+          {filteredData.map(p=>{
             const fotos=getFotos(p)
+            const statusColor = (p.status_properti||'Ready').toLowerCase().includes('progress')? 'bg-orange-500' : (p.status_properti||'').toLowerCase().includes('indent')? 'bg-blue-600' : (p.status_properti||'').toLowerCase().includes('jual') || (p.status_properti||'').toLowerCase().includes('terjual')? 'bg-red-600' : 'bg-[#D4AF37]'
             return (
-              <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37] shadow-[0_0_0_1px_rgba(212,175,55,0.3),0_10px_40px_rgba(212,175,55,0.18)]':'bg-white border-[#D4AF37] shadow-[0_10px_40px_rgba(212,175,55,0.18)]'}`}>
+              <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
                 <div className="h-[260px] relative cursor-pointer" onClick={()=>{setZoomFotos(fotos); setZoomIdx(0)}}>
                   <img src={fotos[0]} className="w-full h-full object-cover"/>
-                  <div className="absolute top-4 left-4 bg-[#D4AF37] text-black text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest">{p.tipe_transaksi?.toUpperCase()||'JUAL'}</div>
-                  <div className="absolute top-4 right-4 bg-black text-white text-[11px] font-bold px-3 py-1.5 rounded-full">{fotos.length} FOTO • ZOOM</div>
-                  <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white text-[12px] font-bold px-4 py-2 rounded-full border border-white/10">{p.kecamatan} • {p.sertifikat} • {p.tipe_properti}</div>
+                  <div className="absolute top-4 left-4 flex gap-2">
+                    <div className="bg-[#D4AF37] text-black text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest">{p.tipe_transaksi?.toUpperCase()||'JUAL'}</div>
+                    <div className={`${statusColor} text-white text-[10px] font-black px-3 py-1.5 rounded-full tracking-widest uppercase`}>{p.status_properti||'Ready'}</div>
+                  </div>
+                  <div className="absolute top-4 right-4 bg-black text-white text-[11px] font-bold px-3 py-1.5 rounded-full">{fotos.length} FOTO</div>
+                  <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white text-[12px] font-bold px-4 py-2 rounded-full border border-white/10">{p.kecamatan} • {p.sertifikat}</div>
                 </div>
 
                 <div className="p-6 flex flex-col flex-1">
@@ -94,19 +146,26 @@ export default function PropertiesPage(){
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mt-6">
-                    <a href={waLink(p)} target="_blank" className="bg-[#25D366] text-white text-center py-4 rounded-full font-black text-[14px] shadow-lg hover:scale-105 transition">Whatsapp</a>
-                    <Link href={`/properties/${p.slug}`} className={`${isDark?'bg-white text-black':'bg-black text-white'} text-center py-4 rounded-full font-black text-[14px] hover:scale-105 transition`}>DETAIL →</Link>
+                    <a href={waLink(p)} target="_blank" className="bg-[#25D366] text-white text-center py-4 rounded-full font-black text-[14px] shadow-lg">Whatsapp</a>
+                    <Link href={`/properties/${p.slug}`} className={`${isDark?'bg-white text-black':'bg-black text-white'} text-center py-4 rounded-full font-black text-[14px]`}>DETAIL →</Link>
                   </div>
                 </div>
               </div>
             )
           })}
         </div>
+
+        {filteredData.length===0 && (
+          <div className="text-center py-20 opacity-50">
+            <p className="text-[40px]">🏠</p>
+            <p className="font-black mt-3">Gak ada properti {filterStatus} yang cocok "{search}"</p>
+            <button onClick={()=>{setSearch(''); setFilterStatus('Semua')}} className="mt-3 bg-[#D4AF37] text-black px-6 py-2 rounded-full text-[12px] font-black">RESET FILTER</button>
+          </div>
+        )}
       </div>
 
-      {/* WA MELAYANG 08979879518 */}
-      <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20saya%20mau%20tanya%20properti" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white hover:scale-110 transition">
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M19.05 4.91A9.93 9.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.14 1.6 5.94L0 24l6.35-1.66A11.9 11.9 0 0 0 12 23.88h.01c6.53 0 11.86-5.33 11.86-11.88 0-3.17-1.24-6.16-3.49-8.4Zm-7.05 14.4a9.3 9.3 0 0 1-4.75-1.3l-.34-.2-3.77.99 1-3.67-.22-.37A9.36 9.36 0 0 1 2.6 12c0-5.14 4.2-9.32 9.38-9.32 2.5 0 4.85.97 6.62 2.74A9.3 9.3 0 0 1 21.33 12c0 5.14-4.2 9.3-9.33 9.3Zm5.29-6.97c-.29-.15-1.7-.84-1.96-.94-.27-.1-.46-.15-.66.15-.19.29-.76.94-.93 1.13-.17.2-.35.22-.64.07-.29-.15-1.22-.45-2.32-1.43-.86-.77-1.44-1.71-1.61-2-.17-.29-.02-.45.13-.6.13-.13.29-.35.44-.52.14-.17.19-.29.29-.5.1-.2.05-.37-.03-.52-.07-.15-.66-1.6-.91-2.18-.24-.57-.48-.5-.66-.5h-.56c-.2 0-.52.07-.8.37-.27.29-1.05 1.03-1.05 2.5s1.08 2.9 1.23 3.1c.15.2 2.12 3.24 5.14 4.54.72.31 1.28.5 1.72.64.72.23 1.37.2 1.89.12.58-.09 1.7-.7 1.94-1.37.24-.68.24-1.26.17-1.38-.07-.12-.27-.19-.56-.34Z"/></svg>
+      <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20saya%20mau%20tanya%20properti" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white">
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M19.05 4.91A9.93 9.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.14 1.6 5.94L0 24l6.35-1.66A11.9 11.9 0 0 0 12 23.88h.01c6.53 0 11.86-5.33 11.86-11.88 0-3.17-1.24-6.16-3.49-8.4Zm-7.05 14.4a9.3 9.3 0 0 1-4.75-1.3l-.34-.2-3.77.99 1-3.67-.22-.37A9.36 9.36 0 0 1 2.6 12c0-5.14 4.2-9.32 9.38-9.32 2.5 0 4.85.97 6.62 2.74A9.3 9.3 0 0 1 21.33 12c0 5.14-4.2 9.3-9.33 9.3Z"/></svg>
       </a>
 
       {zoomFotos.length>0 && (
