@@ -86,7 +86,7 @@ export default function PropertiesPage(){
       )}
 
       <div className="max-w-7xl mx-auto p-4 md:p-6">
-        <h1 className="text-3xl font-black tracking-tighter mt-2">PROPERTI<span style={{color:COLORS.gold}}> GADANG</span></h1>
+        <h1 className="text-3xl font-black tracking-tighter mt-2">PROPERTI<span style={{color:COLORS.gold}}> Pasa Gadang </span></h1>
         <p className={`${isDark?'text-white/50':'text-black/50'} text-[13px] mt-1`}>{filteredData.length} dari {data.length} unit ready di Padang</p>
 
         {/* SEARCH BOX */}
