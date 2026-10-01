@@ -128,7 +128,7 @@ export default function EstetikaPage(){
     <div className="max-w-7xl mx-auto p-4 md:p-10">
       <div className="flex justify-between items-start mt-2">
         <div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tighter">ESTETIKA<span style={{color:COLORS.gold}}> GADANG</span></h1>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter">ESTETIKA<span style={{color:COLORS.gold}}> Pasa Gadang </span></h1>
           <p className={`text-[13px] font-bold mt-2 ${isDark?'text-zinc-400':'text-black/60'}`}>{filtered.length} dari {estetikas.length} desain • Roster, Batu Alam, Granit Ready</p>
         </div>
       </div>
