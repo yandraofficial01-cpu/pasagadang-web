@@ -113,7 +113,7 @@ export default function MaterialsPage(){
     <div className="max-w-7xl mx-auto p-4 md:p-10">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tighter">MATERIAL<span style={{color:COLORS.gold}}> GADANG</span></h1>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter">MATERIAL<span style={{color:COLORS.gold}}> Pasa Gadang </span></h1>
           <p className={`text-[13px] font-bold mt-2 ${isDark?'text-white/50':'text-black/60'}`}>{filtered.length} dari {materials.length} SKU aktif • Harga live update</p>
         </div>
         <div className={`${isDark?'bg-white text-black':'bg-black text-white'} rounded-[16px] px-5 py-3`}>
