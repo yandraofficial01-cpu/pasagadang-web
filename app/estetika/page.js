@@ -97,10 +97,21 @@ export default function EstetikaPage(){
   })
 
   const formatRupiah = (n) => new Intl.NumberFormat('id-ID').format(n||0)
+
+  // PARSER SPESIFIKASI CENTANG HIJAU
+  const parseSpec = (text)=>{
+    if(!text) return []
+    // split by newline atau ✅
+    return text
+     .split(/\n+/)
+     .map(t=> t.replace(/✅|✔️|✓|•|-/g,'').trim())
+     .filter(Boolean)
+     .flatMap(t=> t.split(',').map(x=>x.trim()).filter(Boolean))
+  }
+
   if(loading) return <div className={`min-h-screen flex items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}><p className="font-black animate-pulse">LOADING ESTETIKA...</p></div>
 
   return <main className={`${isDark? 'bg-[#0B0B0F] text-white' : 'bg-[#FFFBF0] text-black'} min-h-screen transition-colors duration-300 pb-24`}>
-      {/* NAVBAR - PERSIS HOME + PROPERTI + MATERIAL */}
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/"><LogoPasagadang /></Link>
         <div className="flex gap-2 items-center">
@@ -150,6 +161,7 @@ export default function EstetikaPage(){
           const qty = calc[m.id]||10
           const hargaAktif = hasPromo? m.harga_promo : m.harga
           const total = hargaAktif * qty
+          const specs = parseSpec(m.spesifikasi)
           return(
           <div key={m.id} className={`rounded-[28px] overflow-hidden border-[2.5px] flex flex-col hover:scale-[1.02] transition ${isDark?'bg-[#121214]':'bg-white'}`} style={{borderColor:COLORS.gold}}>
             <Link href={`/estetika/${m.slug||m.id}`} className="h-[260px] relative grid grid-cols-2 cursor-pointer">
@@ -170,16 +182,30 @@ export default function EstetikaPage(){
               {m.deskripsi && (
                 <div className={`mt-3 border p-3 rounded-xl ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/20'}`}>
                   <p className="text-[10px] font-black tracking-widest text-[#B8960C]">DESKRIPSI</p>
-                  <p className="text-[13px] font-medium mt-1 leading-relaxed line-clamp-3">{m.deskripsi}</p>
+                  <p className="text-[13px] font-medium mt-1 leading-relaxed whitespace-pre-wrap break-words">{m.deskripsi}</p>
                 </div>
               )}
 
-              <div className="mt-3 p-3 rounded-2xl bg-black text-white">
+              {/* SPESIFIKASI FIX - CENTANG HIJAU FULL */}
+              <div className="mt-3 p-3.5 rounded-2xl bg-black text-white">
                 <div className="text-[10px] font-bold tracking-widest opacity-60 uppercase">SPESIFIKASI</div>
-                <div className="text-[13px] font-bold mt-1 line-clamp-2">{m.spesifikasi || 'Belum ada spesifikasi'}</div>
-                <div className="flex gap-2 mt-2">
-                  {m.ukuran && <span className="text-[10px] bg-white/20 px-2 py-1 rounded-full">Ukuran: {m.ukuran}</span>}
-                  {m.kategori && <span className="text-[10px] bg-[#D4AF37] text-black px-2 py-1 rounded-full font-black">{m.kategori.toUpperCase()}</span>}
+                {specs.length>0? (
+                  <div className="mt-2 space-y-2">
+                    {specs.map((s,i)=>(
+                      <div key={i} className="flex gap-2 items-start">
+                        <div className="w-[18px] h-[18px] rounded-full bg-[#22C55E] flex items-center justify-center shrink-0 mt-[1px]">
+                          <span className="text-white text-[10px] font-black">✓</span>
+                        </div>
+                        <span className="text-[13px] font-bold leading-tight break-words flex-1">{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-[13px] font-bold mt-1 opacity-50">Belum ada spesifikasi</div>
+                )}
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {m.ukuran && <span className="text-[10px] bg-white/20 px-2.5 py-1 rounded-full">Ukuran: {m.ukuran}</span>}
+                  {m.kategori && <span className="text-[10px] bg-[#D4AF37] text-black px-2.5 py-1 rounded-full font-black">{m.kategori.toUpperCase()}</span>}
                 </div>
               </div>
 
@@ -205,7 +231,6 @@ export default function EstetikaPage(){
       </div>
     </div>
 
-    {/* WA MELAYANG 08979879518 */}
     <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20mau%20tanya%20estetika" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white hover:scale-110 transition">
       <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M19.05 4.91A9.93 9.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.14 1.6 5.94L0 24l6.35-1.66A11.9 11.9 0 0 0 12 23.88h.01c6.53 0 11.86-5.33 11.86-11.88 0-3.17-1.24-6.16-3.49-8.4Z"/></svg>
     </a>
