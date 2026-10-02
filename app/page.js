@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-// KOMPONEN ANIMASI KETIK BARU
 function TypewriterText({ isDark }){
   const fullText = `Pasa Gadang jual 3 hal:
 PROPERTI impianmu,
@@ -10,7 +9,6 @@ BAHAN ESTETIKA biar rumah lebih indah,
 dan MATERIAL yang tinggal pesan online langsung kirim.`
   const [displayed, setDisplayed] = useState('')
   const [index, setIndex] = useState(0)
-
   useEffect(()=>{
     if(index < fullText.length){
       const t = setTimeout(()=>{
@@ -20,7 +18,6 @@ dan MATERIAL yang tinggal pesan online langsung kirim.`
       return ()=> clearTimeout(t)
     }
   },[index, fullText])
-
   return (
     <div className="text-center">
       <h2 className="font-black text-[22px] md:text-[26px] tracking-tighter leading-none">
@@ -46,14 +43,12 @@ export default function Home(){
   const [zoomList, setZoomList] = useState([])
   const [zoomIdx, setZoomIdx] = useState(0)
   const API = process.env.NEXT_PUBLIC_API_URL
-
   const COLORS = { gold: '#D4AF37', red: '#B22222', cream: '#FFFBF0', dark: '#0B0B0F' }
 
   useEffect(()=>{
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
     if(!API) return
-    // FIX 307 - TAMBAH / SEBELUM?
     fetch(`${API}/properties/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{})
     fetch(`${API}/materials/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setMaterials(j.data||j.items||j||[])).catch(()=>{})
     fetch(`${API}/estetikas/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setEstetikas(j.data||j.items||j||[])).catch(()=>{})
@@ -139,9 +134,7 @@ export default function Home(){
       )}
 
       <div className="max-w-[400px] mx-auto px-6 pt-6">
-        {/* GANTI KATA PEMBUKA LAMA JADI ANIMASI KETIK */}
         <TypewriterText isDark={isDark} />
-
         <div className="relative w-full h-[580px] mt-6">
           <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
             <line x1="170" y1="290" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
@@ -182,23 +175,34 @@ export default function Home(){
             {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[260px] h-[380px] border rounded-[22px] animate-pulse ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
             properties.map(p=>{
               const imgs = [p.thumbnail, p.foto_1, p.foto_2, p.foto_3, p.foto_4].filter(Boolean)
+              const badgeRaw = (p.badge || '').toString()
+              const isTerjual = badgeRaw.toLowerCase().includes('terjual') || (p.status_properti||'').toLowerCase().includes('terjual')
               return(
               <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
                 <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" onClick={()=>openZoom(imgs,0)}>
                   <img src={imgs[0]} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
-                  <div className="absolute top-3 left-3 bg-[#D4AF37] text-black text-[10px] font-black px-3 py-1 rounded-full">{p.tipe_transaksi?.toUpperCase()||'JUAL'}</div>
-                  <div className="absolute bottom-3 left-3 bg-black/75 backdrop-blur text-white text-[10px] px-3 py-1.5 rounded-full border border-white/10">{p.kecamatan||'Padang'} • {p.sertifikat||'SHM'}</div>
-                  <div className="absolute top-3 right-3 bg-black/60 text-white text-[9px] px-2 py-1 rounded-full">🔍 {imgs.length}</div>
+                  {/* HANYA BADGE API UNGU/MERAH - JUAL, KURANJI•SHM, FOTO COUNT DIHAPUS */}
+                  {badgeRaw && (
+                    <div className="absolute top-3 left-3 z-20">
+                      <div className={`text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg animate-pulse
+                        ${isTerjual? 'bg-gradient-to-r from-red-600 to-orange-600 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : 'bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]'}`}>
+                        🔥 {badgeRaw.toUpperCase()}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <div className="font-bold text-[14px] leading-tight line-clamp-2 min-h-[36px]">{p.judul}</div>
                   <div className="font-black text-[17px] mt-2" style={{color:COLORS.gold}}>Rp {Number(p.harga_cash||0).toLocaleString('id-ID')}</div>
-                  <div className={`grid grid-cols-4 gap-2 mt-3 text-[10px] p-2.5 rounded-xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}>
-                    <div className="text-center"><div className="opacity-50 text-[9px]">LT</div><div className="font-black text-[11px]">{p.luas_tanah||0}m²</div></div>
-                    <div className="text-center"><div className="opacity-50 text-[9px]">LB</div><div className="font-black text-[11px]">{p.luas_bangunan||0}m²</div></div>
-                    <div className="text-center"><div className="opacity-50 text-[9px]">KT</div><div className="font-black text-[11px]">{p.kamar_tidur||0}</div></div>
-                    <div className="text-center"><div className="opacity-50 text-[9px]">KM</div><div className="font-black text-[11px]">{p.kamar_mandi||0}</div></div>
+
+                  {/* LT LB KT KM DIBIKIN JELAS - BUKAN SINGKATAN LAGI */}
+                  <div className={`grid grid-cols-2 gap-2 mt-3 text-[10px] p-2.5 rounded-xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}>
+                    <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Luas Tanah</div><div className="font-black text-[12px] mt-0.5">{p.luas_tanah||0}m²</div></div>
+                    <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Luas Bangunan</div><div className="font-black text-[12px] mt-0.5">{p.luas_bangunan||0}m²</div></div>
+                    <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Tidur</div><div className="font-black text-[12px] mt-0.5">{p.kamar_tidur||0} Kamar</div></div>
+                    <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Mandi</div><div className="font-black text-[12px] mt-0.5">{p.kamar_mandi||0} Kamar</div></div>
                   </div>
+
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <a href={waLink(p)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
                     <Link href={`/properties/${p.slug||p.id}`} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>DETAIL</Link>
@@ -279,4 +283,4 @@ export default function Home(){
       )}
     </main>
   )
-}
+  }
