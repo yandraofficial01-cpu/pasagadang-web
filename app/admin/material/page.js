@@ -48,7 +48,7 @@ export default function Page(){
       const json = await res.json()
       if(json.status === 'sukses'){
         setForm(f=>({
-        ...f,
+       ...f,
           deskripsi: json.data.deskripsi + (json.data.hemat_text? `\n\n${json.data.hemat_text}` : ''),
           spesifikasi: f.spesifikasi || json.data.seo?.title || ''
         }))
@@ -92,7 +92,7 @@ export default function Page(){
     try{
       const slug = form.nama.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
       const payload={
-      ...form,
+     ...form,
         slug,
         harga:parseInt(form.harga)||0,
         harga_promo:form.harga_promo?parseInt(form.harga_promo):null,
@@ -202,4 +202,4 @@ export default function Page(){
       </div>
     </div>
   </AdminLayout>)
-}
+       }
