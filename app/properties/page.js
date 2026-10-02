@@ -20,7 +20,7 @@ export default function PropertiesPage(){
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
     fetch(`${API}/properties?is_published=true`)
-  .then(r=>r.json()).then(j=>setData(j.data||j||[]))
+ .then(r=>r.json()).then(j=>setData(j.data||j||[]))
   },[API])
 
   const toggleTheme = ()=>{
@@ -29,6 +29,12 @@ export default function PropertiesPage(){
   }
 
   const getFotos=(p)=>[p.thumbnail,p.foto_1,p.foto_2,p.foto_3,p.foto_4,p.foto_5,p.foto_6,p.foto_7,p.foto_8].filter(Boolean)
+
+  // BERSIHIN FASILITAS BIAR MAP GAK MUNCUL DI LIST - SAMA KAYAK SLUG
+  const cleanFasilitas = (fasilitas)=>{
+    if(!fasilitas) return ''
+    return fasilitas.replace(/\[MAP:.*?\]/g,'').replace(/\[MAP_IMG:.*?\]/g,'').trim()
+  }
 
   const filteredData = useMemo(()=>{
     return data.filter(p=>{
@@ -48,7 +54,6 @@ export default function PropertiesPage(){
 
   return (
     <main className={`${isDark?'bg-[#0B0B0F] text-white':'bg-[#FFFBF0] text-black'} min-h-screen transition-colors pb-24`}>
-      {/* NAVBAR */}
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/" className="flex flex-col leading-none">
           <div className="flex font-black text-[24px] tracking-tight">
@@ -74,7 +79,6 @@ export default function PropertiesPage(){
         </div>
       </nav>
 
-      {/* MENU - SAMA KAYAK HOMEPAGE */}
       {open && (
         <div className={`px-6 py-4 space-y-0 shadow-xl border-b ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/5'}`}>
           <Link href="/properties" onClick={()=>setOpen(false)} className={`flex justify-between items-center py-4 font-black text-[14px] border-b ${isDark?'border-white/10':'border-black/5'}`}>01 • PROPERTI <span className="opacity-40">→</span></Link>
@@ -89,14 +93,12 @@ export default function PropertiesPage(){
         <h1 className="text-3xl font-black tracking-tighter mt-2">PROPERTI<span style={{color:COLORS.gold}}> Pasa Gadang </span></h1>
         <p className={`${isDark?'text-white/50':'text-black/50'} text-[13px] mt-1`}>{filteredData.length} dari {data.length} unit ready di Padang</p>
 
-        {/* SEARCH BOX */}
         <div className={`mt-5 flex items-center gap-3 px-5 py-3.5 rounded-full border ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/10 shadow-sm'}`}>
           <span className="text-[18px] opacity-40">🔍</span>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Cari lokasi, Manggis, Kuranji, Balai Baru..." className="flex-1 bg-transparent outline-none text-[14px] font-medium placeholder:opacity-40"/>
           {search && <button onClick={()=>setSearch('')} className="w-6 h-6 bg-black/10 rounded-full flex items-center justify-center text-[12px]">✕</button>}
         </div>
 
-        {/* FILTER STATUS - READY / ON PROGRESS / INDENT / TERJUAL */}
         <div className="flex gap-2 overflow-x-auto mt-4 pb-2 scrollbar-hide">
           {STATUS_LIST.map(s=>{
             const active = filterStatus===s
@@ -111,17 +113,29 @@ export default function PropertiesPage(){
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
           {filteredData.map(p=>{
             const fotos=getFotos(p)
-            const statusColor = (p.status_properti||'Ready').toLowerCase().includes('progress')? 'bg-orange-500' : (p.status_properti||'').toLowerCase().includes('indent')? 'bg-blue-600' : (p.status_properti||'').toLowerCase().includes('jual') || (p.status_properti||'').toLowerCase().includes('terjual')? 'bg-red-600' : 'bg-[#D4AF37]'
+            // LOGIC BADGE API - UNGU vs MERAH
+            const badgeRaw = (p.badge || p.status_properti || '').toString()
+            const isTerjual = badgeRaw.toLowerCase().includes('terjual') || badgeRaw.toLowerCase().includes('sold') || badgeRaw.toLowerCase().includes('habis')
+            const fasilitasBersih = cleanFasilitas(p.fasilitas)
+
             return (
               <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
                 <div className="h-[260px] relative cursor-pointer" onClick={()=>{setZoomFotos(fotos); setZoomIdx(0)}}>
                   <img src={fotos[0]} className="w-full h-full object-cover"/>
-                  <div className="absolute top-4 left-4 flex gap-2">
-                    <div className="bg-[#D4AF37] text-black text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest">{p.tipe_transaksi?.toUpperCase()||'JUAL'}</div>
-                    <div className={`${statusColor} text-white text-[10px] font-black px-3 py-1.5 rounded-full tracking-widest uppercase`}>{p.status_properti||'Ready'}</div>
-                  </div>
-                  <div className="absolute top-4 right-4 bg-black text-white text-[11px] font-bold px-3 py-1.5 rounded-full">{fotos.length} FOTO</div>
-                  <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white text-[12px] font-bold px-4 py-2 rounded-full border border-white/10">{p.kecamatan} • {p.sertifikat}</div>
+
+                  {/* CUMA BADGE API - SESUAI PERMINTAAN LU */}
+                  {badgeRaw && (
+                    <div className="absolute top-4 left-4 z-20">
+                      <div className={`text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase border border-white shadow-lg animate-bounce flex items-center gap-1
+                        ${isTerjual
+                         ? 'bg-gradient-to-r from-red-600 to-orange-600 shadow-[0_0_15px_rgba(239,68,68,0.8)]'
+                          : 'bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]'
+                        }`}>
+                        🔥 {badgeRaw.toUpperCase()}
+                      </div>
+                    </div>
+                  )}
+                  {/* HAPUS: JUAL, READY, 6 FOTO, Kuranji•SHM SUDAH DIHAPUS */}
                 </div>
 
                 <div className="p-6 flex flex-col flex-1">
@@ -137,7 +151,7 @@ export default function PropertiesPage(){
 
                   <div className="mt-3 p-3 rounded-2xl bg-black text-white">
                     <div className="text-[10px] font-bold tracking-widest opacity-60 uppercase">Fasilitas</div>
-                    <div className="text-[13px] font-bold mt-1 line-clamp-2">{p.fasilitas||'- Free carport, free taman'}</div>
+                    <div className="text-[13px] font-bold mt-1 line-clamp-2">{fasilitasBersih||'- Free carport, free taman'}</div>
                   </div>
 
                   <div className="mt-5">
@@ -181,4 +195,4 @@ export default function PropertiesPage(){
       )}
     </main>
   )
-}
+  }
