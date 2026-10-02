@@ -30,13 +30,8 @@ function safeRender(html){
   let s = html.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&')
   const imgMap = []
   s = s.replace(/<img[^>]*>/gi, (m)=>{ imgMap.push(m); return `__IMG_${imgMap.length-1}__` })
-
-  // auto bold: **teks** -> <strong>
   s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-
-  // auto bold sub-judul yang diakhiri titik dua: Tips:, Catatan:
   s = s.replace(/([A-Z][a-zA-Z\s]{2,30}:)/g, '<strong style="color:#111">$1</strong>')
-
   s = s.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#D4AF37;text-decoration:underline;word-break:break-all">$1</a>')
   s = s.replace(/__IMG_(\d+)__/g, (_, i)=>{
     let tag = imgMap[Number(i)] || ''
@@ -133,12 +128,10 @@ export default function DetailBlog(){
           <div className="mt-8 space-y-6">
             <div className={`text-[17px] leading-[1.9] ${muted}`} dangerouslySetInnerHTML={{__html: safeRender(points[0])}}/>
             {points.slice(1).map((raw,i)=>{
-              // Ambil baris pertama sebagai JUDUL BOLD
               const clean = raw.replace(/^\d+\.\s*/,'').trim()
               const lines = clean.split('\n').filter(Boolean)
               const firstLine = lines[0] || clean.split('.')[0]
               const rest = clean.replace(firstLine,'').trim()
-
               return(
                 <div key={i} className={`rounded-[24px] p-6 border ${cardBg}`}>
                   <div className="flex gap-3 items-start">
@@ -152,22 +145,47 @@ export default function DetailBlog(){
           </div>
         )}
 
-        <div className={`mt-12 p-6 rounded-[24px] border ${cardBg}`}>
-          <p className="font-black text-[13px] tracking-widest">BUTUH BAHAN BANGUNAN?</p>
-          <p className={`text-[13px] mt-1 ${muted}`}>Konsultasi gratis roster & batu alam Pasa Gadang. Hemat 30% biaya bahan.</p>
-          <div className="flex gap-2 mt-4">
-            <a href="/estetika" className="bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black">LIHAT KATALOG →</a>
-            <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20dari%20blog" target="_blank" className="bg-[#25D366] text-white px-5 py-3 rounded-full text-[11px] font-black">WA 08979879518</a>
+        {/* === 2 BLOK ANIMASI BARU === */}
+        <div className="mt-12 space-y-4">
+          {/* BLOK 1 */}
+          <div className={`group relative p-6 rounded-[24px] border overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(212,175,55,0.2)] ${cardBg} animate-float`}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-[#D4AF37]/10 to-transparent"></div>
+            <div className="absolute -top-10 -right-10 w-20 h-20 bg-[#D4AF37] rounded-full blur-2xl opacity-20 animate-pulse"></div>
+            <p className="relative font-black text-[13px] tracking-widest flex items-center gap-2">🟡 BUTUH BAHAN BANGUNAN?</p>
+            <p className={`relative text-[13px] mt-1 ${muted}`}>Konsultasi gratis roster & batu alam Pasa Gadang. Hemat 30% biaya bahan.</p>
+            <div className="relative flex gap-2 mt-4">
+              <a href="/materials" className="flex-1 text-center bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black hover:bg-[#FFEB7F] transition-colors">LIHAT KATALOG →</a>
+              <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20dari%20blog" target="_blank" className="flex-1 text-center bg-[#25D366] text-white px-5 py-3 rounded-full text-[11px] font-black hover:scale-105 transition-transform">WA 08979879518</a>
+            </div>
+          </div>
+
+          {/* BLOK 2 */}
+          <div className={`group relative p-6 rounded-[24px] border overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] ${cardBg} animate-float-delay`}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-black/[0.03] to-transparent dark:from-white/[0.05]"></div>
+            <div className="absolute -top-10 -right-10 w-20 h-20 bg-[#111] dark:bg-white rounded-full blur-2xl opacity-10 animate-pulse"></div>
+            <p className="relative font-black text-[13px] tracking-widest flex items-center gap-2">✨ PERCANTIK PROPERTI ANDA?</p>
+            <p className={`relative text-[13px] mt-1 ${muted}`}>Percantik Properti anda lebih estetik dengan bahan roster dan batu alam, granite.</p>
+            <div className="relative flex gap-2 mt-4">
+              <a href="/estetika" className="flex-1 text-center bg-[#111] dark:bg-white text-white dark:text-black px-5 py-3 rounded-full text-[11px] font-black hover:scale-105 transition-transform">LIHAT ESTETIKA →</a>
+              <a href="https://wa.me/628979879518?text=Halo%20mau%20konsultasi%20estetika%20roster" target="_blank" className="flex-1 text-center bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black hover:bg-[#FFEB7F] transition-colors">KONSULTASI</a>
+            </div>
           </div>
         </div>
+
       </div>
 
-      <a href="https://wa.me/628979879518" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white">💬</a>
+      <a href="https://wa.me/628979879518" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white animate-bounce-slow">💬</a>
 
       <style>{`
         strong, b { font-weight: 900!important; color: ${isDark?'#fff':'#111'}; }
        .prose strong { font-weight: 900!important; }
+        @keyframes float { 0%,100%{ transform: translateY(0px) } 50%{ transform: translateY(-3px) } }
+        @keyframes float-delay { 0%,100%{ transform: translateY(0px) } 50%{ transform: translateY(-4px) } }
+        @keyframes bounce-slow { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } }
+       .animate-float { animation: float 4s ease-in-out infinite; }
+       .animate-float-delay { animation: float-delay 4.5s ease-in-out infinite; }
+       .animate-bounce-slow { animation: bounce-slow 2.5s ease-in-out infinite; }
       `}</style>
     </div>
   )
-                }
+}
