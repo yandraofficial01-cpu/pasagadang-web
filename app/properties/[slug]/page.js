@@ -2,7 +2,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function PropertyDetailMewah(){
   const {slug}=useParams()
@@ -13,8 +12,7 @@ export default function PropertyDetailMewah(){
 
   useEffect(()=>{
     if(!slug) return
-    fetch(`${API}/properties/${slug}`)
-.then(r=>r.json()).then(j=>setP(j.data||j))
+    fetch(`${API}/properties/${slug}`).then(r=>r.json()).then(j=>setP(j.data||j))
   },[slug,API])
 
   useEffect(()=>{
@@ -28,17 +26,19 @@ export default function PropertyDetailMewah(){
   },[p])
 
   const mapData = useMemo(()=>{
-    if(!p?.fasilitas) return { mapUrl: null, fasilitasBersih: '', list: [], lat:null, lng:null }
+    if(!p?.fasilitas) return { mapUrl: null, mapImg: null, fasilitasBersih: '', list: [], lat:null, lng:null }
     const m = p.fasilitas.match(/\[MAP:(.*?)\]/)
+    const mImg = p.fasilitas.match(/\[MAP_IMG:(.*?)\]/)
     const mapUrl = m? m[1].trim() : null
+    const mapImg = mImg? mImg[1].trim() : null
     let lat=null,lng=null
     if(mapUrl){
       const at = mapUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
       if(at){ lat=at[1]; lng=at[2] }
     }
-    const bersih = p.fasilitas.replace(/\[MAP:.*?\]/g, '').trim()
+    const bersih = p.fasilitas.replace(/\[MAP:.*?\]/g,'').replace(/\[MAP_IMG:.*?\]/g,'').trim()
     const list = bersih.split(',').map(s=>s.trim()).filter(Boolean)
-    return { mapUrl, fasilitasBersih: bersih, list, lat, lng }
+    return { mapUrl, mapImg, fasilitasBersih: bersih, list, lat, lng }
   },[p])
 
   if(!p) return <div className="min-h-screen bg-[#FFFBF0] flex items-center justify-center font-black tracking-widest animate-pulse">LOADING {slug}...</div>
@@ -49,11 +49,10 @@ export default function PropertyDetailMewah(){
 
   const realMapLink = mapData.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||'')}`
 
-  // PIN EXACT MANGGIS GARDEN AA01 - ANTI GESER KE BLOK T5
   const embedUrl = mapData.lat && mapData.lng
- ? `https://www.google.com/maps?q=${mapData.lat},${mapData.lng}&z=19&t=k&output=embed`
+? `https://www.google.com/maps?q=${mapData.lat},${mapData.lng}&z=19&t=k&output=embed`
   : mapData.mapUrl && mapData.mapUrl.includes('/embed')
- ? mapData.mapUrl
+? mapData.mapUrl
   : `https://www.google.com/maps?q=-0.914529,100.383185&z=19&t=k&output=embed`
 
   return (
@@ -61,20 +60,15 @@ export default function PropertyDetailMewah(){
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-[#D4AF37]/30">
         <div className="max-w-6xl mx-auto flex justify-between items-center p-4">
           <Link href="/properties" className="bg-black text-white px-5 py-2.5 rounded-full font-black text-[12px]">← KEMBALI</Link>
-          <span className="bg-[#D4AF37] text-black px-4 py-1.5 rounded-full font-black text-[11px]">{p.tipe_transaksi?.toUpperCase()} {p.badge?`• ${p.badge}`:''}</span>
+          <span className="bg-[#D4AF37] text-black px-4 py-1.5 rounded-full font-black text-[11px] flex items-center gap-1">{p.tipe_transaksi?.toUpperCase()} {p.badge?`• 🔥 ${p.badge}`:''}</span>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.2fr_0.8fr] gap-6 p-4 mt-4">
         <div>
-          {/* FIX FOTO MELEBAR - GAK PAKAI FILL LAGI, PAKAI AUTO HEIGHT */}
           <div className="relative w-full bg-black rounded-[24px] overflow-hidden border-[3px] border-[#D4AF37] flex items-center justify-center min-h-[340px] md:min-h-[500px] cursor-zoom-in" onClick={()=>setZoom(true)}>
             {fotos[active] && (
-              <img
-                src={fotos[active]}
-                alt={p.judul}
-                className="w-full h-auto max-h-[70vh] object-contain"
-              />
+              <img src={fotos[active]} alt={p.judul} className="w-full h-auto max-h-[70vh] object-contain" />
             )}
             {p.badge && (
               <div className="absolute top-3 left-3 z-20">
@@ -116,17 +110,30 @@ export default function PropertyDetailMewah(){
 
           <div className="mt-4 text-[13px] whitespace-pre-line opacity-70">{p.deskripsi}</div>
 
+          {/* MAP REAL - FOTO CROP MANUAL KLIK BUKA MAP */}
           <div className="mt-6 rounded-[16px] overflow-hidden border-2 border-[#D4AF37]/30">
-            <div className="bg-black text-[#D4AF37] p-2.5 font-black text-[10px] tracking-widest flex justify-between">
-              <span>LOKASI EXACT - SATELIT</span>
-              <span className="bg-[#D4AF37] text-black px-2 rounded-full">PIN AA01</span>
+            <div className="bg-black text-[#D4AF37] p-2.5 font-black text-[10px] tracking-widest flex justify-between items-center">
+              <span>LOKASI EXACT - FOTO MAP</span>
+              <span className="bg-[#D4AF37] text-black px-2 py-0.5 rounded-full text-[9px]">PIN AA01</span>
             </div>
-            <div className="h-[340px] bg-zinc-100">
+
+            {mapData.mapImg? (
+              <a href={realMapLink} target="_blank" className="block relative group cursor-pointer">
+                <img src={mapData.mapImg} alt="Foto Map" className="w-full h-[240px] object-cover" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 bg-black text-white px-4 py-2 rounded-full font-black text-[11px]">📍 KLIK BUKA GOOGLE MAPS</span>
+                </div>
+                <div className="absolute bottom-2 left-2 bg-white text-black px-2.5 py-1 rounded-full font-black text-[10px] shadow">📍 Klik buka map real</div>
+              </a>
+            ) : (
+              <div className="h-[180px] bg-zinc-100 flex items-center justify-center text-[11px] font-bold opacity-50">Belum ada foto map</div>
+            )}
+
+            <div className="h-[320px] bg-zinc-100 border-t-2 border-[#D4AF37]/20">
               <iframe src={embedUrl} width="100%" height="100%" style={{border:0}} loading="lazy"></iframe>
             </div>
           </div>
 
-          {/* CUMA 1 SET - GAK DOUBLE LAGI */}
           <div className="mt-5 space-y-3">
             <a href={realMapLink} target="_blank" className="w-full bg-white border-2 border-black rounded-full py-3.5 text-center font-black text-[13px] block">📍 BUKA DI GOOGLE MAPS</a>
             <a href={`https://wa.me/${wa62}?text=${waMsg}`} target="_blank" className="w-full bg-[#25D366] text-white text-center py-4 rounded-full font-black text-[15px] block shadow-lg">WHATSAPP SEKARANG</a>
@@ -140,7 +147,6 @@ export default function PropertyDetailMewah(){
           <img src={fotos[active]} alt="" className="max-w-[92vw] max-h-[80vh] object-contain rounded-[16px] border-2 border-[#D4AF37]"/>
         </div>
       )}
-      {/* HAPUS STICKY BOTTOM BAR BIAR GAK DOUBLE */}
     </main>
   )
-    }
+              }
