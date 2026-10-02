@@ -13,7 +13,8 @@ export default function Page(){
     harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan',
     alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM',
     thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'',
-    video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false
+    video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false,
+    map_link:'' // <-- FIELD MAP REAL, GAK UBAH DB
   })
   const [editId,setEditId]=useState(null)
   const [showFotoLain,setShowFotoLain]=useState(false)
@@ -50,8 +51,17 @@ export default function Page(){
 
   const submit=async(e)=>{
     e.preventDefault()
+
+    // === TRIK TANPA UBAH DB: MASUKIN MAP KE DALAM FASILITAS ===
+    let fasilitasFinal = form.fasilitas || ''
+    fasilitasFinal = fasilitasFinal.replace(/\[MAP:.*?\]/g, '').trim()
+    if(form.map_link){
+      fasilitasFinal = fasilitasFinal? `${fasilitasFinal} [MAP:${form.map_link}]` : `[MAP:${form.map_link}]`
+    }
+
     const payload = {
-    ...form,
+   ...form,
+      fasilitas: fasilitasFinal,
       harga_kredit: form.harga_kredit? parseInt(form.harga_kredit) : null,
       dp: form.dp? parseInt(form.dp) : null,
       cicilan_per_bulan: form.cicilan_per_bulan? parseInt(form.cicilan_per_bulan) : null,
@@ -62,6 +72,8 @@ export default function Page(){
       kamar_tidur: parseInt(form.kamar_tidur)||0,
       kamar_mandi: parseInt(form.kamar_mandi)||0,
     }
+    delete payload.map_link // hapus biar API gak komplain kolom gak ada
+
     const url=editId?`${API}/properties/${editId}`:`${API}/properties`
     const res = await fetch(url,{
       method:editId?'PUT':'POST',
@@ -70,7 +82,7 @@ export default function Page(){
     })
     if(res.ok){
       load(); setEditId(null)
-      setForm({judul:'', tipe_properti:'Rumah', tipe_transaksi:'jual', harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan', alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM', thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'', video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false})
+      setForm({judul:'', tipe_properti:'Rumah', tipe_transaksi:'jual', harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan', alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM', thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'', video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false, map_link:''})
     } else {
       alert('Gagal simpan, cek API')
     }
@@ -88,6 +100,16 @@ export default function Page(){
       <input value={form[field]||''} onChange={e=>setForm({...form,[field]:e.target.value})} placeholder={`${label} URL`} className="w-full bg-black/50 border border-white/10 p-2.5 rounded-xl text-[11px]" required={required}/>
     </div>
   )
+
+  const handleEdit = (i) => {
+    const m = i.fasilitas?.match(/\[MAP:(.*?)\]/)
+    const map = m? m[1] : ''
+    const fasilitasBersih = i.fasilitas?.replace(/\[MAP:.*?\]/g,'').trim()
+    setForm({...i, fasilitas: fasilitasBersih, map_link: map})
+    setEditId(i.id)
+    setShowFotoLain(true)
+    window.scrollTo(0,0)
+  }
 
   return(
   <AdminLayout title={`PROPERTI (${data.length}) - sesuai model properties`}>
@@ -136,6 +158,22 @@ export default function Page(){
         </div>
 
         <input value={form.alamat} onChange={e=>setForm({...form,alamat:e.target.value})} placeholder="Alamat Lengkap" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
+
+        {/* MAP REAL INPUT - TANPA UBAH DB */}
+        <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/20 p-3 rounded-xl space-y-2">
+          <p className="text-[10px] font-black tracking-widest text-[#D4AF37]">📍 MAP REAL (GOOGLE MAPS)</p>
+          <input
+            value={form.map_link}
+            onChange={e=>setForm({...form,map_link:e.target.value})}
+            placeholder="Paste link Google Maps: https://maps.app.goo.gl/..."
+            className="w-full bg-black/50 border border-[#D4AF37]/20 p-3 rounded-xl text-sm"
+          />
+          <p className="text-[9px] text-zinc-500">Cara: Buka GMaps > Pin lokasi rumah > Share > Copy Link. Otomatis kesimpen tanpa ubah DB.</p>
+          {form.map_link && (
+            <a href={form.map_link} target="_blank" className="text-[10px] text-[#D4AF37] underline">Test Buka Map ↗</a>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-2">
           <input value={form.kecamatan} onChange={e=>setForm({...form,kecamatan:e.target.value})} placeholder="Kecamatan" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
           <input value={form.wa_number} onChange={e=>setForm({...form,wa_number:e.target.value})} placeholder="WA Number" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
@@ -165,7 +203,7 @@ export default function Page(){
         </div>
 
         <textarea value={form.deskripsi} onChange={e=>setForm({...form,deskripsi:e.target.value})} placeholder="Deskripsi Lengkap" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm h-24"/>
-        <textarea value={form.fasilitas} onChange={e=>setForm({...form,fasilitas:e.target.value})} placeholder="Fasilitas (pisah koma)" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm h-16"/>
+        <textarea value={form.fasilitas} onChange={e=>setForm({...form,fasilitas:e.target.value})} placeholder="Fasilitas (pisah koma) - MAP otomatis ditambah di sini" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm h-16"/>
 
         <div className="grid grid-cols-2 gap-2">
           <input value={form.badge} onChange={e=>setForm({...form,badge:e.target.value})} placeholder="Badge (BEST)" className="bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
@@ -173,7 +211,7 @@ export default function Page(){
         </div>
 
         <button className="w-full bg-[#D4AF37] text-black py-3 rounded-xl font-black text-xs tracking-widest">{editId?'UPDATE PROPERTI':'SIMPAN PROPERTI'}</button>
-        {editId&&<button type="button" onClick={()=>{setEditId(null); setForm({judul:'', tipe_properti:'Rumah', tipe_transaksi:'jual', harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan', alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM', thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'', video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false})}} className="w-full bg-white/10 py-3 rounded-xl font-black text-xs">BATAL EDIT</button>}
+        {editId&&<button type="button" onClick={()=>{setEditId(null); setForm({judul:'', tipe_properti:'Rumah', tipe_transaksi:'jual', harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan', alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM', thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'', video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false, map_link:''})}} className="w-full bg-white/10 py-3 rounded-xl font-black text-xs">BATAL EDIT</button>}
       </form>
 
       <div className="bg-[#16161E] border border-white/10 p-5 rounded-[24px] space-y-2 max-h-[90vh] overflow-y-auto">
@@ -184,11 +222,11 @@ export default function Page(){
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold line-clamp-1">{i.judul}</p>
                 <p className="text-[11px] text-zinc-500">{i.tipe_properti} | {i.tipe_transaksi} | Rp{i.harga_cash?.toLocaleString()}</p>
-                <p className="text-[10px] text-zinc-600">{i.is_published?'✅ Published':'📝 Draft'} | {i.kecamatan}</p>
+                <p className="text-[10px] text-zinc-600">{i.is_published?'✅ Published':'📝 Draft'} | {i.kecamatan} {i.fasilitas?.includes('[MAP:')?'| 📍 Map OK':''}</p>
               </div>
             </div>
             <div className="flex gap-1 ml-2">
-              <button onClick={()=>{setForm(i);setEditId(i.id); setShowFotoLain(true); window.scrollTo(0,0)}} className="bg-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold">EDIT</button>
+              <button onClick={()=>handleEdit(i)} className="bg-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold">EDIT</button>
               <button onClick={async()=>{if(!confirm('Hapus?'))return;await fetch(`${API}/properties/${i.id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok()}`}});load()}} className="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-[10px] font-bold">HAPUS</button>
             </div>
           </div>
