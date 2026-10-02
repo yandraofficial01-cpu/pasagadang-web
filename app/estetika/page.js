@@ -37,18 +37,27 @@ export default function EstetikaPage(){
   useEffect(()=>{
     const savedTheme = localStorage.getItem('theme') || 'light'
     setTheme(savedTheme)
+    const saved = localStorage.getItem('pg_cart')
+    if(saved) setCart(JSON.parse(saved))
+  },[])
+
+  // FIX UTAMA: LOAD PER KATEGORI, BUKAN BARENG
+  useEffect(()=>{
     async function getData(){
+      setLoading(true)
       try{
-        const res = await fetch(`${API}/estetikas`)
+        let url = `${API}/estetikas?limit=20`
+        if(cat!== 'semua'){
+          url += `&kategori=${encodeURIComponent(cat)}`
+        }
+        const res = await fetch(url)
         const data = await res.json()
         const arr = Array.isArray(data)? data : data.data || []
         setEstetikas(arr.filter(m=>m.is_active!==false))
-        const saved = localStorage.getItem('pg_cart')
-        if(saved) setCart(JSON.parse(saved))
       }catch{} finally{ setLoading(false) }
     }
     getData()
-  },[API])
+  },[API, cat])
 
   useEffect(()=>{ localStorage.setItem('pg_cart', JSON.stringify(cart)) },[cart])
 
@@ -91,22 +100,19 @@ export default function EstetikaPage(){
 
   const categories = ['semua','roster','batu alam','granit','keramik','bata ekspos','ornamen']
   let filtered = estetikas.filter(m=>{
-    const matchCat = cat==='semua' || m.kategori?.toLowerCase()===cat.toLowerCase()
     const matchSearch = search==='' || m.nama.toLowerCase().includes(search.toLowerCase()) || (m.deskripsi||'').toLowerCase().includes(search.toLowerCase())
-    return matchCat && matchSearch
+    return matchSearch
   })
 
   const formatRupiah = (n) => new Intl.NumberFormat('id-ID').format(n||0)
 
-  // PARSER SPESIFIKASI CENTANG HIJAU
   const parseSpec = (text)=>{
     if(!text) return []
-    // split by newline atau ✅
     return text
-     .split(/\n+/)
-     .map(t=> t.replace(/✅|✔️|✓|•|-/g,'').trim())
-     .filter(Boolean)
-     .flatMap(t=> t.split(',').map(x=>x.trim()).filter(Boolean))
+    .split(/\n+/)
+    .map(t=> t.replace(/✅|✔️|✓|•|-/g,'').trim())
+    .filter(Boolean)
+    .flatMap(t=> t.split(',').map(x=>x.trim()).filter(Boolean))
   }
 
   if(loading) return <div className={`min-h-screen flex items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}><p className="font-black animate-pulse">LOADING ESTETIKA...</p></div>
@@ -140,7 +146,7 @@ export default function EstetikaPage(){
       <div className="flex justify-between items-start mt-2">
         <div>
           <h1 className="text-3xl md:text-5xl font-black tracking-tighter">ESTETIKA<span style={{color:COLORS.gold}}> Pasa Gadang </span></h1>
-          <p className={`text-[13px] font-bold mt-2 ${isDark?'text-zinc-400':'text-black/60'}`}>{filtered.length} dari {estetikas.length} desain • Roster, Batu Alam, Granit Ready</p>
+          <p className={`text-[13px] font-bold mt-2 ${isDark?'text-zinc-400':'text-black/60'}`}>{filtered.length} desain {cat.toUpperCase()} • Roster, Batu Alam, Granit Ready</p>
         </div>
       </div>
 
@@ -186,7 +192,6 @@ export default function EstetikaPage(){
                 </div>
               )}
 
-              {/* SPESIFIKASI FIX - CENTANG HIJAU FULL */}
               <div className="mt-3 p-3.5 rounded-2xl bg-black text-white">
                 <div className="text-[10px] font-bold tracking-widest opacity-60 uppercase">SPESIFIKASI</div>
                 {specs.length>0? (
