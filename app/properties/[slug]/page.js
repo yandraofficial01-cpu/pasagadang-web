@@ -14,7 +14,7 @@ export default function PropertyDetailMewah(){
   useEffect(()=>{
     if(!slug) return
     fetch(`${API}/properties/${slug}`)
-  .then(r=>r.json()).then(j=>setP(j.data||j))
+ .then(r=>r.json()).then(j=>setP(j.data||j))
   },[slug,API])
 
   useEffect(()=>{
@@ -25,6 +25,16 @@ export default function PropertyDetailMewah(){
   const fotos = useMemo(()=> {
     if(!p) return []
     return [p.thumbnail,p.foto_1,p.foto_2,p.foto_3,p.foto_4,p.foto_5,p.foto_6,p.foto_7,p.foto_8].filter(Boolean)
+  },[p])
+
+  // === FIX MAP REAL ===
+  const mapData = useMemo(()=>{
+    if(!p?.fasilitas) return { mapUrl: null, fasilitasBersih: '', list: [] }
+    const m = p.fasilitas.match(/\[MAP:(.*?)\]/)
+    const mapUrl = m? m[1].trim() : null
+    const bersih = p.fasilitas.replace(/\[MAP:.*?\]/g, '').trim()
+    const list = bersih.split(',').map(s=>s.trim()).filter(Boolean)
+    return { mapUrl, fasilitasBersih: bersih, list }
   },[p])
 
   const cicilanAuto = useMemo(()=>{
@@ -38,6 +48,11 @@ export default function PropertyDetailMewah(){
   const raw=String(p.wa_number||'08979879518').replace(/[^0-9]/g,'')
   const wa62=raw.startsWith('0')?'62'+raw.slice(1):raw
   const waMsg=encodeURIComponent(`Halo Pasa Gadang, saya serius mau tanya detail:\n\n${p.judul}\nAlamat: ${p.alamat}\nKecamatan: ${p.kecamatan}\nLT ${p.luas_tanah}m² LB ${p.luas_bangunan}m² KT ${p.kamar_tidur} KM ${p.kamar_mandi}\nSertifikat: ${p.sertifikat}\nHarga: Rp ${Number(p.harga_cash).toLocaleString('id-ID')}\n\nLink: ${typeof window!=='undefined'?window.location.href+'?ref=pasagadang':''}`)
+
+  const realMapLink = mapData.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||p.kecamatan||'Padang')}`
+  const embedUrl = mapData.mapUrl
+   ? `https://www.google.com/maps?q=${encodeURIComponent(mapData.mapUrl)}&z=17&output=embed`
+    : `https://www.google.com/maps?q=${encodeURIComponent(p.alamat||'Padang')}&z=15&output=embed`
 
   return (
     <main className="min-h-screen bg-[#FFFBF0] pb-28">
@@ -68,7 +83,7 @@ export default function PropertyDetailMewah(){
           </div>
           {p.video_url && (
             <div className="mt-6 rounded-[24px] overflow-hidden border-2 border-black">
-              <div className="bg-black text-white p-3 font-black text-[12px] tracking-widest">🎥 VIDEO TOUR</div>
+              <div className="bg-black text-white p-3 font-black text-[12px] tracking-widest">VIDEO TOUR</div>
               <div className="aspect-video bg-black"><iframe src={p.video_url} className="w-full h-full" allowFullScreen/></div>
             </div>
           )}
@@ -110,18 +125,35 @@ export default function PropertyDetailMewah(){
               <div className="bg-white border border-black/10 rounded-2xl p-4"><div className="text-[10px] font-bold text-black/40 tracking-widest uppercase">Tipe Properti</div><div className="text-[15px] font-black text-black mt-1">{p.tipe_properti}</div></div>
             </div>
 
-            <div className="mt-5 p-5 bg-zinc-50 border rounded-2xl">
-              <div className="text-[11px] font-black tracking-widest uppercase text-black/40">Fasilitas Lengkap</div>
-              <div className="text-[14px] font-bold text-black mt-2 whitespace-pre-line leading-relaxed">{p.fasilitas}</div>
-            </div>
+            {mapData.fasilitasBersih && (
+              <div className="mt-5 p-5 bg-zinc-50 border rounded-2xl">
+                <div className="text-[11px] font-black tracking-widest uppercase text-black/40">Fasilitas Lengkap</div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {mapData.list.map((f,i)=>(
+                    <span key={i} className="bg-white border border-black/10 px-3 py-1.5 rounded-full text-[12px] font-bold">{f}</span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="mt-5">
               <div className="text-[11px] font-black tracking-widest uppercase text-black/40">Deskripsi</div>
               <div className="text-[14px] font-medium text-black/80 mt-2 whitespace-pre-line leading-relaxed">{p.deskripsi}</div>
             </div>
 
+            {/* MAP REAL - TAMPILAN ASLI KAYAK GOOGLE MAPS */}
+            <div className="mt-6 rounded-[20px] overflow-hidden border-2 border-[#D4AF37]/30">
+              <div className="bg-black text-[#D4AF37] p-3 font-black text-[11px] tracking-widest flex justify-between items-center">
+                <span>LOKASI REAL - GOOGLE MAPS</span>
+                {mapData.mapUrl && <span className="bg-[#D4AF37] text-black px-2 py-0.5 rounded-full text-[9px]">REAL</span>}
+              </div>
+              <div className="h-[280px] bg-zinc-100">
+                <iframe src={embedUrl} width="100%" height="100%" style={{border:0}} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+              </div>
+            </div>
+
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||p.kecamatan)}`} target="_blank" className="bg-white border-2 border-black rounded-full py-3 text-center font-black text-[12px]">📍 MAP</a>
+              <a href={realMapLink} target="_blank" className="bg-white border-2 border-black rounded-full py-3 text-center font-black text-[12px] hover:bg-black hover:text-white transition">📍 MAP</a>
               <button onClick={()=>{navigator.clipboard.writeText(window.location.href); alert('Link disalin!')}} className="bg-black text-[#D4AF37] rounded-full py-3 text-center font-black text-[12px] border border-[#D4AF37]">🔗 SHARE</button>
             </div>
 
@@ -147,8 +179,8 @@ export default function PropertyDetailMewah(){
 
       <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur border-t border-[#D4AF37]/30 flex gap-3 z-40">
         <a href={`https://wa.me/${wa62}?text=${waMsg}`} target="_blank" className="flex-1 bg-[#25D366] text-white text-center py-4 rounded-full font-black">WHATSAPP</a>
-        <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||'')}`} target="_blank" className="px-6 bg-black text-white py-4 rounded-full font-black text-[12px]">MAP</a>
+        <a href={realMapLink} target="_blank" className="px-6 bg-black text-white py-4 rounded-full font-black text-[12px]">MAP</a>
       </div>
     </main>
   )
-            }
+    }
