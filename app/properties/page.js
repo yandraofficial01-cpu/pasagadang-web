@@ -13,14 +13,12 @@ export default function PropertiesPage(){
   const API=process.env.NEXT_PUBLIC_API_URL
   const COLORS = { gold: '#D4AF37', red: '#B22222', cream: '#FFFBF0', dark: '#0B0B0F' }
   const isDark = theme==='dark'
-
   const STATUS_LIST = ['Semua','Ready','On Progress','Indent','Terjual']
 
   useEffect(()=>{
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
-    fetch(`${API}/properties?is_published=true`)
- .then(r=>r.json()).then(j=>setData(j.data||j||[]))
+    fetch(`${API}/properties?is_published=true`).then(r=>r.json()).then(j=>setData(j.data||j||[]))
   },[API])
 
   const toggleTheme = ()=>{
@@ -30,10 +28,17 @@ export default function PropertiesPage(){
 
   const getFotos=(p)=>[p.thumbnail,p.foto_1,p.foto_2,p.foto_3,p.foto_4,p.foto_5,p.foto_6,p.foto_7,p.foto_8].filter(Boolean)
 
-  // BERSIHIN FASILITAS BIAR MAP GAK MUNCUL DI LIST - SAMA KAYAK SLUG
-  const cleanFasilitas = (fasilitas)=>{
-    if(!fasilitas) return ''
-    return fasilitas.replace(/\[MAP:.*?\]/g,'').replace(/\[MAP_IMG:.*?\]/g,'').trim()
+  // PARSER SINKRON SAMA SLUG - FIX KOMA
+  const getMapData = (p)=>{
+    if(!p?.fasilitas) return { mapUrl: null, mapImg: null, fasilitasBersih: '', list: [] }
+    const m = p.fasilitas.match(/\[MAP:(.*?)\]/)
+    const mImg = p.fasilitas.match(/\[MAP_IMG:(.*?)\]/)
+    const mapUrl = m? m[1].trim() : null
+    const mapImg = mImg? mImg[1].trim() : null
+    const bersih = p.fasilitas.replace(/\[MAP:.*?\]/g,'').replace(/\[MAP_IMG:.*?\]/g,'').trim()
+    const list = bersih.split(',').map(s=>s.trim()).filter(Boolean)
+    const fasilitasBersih = list.join(', ')
+    return { mapUrl, mapImg, fasilitasBersih, list }
   }
 
   const filteredData = useMemo(()=>{
@@ -56,26 +61,12 @@ export default function PropertiesPage(){
     <main className={`${isDark?'bg-[#0B0B0F] text-white':'bg-[#FFFBF0] text-black'} min-h-screen transition-colors pb-24`}>
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/" className="flex flex-col leading-none">
-          <div className="flex font-black text-[24px] tracking-tight">
-            <span style={{color:COLORS.red}}>PA</span>
-            <span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGA</span>
-            <span style={{color:COLORS.red}}>DANG</span>
-            <span className="text-[10px] ml-1 mt-1 tracking-widest" style={{color:COLORS.red}}>.COM</span>
-          </div>
-          <div className="relative w-[165px] h-[8px] mt-[2px]">
-            <svg viewBox="0 0 165 10" className="w-full h-full">
-              <path d="M0 6 Q22 0 44 4 T88 4 T132 3 T165 1 Q132 7 88 7 T44 7 T0 6" fill="#D4AF37" opacity="0.9"/>
-              <path d="M18 9 Q40 6 62 7.5 T106 7.5 T148 6 Q106 10 62 10.5 T18 9" fill="#D4AF37" opacity="0.8"/>
-            </svg>
-          </div>
+          <div className="flex font-black text-[24px] tracking-tight"><span style={{color:COLORS.red}}>PA</span><span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGA</span><span style={{color:COLORS.red}}>DANG</span><span className="text-[10px] ml-1 mt-1 tracking-widest" style={{color:COLORS.red}}>.COM</span></div>
+          <div className="relative w-[165px] h-[8px] mt-[2px]"><svg viewBox="0 0 165 10" className="w-full h-full"><path d="M0 6 Q22 0 44 4 T88 4 T132 3 T165 1 Q132 7 88 7 T44 7 T0 6" fill="#D4AF37" opacity="0.9"/><path d="M18 9 Q40 6 62 7.5 T106 7.5 T148 6 Q106 10 62 10.5 T18 9" fill="#D4AF37" opacity="0.8"/></svg></div>
         </Link>
         <div className="flex gap-2">
           <button onClick={toggleTheme} className={`w-10 h-10 rounded-full border flex items-center justify-center ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>{isDark?'☀️':'🌙'}</button>
-          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>
-            <span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span>
-            <span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span>
-            <span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span>
-          </button>
+          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}><span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span></button>
         </div>
       </nav>
 
@@ -102,40 +93,28 @@ export default function PropertiesPage(){
         <div className="flex gap-2 overflow-x-auto mt-4 pb-2 scrollbar-hide">
           {STATUS_LIST.map(s=>{
             const active = filterStatus===s
-            return(
-              <button key={s} onClick={()=>setFilterStatus(s)} className={`px-5 py-2.5 rounded-full text-[12px] font-black tracking-widest whitespace-nowrap border transition ${active?'bg-[#D4AF37] text-black border-[#D4AF37]':'bg-transparent border-black/10 opacity-70 hover:opacity-100'} ${isDark &&!active?'bg-white/10 border-white/10 text-white':''}`}>
-                {s.toUpperCase()}
-              </button>
-            )
+            return(<button key={s} onClick={()=>setFilterStatus(s)} className={`px-5 py-2.5 rounded-full text-[12px] font-black tracking-widest whitespace-nowrap border transition ${active?'bg-[#D4AF37] text-black border-[#D4AF37]':'bg-transparent border-black/10 opacity-70 hover:opacity-100'} ${isDark &&!active?'bg-white/10 border-white/10 text-white':''}`}>{s.toUpperCase()}</button>)
           })}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
           {filteredData.map(p=>{
             const fotos=getFotos(p)
-            // LOGIC BADGE API - UNGU vs MERAH
-            const badgeRaw = (p.badge || p.status_properti || '').toString()
-            const isTerjual = badgeRaw.toLowerCase().includes('terjual') || badgeRaw.toLowerCase().includes('sold') || badgeRaw.toLowerCase().includes('habis')
-            const fasilitasBersih = cleanFasilitas(p.fasilitas)
+            const mapData = getMapData(p)
+            const badgeRaw = (p.badge || '').toString()
+            const isTerjual = badgeRaw.toLowerCase().includes('terjual') || badgeRaw.toLowerCase().includes('sold') || (p.status_properti||'').toLowerCase().includes('terjual')
+            const realMapLink = mapData.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||'')}`
 
             return (
               <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
                 <div className="h-[260px] relative cursor-pointer" onClick={()=>{setZoomFotos(fotos); setZoomIdx(0)}}>
                   <img src={fotos[0]} className="w-full h-full object-cover"/>
-
-                  {/* CUMA BADGE API - SESUAI PERMINTAAN LU */}
+                  {/* CUMA BADGE API UNGU/MERAH */}
                   {badgeRaw && (
                     <div className="absolute top-4 left-4 z-20">
-                      <div className={`text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase border border-white shadow-lg animate-bounce flex items-center gap-1
-                        ${isTerjual
-                         ? 'bg-gradient-to-r from-red-600 to-orange-600 shadow-[0_0_15px_rgba(239,68,68,0.8)]'
-                          : 'bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]'
-                        }`}>
-                        🔥 {badgeRaw.toUpperCase()}
-                      </div>
+                      <div className={`text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase border border-white shadow-lg animate-bounce ${isTerjual? 'bg-gradient-to-r from-red-600 to-orange-600 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : 'bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]'}`}>🔥 {badgeRaw.toUpperCase()}</div>
                     </div>
                   )}
-                  {/* HAPUS: JUAL, READY, 6 FOTO, Kuranji•SHM SUDAH DIHAPUS */}
                 </div>
 
                 <div className="p-6 flex flex-col flex-1">
@@ -149,10 +128,22 @@ export default function PropertiesPage(){
                     <div className={`p-3 rounded-2xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}><div className="text-[10px] font-bold tracking-widest opacity-50 uppercase">Kamar Mandi</div><div className="text-[15px] font-black mt-1">{p.kamar_mandi} Kamar</div></div>
                   </div>
 
-                  <div className="mt-3 p-3 rounded-2xl bg-black text-white">
-                    <div className="text-[10px] font-bold tracking-widest opacity-60 uppercase">Fasilitas</div>
-                    <div className="text-[13px] font-bold mt-1 line-clamp-2">{fasilitasBersih||'- Free carport, free taman'}</div>
-                  </div>
+                  {mapData.fasilitasBersih? (
+                    <div className="mt-3 p-3 rounded-2xl bg-black text-white">
+                      <div className="text-[10px] font-bold tracking-widest opacity-60 uppercase">Fasilitas</div>
+                      <div className="text-[13px] font-bold mt-1 line-clamp-2">{mapData.fasilitasBersih}</div>
+                    </div>
+                  ) : null}
+
+                  {/* MAP TAMPIL DI LIST - FOTO CROP MANUAL SAMA KAYAK SLUG */}
+                  {mapData.mapImg && (
+                    <div className="mt-3 rounded-[16px] overflow-hidden border-2 border-[#D4AF37]/30">
+                      <a href={realMapLink} target="_blank" className="block relative group">
+                        <img src={mapData.mapImg} alt="Map Real" className="w-full h-[150px] object-cover"/>
+                        <div className="absolute bottom-2 left-2 bg-white text-black text-[10px] font-black px-3 py-1 rounded-full shadow">📍 Klik buka map real</div>
+                      </a>
+                    </div>
+                  )}
 
                   <div className="mt-5">
                     <div className="text-[11px] font-black tracking-widest opacity-50 uppercase">Harga Cash</div>
