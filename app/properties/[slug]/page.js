@@ -14,7 +14,7 @@ export default function PropertyDetailMewah(){
   useEffect(()=>{
     if(!slug) return
     fetch(`${API}/properties/${slug}`)
- .then(r=>r.json()).then(j=>setP(j.data||j))
+.then(r=>r.json()).then(j=>setP(j.data||j))
   },[slug,API])
 
   useEffect(()=>{
@@ -27,7 +27,6 @@ export default function PropertyDetailMewah(){
     return [p.thumbnail,p.foto_1,p.foto_2,p.foto_3,p.foto_4,p.foto_5,p.foto_6,p.foto_7,p.foto_8].filter(Boolean)
   },[p])
 
-  // === FIX MAP REAL ===
   const mapData = useMemo(()=>{
     if(!p?.fasilitas) return { mapUrl: null, fasilitasBersih: '', list: [] }
     const m = p.fasilitas.match(/\[MAP:(.*?)\]/)
@@ -47,12 +46,13 @@ export default function PropertyDetailMewah(){
 
   const raw=String(p.wa_number||'08979879518').replace(/[^0-9]/g,'')
   const wa62=raw.startsWith('0')?'62'+raw.slice(1):raw
-  const waMsg=encodeURIComponent(`Halo Pasa Gadang, saya serius mau tanya detail:\n\n${p.judul}\nAlamat: ${p.alamat}\nKecamatan: ${p.kecamatan}\nLT ${p.luas_tanah}m² LB ${p.luas_bangunan}m² KT ${p.kamar_tidur} KM ${p.kamar_mandi}\nSertifikat: ${p.sertifikat}\nHarga: Rp ${Number(p.harga_cash).toLocaleString('id-ID')}\n\nLink: ${typeof window!=='undefined'?window.location.href+'?ref=pasagadang':''}`)
+  const waMsg=encodeURIComponent(`Halo Pasa Gadang, saya mau tanya:\n\n${p.judul}\n${p.alamat}\nHarga: Rp ${Number(p.harga_cash).toLocaleString('id-ID')}\nLink: ${typeof window!=='undefined'?window.location.href:''}`)
 
   const realMapLink = mapData.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||p.kecamatan||'Padang')}`
-  const embedUrl = mapData.mapUrl
-   ? `https://www.google.com/maps?q=${encodeURIComponent(mapData.mapUrl)}&z=17&output=embed`
-    : `https://www.google.com/maps?q=${encodeURIComponent(p.alamat||'Padang')}&z=15&output=embed`
+  // FIX PETA DUNIA - PAKAI ALAMAT BUKAN SHORT LINK
+  const embedUrl = mapData.mapUrl && mapData.mapUrl.includes('/embed')
+  ? mapData.mapUrl
+    : `https://www.google.com/maps?q=${encodeURIComponent(p.alamat + ' ' + p.kecamatan + ' Padang')}&z=16&output=embed`
 
   return (
     <main className="min-h-screen bg-[#FFFBF0] pb-28">
@@ -61,7 +61,7 @@ export default function PropertyDetailMewah(){
           <Link href="/properties" className="bg-black text-white px-5 py-2.5 rounded-full font-black text-[12px]">← KEMBALI</Link>
           <div className="flex gap-2">
             <span className="bg-[#D4AF37] text-black px-4 py-1.5 rounded-full font-black text-[11px] tracking-widest">{p.tipe_transaksi?.toUpperCase()}</span>
-            {p.badge && <span className="bg-black text-[#D4AF37] px-4 py-1.5 rounded-full font-black text-[11px] border border-[#D4AF37]">{p.badge}</span>}
+            {p.badge && <span className="bg-black text-[#D4AF37] px-4 py-1.5 rounded-full font-black text-[11px] border border-[#D4AF37] animate-pulse">{p.badge}</span>}
           </div>
         </div>
       </div>
@@ -70,8 +70,20 @@ export default function PropertyDetailMewah(){
         <div>
           <div className="relative h-[380px] md:h-[520px] rounded-[32px] overflow-hidden border-[3px] border-[#D4AF37] shadow-[0_20px_60px_rgba(212,175,55,0.25)] bg-black cursor-zoom-in" onClick={()=>setZoom(true)}>
             {fotos[active] && <Image src={fotos[active]} alt={p.judul} fill className="object-cover" priority />}
-            <div className="absolute top-5 left-5 bg-black/80 backdrop-blur text-white px-4 py-2 rounded-full font-bold text-[12px] border border-white/20">{p.kecamatan} • {p.sertifikat} • {p.tipe_properti}</div>
-            <div className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-full font-black text-[12px]">{active+1} / {fotos.length}</div>
+
+            {/* BADGE API ANIMASI DI SUDUT FOTO */}
+            {p.badge && (
+              <div className="absolute top-5 left-5 z-20 flex items-center gap-2">
+                <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-full font-black text-[12px] shadow-[0_0_20px_rgba(239,68,68,0.6)] border-2 border-white flex items-center gap-1.5 animate-[bounce_1.5s_infinite]">
+                  <span className="animate-[ping_1s_infinite]">🔥</span>
+                  {p.badge}
+                  <span className="animate-pulse">🔥</span>
+                </div>
+              </div>
+            )}
+
+            <div className="absolute top-5 right-5 bg-black/80 backdrop-blur text-white px-4 py-2 rounded-full font-bold text-[12px] border border-white/20">{p.kecamatan} • {p.sertifikat} • {p.tipe_properti}</div>
+            <div className="absolute bottom-5 right-5 bg-white text-black px-4 py-2 rounded-full font-black text-[12px]">{active+1} / {fotos.length}</div>
             <div className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-black/70 px-3 py-2 rounded-full flex gap-2">{fotos.map((_,i)=><button key={i} onClick={e=>{e.stopPropagation();setActive(i)}} className={`h-2 rounded-full transition-all ${i===active?'w-8 bg-[#D4AF37]':'w-2 bg-white/50'}`}/>)}</div>
           </div>
           <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
@@ -83,7 +95,7 @@ export default function PropertyDetailMewah(){
           </div>
           {p.video_url && (
             <div className="mt-6 rounded-[24px] overflow-hidden border-2 border-black">
-              <div className="bg-black text-white p-3 font-black text-[12px] tracking-widest">VIDEO TOUR</div>
+              <div className="bg-black text-white p-3 font-black text-[12px] tracking-widest">🎥 VIDEO TOUR</div>
               <div className="aspect-video bg-black"><iframe src={p.video_url} className="w-full h-full" allowFullScreen/></div>
             </div>
           )}
@@ -106,7 +118,6 @@ export default function PropertyDetailMewah(){
               <div className="mt-2 space-y-1 text-[13px] font-bold">
                 <div>DP: Rp {Number(p.dp||0).toLocaleString('id-ID')}</div>
                 <div>Cicilan Auto: Rp {cicilanAuto.toLocaleString('id-ID')} /bulan x {p.tenor_bulan||120} bulan</div>
-                <div className="text-[11px] opacity-60 mt-1">*Hitung otomatis, nego bisa langsung WA</div>
               </div>
             </div>
 
@@ -121,8 +132,6 @@ export default function PropertyDetailMewah(){
               <div className="bg-[#FFFBF0] border border-[#D4AF37]/40 rounded-2xl p-4"><div className="text-[10px] font-bold text-black/40 tracking-widest uppercase">Luas Bangunan</div><div className="text-[18px] font-black text-black mt-1">{p.luas_bangunan} m²</div></div>
               <div className="bg-[#FFFBF0] border border-[#D4AF37]/40 rounded-2xl p-4"><div className="text-[10px] font-bold text-black/40 tracking-widest uppercase">Kamar Tidur</div><div className="text-[18px] font-black text-black mt-1">{p.kamar_tidur} Kamar</div></div>
               <div className="bg-[#FFFBF0] border border-[#D4AF37]/40 rounded-2xl p-4"><div className="text-[10px] font-bold text-black/40 tracking-widest uppercase">Kamar Mandi</div><div className="text-[18px] font-black text-black mt-1">{p.kamar_mandi} Kamar</div></div>
-              <div className="bg-white border border-black/10 rounded-2xl p-4"><div className="text-[10px] font-bold text-black/40 tracking-widest uppercase">Sertifikat</div><div className="text-[15px] font-black text-black mt-1">{p.sertifikat}</div></div>
-              <div className="bg-white border border-black/10 rounded-2xl p-4"><div className="text-[10px] font-bold text-black/40 tracking-widest uppercase">Tipe Properti</div><div className="text-[15px] font-black text-black mt-1">{p.tipe_properti}</div></div>
             </div>
 
             {mapData.fasilitasBersih && (
@@ -141,11 +150,10 @@ export default function PropertyDetailMewah(){
               <div className="text-[14px] font-medium text-black/80 mt-2 whitespace-pre-line leading-relaxed">{p.deskripsi}</div>
             </div>
 
-            {/* MAP REAL - TAMPILAN ASLI KAYAK GOOGLE MAPS */}
             <div className="mt-6 rounded-[20px] overflow-hidden border-2 border-[#D4AF37]/30">
               <div className="bg-black text-[#D4AF37] p-3 font-black text-[11px] tracking-widest flex justify-between items-center">
                 <span>LOKASI REAL - GOOGLE MAPS</span>
-                {mapData.mapUrl && <span className="bg-[#D4AF37] text-black px-2 py-0.5 rounded-full text-[9px]">REAL</span>}
+                {mapData.mapUrl && <span className="bg-[#D4AF37] text-black px-2 py-0.5 rounded-full text-[9px] animate-pulse">📍 REAL PIN</span>}
               </div>
               <div className="h-[280px] bg-zinc-100">
                 <iframe src={embedUrl} width="100%" height="100%" style={{border:0}} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
@@ -157,9 +165,9 @@ export default function PropertyDetailMewah(){
               <button onClick={()=>{navigator.clipboard.writeText(window.location.href); alert('Link disalin!')}} className="bg-black text-[#D4AF37] rounded-full py-3 text-center font-black text-[12px] border border-[#D4AF37]">🔗 SHARE</button>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-3">
-              <a href={`https://wa.me/${wa62}?text=${waMsg}`} target="_blank" className="w-full bg-[#25D366] text-white text-center py-5 rounded-full font-black text-[16px] shadow-[0_10px_30px_rgba(37,211,102,0.4)] tracking-wide">WHATSAPP SEKARANG</a>
-              <div className="text-center text-[10px] font-bold tracking-widest text-black/30 uppercase mt-1">👁️ {p.views} Views • ID {p.id} • {p.slug}</div>
+            <div className="mt-8">
+              <a href={`https://wa.me/${wa62}?text=${waMsg}`} target="_blank" className="w-full bg-[#25D366] text-white text-center py-5 rounded-full font-black text-[16px] shadow-[0_10px_30px_rgba(37,211,102,0.4)] tracking-wide block">WHATSAPP SEKARANG</a>
+              <div className="text-center text-[10px] font-bold tracking-widest text-black/30 uppercase mt-2">👁️ {p.views} Views • ID {p.id} • {p.slug}</div>
             </div>
           </div>
         </div>
@@ -168,7 +176,7 @@ export default function PropertyDetailMewah(){
       {zoom && (
         <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center p-4">
           <button onClick={()=>setZoom(false)} className="absolute top-6 right-6 bg-white text-black w-12 h-12 rounded-full font-black text-xl z-50">✕</button>
-          <div className="absolute top-6 left-6 bg-[#D4AF37] text-black px-5 py-2 rounded-full font-black text-[13px] tracking-widest z-50">{active+1} / {fotos.length} • {p.judul}</div>
+          <div className="absolute top-6 left-6 bg-gradient-to-r from-orange-500 to-red-600 text-white px-5 py-2 rounded-full font-black text-[13px] tracking-widest z-50 animate-pulse">🔥 {p.badge || 'HOT'} • {p.judul}</div>
           <div className="relative w-[92vw] h-[70vh]"><Image src={fotos[active]} alt="zoom" fill className="object-contain rounded-[20px] border-[3px] border-[#D4AF37]"/></div>
           <div className="flex gap-6 mt-6">
             <button onClick={()=>setActive(i=>i>0?i-1:fotos.length-1)} className="w-16 h-16 bg-white/15 backdrop-blur text-white rounded-full text-3xl border border-white/20">‹</button>
