@@ -2,6 +2,40 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+// KOMPONEN ANIMASI KETIK BARU
+function TypewriterText({ isDark }){
+  const fullText = `Pasa Gadang jual 3 hal:
+PROPERTI impianmu,
+BAHAN ESTETIKA biar rumah lebih indah,
+dan MATERIAL yang tinggal pesan online langsung kirim.`
+  const [displayed, setDisplayed] = useState('')
+  const [index, setIndex] = useState(0)
+
+  useEffect(()=>{
+    if(index < fullText.length){
+      const t = setTimeout(()=>{
+        setDisplayed(prev => prev + fullText[index])
+        setIndex(index+1)
+      }, 30)
+      return ()=> clearTimeout(t)
+    }
+  },[index, fullText])
+
+  return (
+    <div className="text-center">
+      <h2 className="font-black text-[22px] md:text-[26px] tracking-tighter leading-none">
+        LENGKAP. <span style={{color:'#D4AF37'}}>ESTETIK.</span> BISA ONLINE.
+      </h2>
+      <p className={`mt-4 font-bold text-[14px] leading-relaxed whitespace-pre-wrap min-h-[72px] ${isDark?'text-zinc-300':'text-black/70'}`}>
+        {displayed}<span className="animate-pulse">|</span>
+      </p>
+      <p className="mt-4 font-black text-[11px] tracking-[0.3em] animate-bounce">
+        PILIH JALURMU DI BAWAH ↓
+      </p>
+    </div>
+  )
+}
+
 export default function Home(){
   const [open, setOpen] = useState(false)
   const [theme, setTheme] = useState('light')
@@ -19,10 +53,11 @@ export default function Home(){
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
     if(!API) return
-    fetch(`${API}/properties?is_published=true&limit=6`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{})
-    fetch(`${API}/materials?is_active=true&limit=6`).then(r=>r.json()).then(j=>setMaterials(j.data||j.items||j||[])).catch(()=>{})
-    fetch(`${API}/estetikas?is_active=true&limit=6`).then(r=>r.json()).then(j=>setEstetikas(j.data||j.items||j||[])).catch(()=>{})
-    fetch(`${API}/blogs?is_published=true&limit=6`).then(r=>r.json()).then(j=>setBlogs(j.data||j.items||j||[])).catch(()=>{})
+    // FIX 307 - TAMBAH / SEBELUM?
+    fetch(`${API}/properties/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{})
+    fetch(`${API}/materials/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setMaterials(j.data||j.items||j||[])).catch(()=>{})
+    fetch(`${API}/estetikas/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setEstetikas(j.data||j.items||j||[])).catch(()=>{})
+    fetch(`${API}/blogs/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setBlogs(j.data||j.items||j||[])).catch(()=>{})
   },[API])
 
   const toggleTheme = ()=>{
@@ -31,7 +66,6 @@ export default function Home(){
   }
   const isDark = theme==='dark'
 
-  // WA LINKS
   const waLink = (p)=>{
     const raw = String(p.wa_number||'08979879518').replace(/[^0-9]/g,'')
     const wa62 = raw.startsWith('0')? '62'+raw.slice(1) : raw
@@ -55,7 +89,6 @@ export default function Home(){
     else { navigator.clipboard.writeText(url); alert('Link disalin! '+url) }
   }
 
-  // ZOOM SLIDE LOGIC
   const openZoom = (imgs, idx=0)=>{
     const clean = imgs.filter(Boolean)
     if(clean.length===0) return
@@ -70,7 +103,6 @@ export default function Home(){
     <main className={`${isDark? 'bg-[#0B0B0F] text-white' : 'bg-[#FFFBF0] text-black'} min-h-screen transition-colors duration-300`}>
       <style>{`@keyframes float{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}@keyframes dash{0%{stroke-dashoffset:24}100%{stroke-dashoffset:0}}.scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
-      {/* NAVBAR - LOGO V2 MODERN BOLD - PA & DANG MERAH, SAGA EMAS */}
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/" className="flex flex-col leading-none">
           <div className="flex font-black text-[24px] tracking-tight">
@@ -79,7 +111,6 @@ export default function Home(){
             <span style={{color:COLORS.red}}>DANG</span>
             <span className="text-[10px] ml-1 mt-1 tracking-widest" style={{color:COLORS.red}}>.COM</span>
           </div>
-          {/* Wave emas double premium ala Mandiri - Versi 2 */}
           <div className="relative w-[165px] h-[8px] mt-[2px]">
             <svg viewBox="0 0 165 10" className="w-full h-full">
               <path d="M0 6 Q22 0 44 4 T88 4 T132 3 T165 1 Q132 7 88 7 T44 7 T0 6" fill="#D4AF37" opacity="0.9"/>
@@ -107,9 +138,11 @@ export default function Home(){
         </div>
       )}
 
-      <div className="max-w-[400px] mx-auto px-6 pt-4">
-        <p className={`text-[14px] ${isDark?'text-zinc-400':'text-zinc-500'}`}>Klik diagram di bawah - konsumen bisa pilih jalur pencarian langsung!</p>
-        <div className="relative w-full h-[580px] mt-4">
+      <div className="max-w-[400px] mx-auto px-6 pt-6">
+        {/* GANTI KATA PEMBUKA LAMA JADI ANIMASI KETIK */}
+        <TypewriterText isDark={isDark} />
+
+        <div className="relative w-full h-[580px] mt-6">
           <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
             <line x1="170" y1="290" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
             <line x1="170" y1="290" x2="170" y2="495" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.3s'}}/>
@@ -143,7 +176,6 @@ export default function Home(){
       </div>
 
       <div className="max-w-[400px] mx-auto px-6 pb-20 space-y-8 mt-2">
-        {/* PROPERTI */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[16px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2">
@@ -177,7 +209,6 @@ export default function Home(){
           </div>
         </div>
 
-        {/* ESTETIKA - ZOOM + SLIDE + WA + BAGIKAN */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">ESTETIKA <span style={{color:COLORS.gold}}>ROSTER • GRANIT</span></h2><Link href="/estetika" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2">
@@ -203,7 +234,6 @@ export default function Home(){
           </div>
         </div>
 
-        {/* MATERIAL - ZOOM + SLIDE + WA + BAGIKAN */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">MATERIAL <span style={{color:COLORS.gold}}>BANGUNAN</span></h2><Link href="/materials" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2">
@@ -231,7 +261,6 @@ export default function Home(){
         </div>
       </div>
 
-      {/* ZOOM MODAL - SUPPORT SLIDE */}
       {zoomList.length>0 && (
         <div onClick={closeZoom} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-4">
           <button onClick={closeZoom} className="absolute top-6 right-6 bg-white text-black w-10 h-10 rounded-full font-black z-10">X</button>
@@ -250,4 +279,4 @@ export default function Home(){
       )}
     </main>
   )
-        }
+}
