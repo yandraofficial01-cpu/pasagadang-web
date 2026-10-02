@@ -14,7 +14,7 @@ export default function Page(){
     alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM',
     thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'',
     video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false,
-    map_link:''
+    map_link:'', map_img:''
   })
   const [editId,setEditId]=useState(null)
   const [showFotoLain,setShowFotoLain]=useState(false)
@@ -51,12 +51,15 @@ export default function Page(){
   const submit=async(e)=>{
     e.preventDefault()
     let fasilitasFinal = form.fasilitas || ''
-    fasilitasFinal = fasilitasFinal.replace(/\[MAP:.*?\]/g, '').trim()
+    fasilitasFinal = fasilitasFinal.replace(/\[MAP:.*?\]/g,'').replace(/\[MAP_IMG:.*?\]/g,'').trim()
     if(form.map_link){
-      fasilitasFinal = fasilitasFinal? `${fasilitasFinal} [MAP:${form.map_link}]` : `[MAP:${form.map_link}]`
+      fasilitasFinal = fasilitasFinal? `${fasilitasFinal}, [MAP:${form.map_link}]` : `[MAP:${form.map_link}]`
+    }
+    if(form.map_img){
+      fasilitasFinal = fasilitasFinal? `${fasilitasFinal}, [MAP_IMG:${form.map_img}]` : `[MAP_IMG:${form.map_img}]`
     }
     const payload = {
-   ...form,
+  ...form,
       fasilitas: fasilitasFinal,
       harga_kredit: form.harga_kredit? parseInt(form.harga_kredit) : null,
       dp: form.dp? parseInt(form.dp) : null,
@@ -69,6 +72,7 @@ export default function Page(){
       kamar_mandi: parseInt(form.kamar_mandi)||0,
     }
     delete payload.map_link
+    delete payload.map_img
     const url=editId?`${API}/properties/${editId}`:`${API}/properties`
     const res = await fetch(url,{
       method:editId?'PUT':'POST',
@@ -77,7 +81,7 @@ export default function Page(){
     })
     if(res.ok){
       load(); setEditId(null)
-      setForm({judul:'', tipe_properti:'Rumah', tipe_transaksi:'jual', harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan', alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM', thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'', video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false, map_link:''})
+      setForm({judul:'', tipe_properti:'Rumah', tipe_transaksi:'jual', harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan', alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM', thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'', video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false, map_link:'', map_img:''})
     } else {
       alert('Gagal simpan, cek API')
     }
@@ -90,16 +94,18 @@ export default function Page(){
         <input type="file" accept="image/*" onChange={e=>upload(field, e.target.files[0])} className="flex-1 text-[11px] text-zinc-400 file:mr-2 file:bg-[#D4AF37] file:text-black file:border-0 file:rounded-full file:px-3 file:py-1 file:font-black file:text-[10px]"/>
       </div>
       {up===field && <p className="text-[10px] text-[#D4AF37] animate-pulse">UPLOADING...</p>}
-      {form[field] && <img src={form[field]} className="w-full h-32 object-cover rounded-lg border border-white/10"/>}
+      {form[field] && <img src={form[field]} className="w-full h-32 object-contain bg-black rounded-lg border border-white/10"/>}
       <input value={form[field]||''} onChange={e=>setForm({...form,[field]:e.target.value})} placeholder={`${label} URL`} className="w-full bg-black/50 border border-white/10 p-2.5 rounded-xl text-[11px]" required={required}/>
     </div>
   )
 
   const handleEdit = (i) => {
     const m = i.fasilitas?.match(/\[MAP:(.*?)\]/)
+    const mImg = i.fasilitas?.match(/\[MAP_IMG:(.*?)\]/)
     const map = m? m[1] : ''
-    const bersih = i.fasilitas?.replace(/\[MAP:.*?\]/g,'').trim()
-    setForm({...i, fasilitas: bersih, map_link: map})
+    const mapImg = mImg? mImg[1] : ''
+    const bersih = i.fasilitas?.replace(/\[MAP:.*?\]/g,'').replace(/\[MAP_IMG:.*?\]/g,'').trim()
+    setForm({...i, fasilitas: bersih, map_link: map, map_img: mapImg, harga_kredit:i.harga_kredit||'', dp:i.dp||'', cicilan_per_bulan:i.cicilan_per_bulan||'', tenor_bulan:i.tenor_bulan||''})
     setEditId(i.id)
     setShowFotoLain(true)
     window.scrollTo(0,0)
@@ -147,12 +153,16 @@ export default function Page(){
           <input type="number" value={form.kamar_mandi} onChange={e=>setForm({...form,kamar_mandi:e.target.value})} placeholder="KM" className="bg-black/50 border border-white/10 p-2 rounded-xl text-sm"/>
         </div>
         <input value={form.alamat} onChange={e=>setForm({...form,alamat:e.target.value})} placeholder="Alamat Lengkap" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
-        <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/20 p-3 rounded-xl space-y-2">
-          <p className="text-[10px] font-black tracking-widest text-[#D4AF37]">MAP REAL GOOGLE MAPS</p>
-          <input value={form.map_link} onChange={e=>setForm({...form,map_link:e.target.value})} placeholder="Paste link Google Maps https://maps.app.goo.gl/..." className="w-full bg-black/50 border border-[#D4AF37]/20 p-3 rounded-xl text-sm"/>
-          <p className="text-[9px] text-zinc-500">Buka GMaps, pin lokasi, Share, Copy Link. Kesimpen tanpa ubah DB.</p>
-          {form.map_link && <a href={form.map_link} target="_blank" className="text-[10px] text-[#D4AF37] underline">Test Buka Map</a>}
+
+        {/* MAP REAL + FOTO MAP UPLOAD - TANPA UBAH DB */}
+        <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-3 rounded-xl space-y-3">
+          <p className="text-[10px] font-black tracking-widest text-[#D4AF37]">📍 MAP REAL + FOTO MAP (TANPA UBAH DB)</p>
+          <input value={form.map_link} onChange={e=>setForm({...form,map_link:e.target.value})} placeholder="Paste link Google Maps https://maps.app.goo.gl/..." className="w-full bg-black/50 border border-[#D4AF37]/30 p-3 rounded-xl text-sm"/>
+          {form.map_link && <a href={form.map_link} target="_blank" className="text-[10px] text-[#D4AF37] underline">🔗 Test Buka Map Real</a>}
+          <FieldUpload field="map_img" label="FOTO MAP / SCREENSHOT PIN MERAH (upload)" />
+          <p className="text-[9px] text-zinc-500">Foto ini yang tampil di web (anti melebar), klik nya buka link di atas</p>
         </div>
+
         <div className="grid grid-cols-2 gap-2">
           <input value={form.kecamatan} onChange={e=>setForm({...form,kecamatan:e.target.value})} placeholder="Kecamatan" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
           <input value={form.wa_number} onChange={e=>setForm({...form,wa_number:e.target.value})} placeholder="WA Number" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
@@ -177,23 +187,29 @@ export default function Page(){
           )}
         </div>
         <textarea value={form.deskripsi} onChange={e=>setForm({...form,deskripsi:e.target.value})} placeholder="Deskripsi Lengkap" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm h-24"/>
-        <textarea value={form.fasilitas} onChange={e=>setForm({...form,fasilitas:e.target.value})} placeholder="Fasilitas (pisah koma)" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm h-16"/>
+        <textarea value={form.fasilitas} onChange={e=>setForm({...form,fasilitas:e.target.value})} placeholder="Fasilitas (pisah koma) - jangan isi MAP manual" className="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm h-16"/>
         <div className="grid grid-cols-2 gap-2">
-          <input value={form.badge} onChange={e=>setForm({...form,badge:e.target.value})} placeholder="Badge (BEST)" className="bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
+          <input value={form.badge} onChange={e=>setForm({...form,badge:e.target.value})} placeholder="Badge (BEST, TERJUAL, PROMO)" className="bg-black/50 border border-white/10 p-3 rounded-xl text-sm"/>
           <label className="flex items-center justify-center gap-2 bg-black/50 border border-white/10 rounded-xl text-xs"><input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/> Publish</label>
         </div>
         <button className="w-full bg-[#D4AF37] text-black py-3 rounded-xl font-black text-xs tracking-widest">{editId?'UPDATE PROPERTI':'SIMPAN PROPERTI'}</button>
-        {editId&&<button type="button" onClick={()=>{setEditId(null); setForm({judul:'', tipe_properti:'Rumah', tipe_transaksi:'jual', harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan', alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM', thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'', video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false, map_link:''})}} className="w-full bg-white/10 py-3 rounded-xl font-black text-xs">BATAL EDIT</button>}
+        {editId&&<button type="button" onClick={()=>{setEditId(null); setForm({judul:'', tipe_properti:'Rumah', tipe_transaksi:'jual', harga_cash:0, harga_kredit:null, dp:null, cicilan_per_bulan:null, tenor_bulan:null, harga_sewa_per:'bulan', alamat:'', kecamatan:'', luas_tanah:0, luas_bangunan:0, kamar_tidur:2, kamar_mandi:1, sertifikat:'SHM', thumbnail:'', foto_1:'', foto_2:'', foto_3:'', foto_4:'', foto_5:'', foto_6:'', foto_7:'', foto_8:'', video_url:'', video_thumbnail:'', deskripsi:'', fasilitas:'', wa_number:'', badge:'', is_published:false, map_link:'', map_img:''})}} className="w-full bg-white/10 py-3 rounded-xl font-black text-xs">BATAL EDIT</button>}
       </form>
       <div className="bg-[#16161E] border border-white/10 p-5 rounded-[24px] space-y-2 max-h-[90vh] overflow-y-auto">
-        {data.map(i=>(
+        {data.map(i=>{
+          const hasMap = i.fasilitas?.includes('[MAP:')
+          const hasMapImg = i.fasilitas?.includes('[MAP_IMG:')
+          return(
           <div key={i.id} className="bg-black/40 border border-white/5 p-3 rounded-xl flex justify-between items-start">
             <div className="flex gap-3 flex-1">
-              <img src={i.thumbnail||i.foto_1} className="w-14 h-14 rounded-lg object-cover bg-zinc-800"/>
+              <div className="relative">
+                <img src={i.thumbnail||i.foto_1} className="w-14 h-14 rounded-lg object-cover bg-zinc-800"/>
+                {i.badge && <div className="absolute -top-2 -left-2 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[8px] font-black px-2 py-0.5 rounded-full animate-bounce border border-white shadow-[0_0_10px_rgba(239,68,68,0.8)]">🔥 {i.badge}</div>}
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold line-clamp-1">{i.judul}</p>
-                <p className="text-[11px] text-zinc-500">{i.tipe_properti} | {i.tipe_transaksi} | Rp{i.harga_cash?.toLocaleString()}</p>
-                <p className="text-[10px] text-zinc-600">{i.is_published?'✅ Published':'📝 Draft'} | {i.kecamatan} {i.fasilitas?.includes('[MAP:')?'| Map OK':''}</p>
+                <p className="text-sm font-bold line-clamp-1 flex items-center gap-1">{i.judul} {i.badge && <span className="animate-pulse">🔥</span>}</p>
+                <p className="text-[11px] text-zinc-500">{i.tipe_properti} | Rp{i.harga_cash?.toLocaleString()}</p>
+                <p className="text-[10px] text-zinc-500">{i.is_published?'✅ Publish':'📝 Draft'} | {hasMap?'📍 Map OK':'⚠️ No Map'} {hasMapImg?'| 🖼️ Foto Map':''}</p>
               </div>
             </div>
             <div className="flex gap-1 ml-2">
@@ -201,8 +217,8 @@ export default function Page(){
               <button onClick={async()=>{if(!confirm('Hapus?'))return;await fetch(`${API}/properties/${i.id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok()}`}});load()}} className="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-[10px] font-bold">HAPUS</button>
             </div>
           </div>
-        ))}
+        )})}
       </div>
     </div>
   </AdminLayout>)
-}
+    }
