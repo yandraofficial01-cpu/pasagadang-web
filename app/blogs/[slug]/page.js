@@ -25,18 +25,23 @@ function LogoPasagadang(){
   )
 }
 
+// === INI YANG FIX LINK ERROR %3Ca ===
 function safeRender(html){
   if(!html) return ''
   let s = html.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&')
   const imgMap = []
-  // Simpan img dulu
+  const linkMap = []
+
+  // Simpan dulu semua <a> dan <img> yang sudah ada biar tidak rusak
+  s = s.replace(/<a\b[^>]*>.*?<\/a>/gis, (m)=>{ linkMap.push(m); return `__LINK_${linkMap.length-1}__` })
   s = s.replace(/<img[^>]*>/gi, (m)=>{ imgMap.push(m); return `__IMG_${imgMap.length-1}__` })
 
-  // FIX LINK: Kerjain link DULU sebelum bold, biar gak ketimpa
-  s = s.replace(/(https?:\/\/[^\s<")]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#D4AF37;text-decoration:underline;word-break:break-all;font-weight:900">$1</a>')
+  // Baru auto-link URL polosan
   s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-  s = s.replace(/([A-Z][a-zA-Z\s]{2,30}:)/g, '<strong style="color:#111">$1</strong>')
+  s = s.replace(/(https?:\/\/[^\s<")]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#D4AF37;text-decoration:underline;word-break:break-all;font-weight:900">$1</a>')
 
+  // Balikin lagi
+  s = s.replace(/__LINK_(\d+)__/g, (_, i)=> linkMap[Number(i)] || '')
   s = s.replace(/__IMG_(\d+)__/g, (_, i)=>{
     let tag = imgMap[Number(i)] || ''
     if(!tag.includes('style=')){
@@ -124,13 +129,8 @@ export default function DetailBlog(){
         <h1 className="text-[30px] md:text-[42px] font-black leading-[0.95] tracking-tight">{b.judul}</h1>
         {b.excerpt && <p className={`mt-5 italic border-l-4 pl-4 text-[17px] leading-relaxed ${muted}`} style={{borderColor:'#D4AF37'}}>{b.excerpt}</p>}
 
-        {/* === FIX THUMBNAIL ANTI KEPOTONG === */}
         <div className="w-full mt-8 rounded-[28px] border overflow-hidden bg-zinc-900 flex items-center justify-center" style={{borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)'}}>
-          <img
-            src={b.thumbnail}
-            alt={b.judul}
-            className="w-full h-auto object-contain max-h-[600px]"
-          />
+          <img src={b.thumbnail} alt={b.judul} className="w-full h-auto object-contain max-h-[600px]" />
         </div>
 
         {!hasNumberedList? (
@@ -156,45 +156,38 @@ export default function DetailBlog(){
           </div>
         )}
 
-        {/* === 2 BLOK ANIMASI BARU === */}
         <div className="mt-12 space-y-4">
           <div className={`group relative p-6 rounded-[24px] border overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(212,175,55,0.2)] ${cardBg} animate-float`}>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-[#D4AF37]/10 to-transparent"></div>
-            <div className="absolute -top-10 -right-10 w-20 h-20 bg-[#D4AF37] rounded-full blur-2xl opacity-20 animate-pulse"></div>
             <p className="relative font-black text-[13px] tracking-widest flex items-center gap-2">🟡 BUTUH BAHAN BANGUNAN?</p>
             <p className={`relative text-[13px] mt-1 ${muted}`}>Konsultasi gratis roster & batu alam Pasa Gadang. Hemat 30% biaya bahan.</p>
             <div className="relative flex gap-2 mt-4">
-              <a href="/materials" className="flex-1 text-center bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black hover:bg-[#FFEB7F] transition-colors">LIHAT KATALOG →</a>
-              <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20dari%20blog" target="_blank" className="flex-1 text-center bg-[#25D366] text-white px-5 py-3 rounded-full text-[11px] font-black hover:scale-105 transition-transform">WA 08979879518</a>
+              <a href="/materials" className="flex-1 text-center bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black">LIHAT KATALOG →</a>
+              <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20dari%20blog" target="_blank" className="flex-1 text-center bg-[#25D366] text-white px-5 py-3 rounded-full text-[11px] font-black">WA 08979879518</a>
             </div>
           </div>
-
           <div className={`group relative p-6 rounded-[24px] border overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] ${cardBg} animate-float-delay`}>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-black/[0.03] to-transparent dark:from-white/[0.05]"></div>
-            <div className="absolute -top-10 -right-10 w-20 h-20 bg-[#111] dark:bg-white rounded-full blur-2xl opacity-10 animate-pulse"></div>
             <p className="relative font-black text-[13px] tracking-widest flex items-center gap-2">✨ PERCANTIK PROPERTI ANDA?</p>
             <p className={`relative text-[13px] mt-1 ${muted}`}>Percantik Properti anda lebih estetik dengan bahan roster dan batu alam, granite.</p>
             <div className="relative flex gap-2 mt-4">
-              <a href="/estetika" className="flex-1 text-center bg-[#111] dark:bg-white text-white dark:text-black px-5 py-3 rounded-full text-[11px] font-black hover:scale-105 transition-transform">LIHAT ESTETIKA →</a>
-              <a href="https://wa.me/628979879518?text=Halo%20mau%20konsultasi%20estetika%20roster" target="_blank" className="flex-1 text-center bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black hover:bg-[#FFEB7F] transition-colors">KONSULTASI</a>
+              <a href="/estetika" className="flex-1 text-center bg-[#111] dark:bg-white text-white dark:text-black px-5 py-3 rounded-full text-[11px] font-black">LIHAT ESTETIKA →</a>
+              <a href="https://wa.me/628979879518?text=Halo%20mau%20konsultasi%20estetika%20roster" target="_blank" className="flex-1 text-center bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black">KONSULTASI</a>
             </div>
           </div>
         </div>
-
       </div>
 
       <a href="https://wa.me/628979879518" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white animate-bounce-slow">💬</a>
 
       <style>{`
         strong, b { font-weight: 900!important; color: ${isDark?'#fff':'#111'}; }
-      .prose strong { font-weight: 900!important; }
+       .prose strong { font-weight: 900!important; }
         @keyframes float { 0%,100%{ transform: translateY(0px) } 50%{ transform: translateY(-3px) } }
         @keyframes float-delay { 0%,100%{ transform: translateY(0px) } 50%{ transform: translateY(-4px) } }
         @keyframes bounce-slow { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } }
-      .animate-float { animation: float 4s ease-in-out infinite; }
-      .animate-float-delay { animation: float-delay 4.5s ease-in-out infinite; }
-      .animate-bounce-slow { animation: bounce-slow 2.5s ease-in-out infinite; }
+       .animate-float { animation: float 4s ease-in-out infinite; }
+       .animate-float-delay { animation: float-delay 4.5s ease-in-out infinite; }
+       .animate-bounce-slow { animation: bounce-slow 2.5s ease-in-out infinite; }
       `}</style>
     </div>
   )
-}
+  }
