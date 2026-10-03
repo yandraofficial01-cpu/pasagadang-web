@@ -29,14 +29,18 @@ function safeRender(html){
   if(!html) return ''
   let s = html.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&')
   const imgMap = []
+  // Simpan img dulu
   s = s.replace(/<img[^>]*>/gi, (m)=>{ imgMap.push(m); return `__IMG_${imgMap.length-1}__` })
+
+  // FIX LINK: Kerjain link DULU sebelum bold, biar gak ketimpa
+  s = s.replace(/(https?:\/\/[^\s<")]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#D4AF37;text-decoration:underline;word-break:break-all;font-weight:900">$1</a>')
   s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
   s = s.replace(/([A-Z][a-zA-Z\s]{2,30}:)/g, '<strong style="color:#111">$1</strong>')
-  s = s.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#D4AF37;text-decoration:underline;word-break:break-all">$1</a>')
+
   s = s.replace(/__IMG_(\d+)__/g, (_, i)=>{
     let tag = imgMap[Number(i)] || ''
     if(!tag.includes('style=')){
-      tag = tag.replace('<img', '<img style="width:100%;border-radius:20px;margin:20px 0;display:block;background:#18181b" loading="lazy"')
+      tag = tag.replace('<img', '<img style="width:100%;height:auto;object-fit:contain;border-radius:20px;margin:20px 0;display:block;background:#18181b" loading="lazy"')
     }
     tag = tag.replace(/class="[^"]*"/g, '')
     return tag
@@ -120,7 +124,14 @@ export default function DetailBlog(){
         <h1 className="text-[30px] md:text-[42px] font-black leading-[0.95] tracking-tight">{b.judul}</h1>
         {b.excerpt && <p className={`mt-5 italic border-l-4 pl-4 text-[17px] leading-relaxed ${muted}`} style={{borderColor:'#D4AF37'}}>{b.excerpt}</p>}
 
-        <img src={b.thumbnail} alt={b.judul} className="w-full h-[320px] md:h-[460px] object-cover rounded-[28px] border mt-8 bg-zinc-900" style={{borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)'}}/>
+        {/* === FIX THUMBNAIL ANTI KEPOTONG === */}
+        <div className="w-full mt-8 rounded-[28px] border overflow-hidden bg-zinc-900 flex items-center justify-center" style={{borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)'}}>
+          <img
+            src={b.thumbnail}
+            alt={b.judul}
+            className="w-full h-auto object-contain max-h-[600px]"
+          />
+        </div>
 
         {!hasNumberedList? (
           <div className={`mt-8 text-[17px] leading-[1.9] prose max-w-none ${isDark?'prose-invert':''} prose-strong:font-black prose-strong:text-[#111] prose-img:rounded-[20px] prose-a:text-[#D4AF37]`} dangerouslySetInnerHTML={{__html: safeRender(b.konten)}} />
@@ -147,7 +158,6 @@ export default function DetailBlog(){
 
         {/* === 2 BLOK ANIMASI BARU === */}
         <div className="mt-12 space-y-4">
-          {/* BLOK 1 */}
           <div className={`group relative p-6 rounded-[24px] border overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(212,175,55,0.2)] ${cardBg} animate-float`}>
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-[#D4AF37]/10 to-transparent"></div>
             <div className="absolute -top-10 -right-10 w-20 h-20 bg-[#D4AF37] rounded-full blur-2xl opacity-20 animate-pulse"></div>
@@ -159,7 +169,6 @@ export default function DetailBlog(){
             </div>
           </div>
 
-          {/* BLOK 2 */}
           <div className={`group relative p-6 rounded-[24px] border overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] ${cardBg} animate-float-delay`}>
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-black/[0.03] to-transparent dark:from-white/[0.05]"></div>
             <div className="absolute -top-10 -right-10 w-20 h-20 bg-[#111] dark:bg-white rounded-full blur-2xl opacity-10 animate-pulse"></div>
@@ -178,13 +187,13 @@ export default function DetailBlog(){
 
       <style>{`
         strong, b { font-weight: 900!important; color: ${isDark?'#fff':'#111'}; }
-       .prose strong { font-weight: 900!important; }
+      .prose strong { font-weight: 900!important; }
         @keyframes float { 0%,100%{ transform: translateY(0px) } 50%{ transform: translateY(-3px) } }
         @keyframes float-delay { 0%,100%{ transform: translateY(0px) } 50%{ transform: translateY(-4px) } }
         @keyframes bounce-slow { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } }
-       .animate-float { animation: float 4s ease-in-out infinite; }
-       .animate-float-delay { animation: float-delay 4.5s ease-in-out infinite; }
-       .animate-bounce-slow { animation: bounce-slow 2.5s ease-in-out infinite; }
+      .animate-float { animation: float 4s ease-in-out infinite; }
+      .animate-float-delay { animation: float-delay 4.5s ease-in-out infinite; }
+      .animate-bounce-slow { animation: bounce-slow 2.5s ease-in-out infinite; }
       `}</style>
     </div>
   )
