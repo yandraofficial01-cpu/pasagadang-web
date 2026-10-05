@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function sitemap(){
   const API = process.env.NEXT_PUBLIC_API_URL
-  const base = 'https://pasagadang-web.vercel.app'
+  const base = 'https://pasagadang.com'
 
   const staticPages = [
     { url: `${base}/`, lastModified: new Date() },
