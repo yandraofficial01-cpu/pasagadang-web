@@ -41,7 +41,6 @@ export default function Page(){
       const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd})
       const d=await res.json()
       if(d.secure_url){
-        // FOTO BESAR OTOMATIS
         const bigUrl = d.secure_url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/')
         if(field==='konten_img'){
           const tag = `\n<img src="${bigUrl}" alt="${form.judul}" class="rounded-2xl my-6 w-full h-auto shadow-lg" loading="lazy" />\n`
@@ -65,16 +64,16 @@ export default function Page(){
     if(!form.konten) return alert('Konten wajib!')
     setLoading(true)
 
-    // Bersihin HTML buat meta description biar SEO #1
     const cleanText = form.konten.replace(/<[^>]*>?/gm, '').substring(0,160)
 
+    // FIX UTAMA DISINI: tags harus STRING, bukan ARRAY
     const payload={
       judul: form.judul,
       kategori: form.kategori,
       thumbnail: form.thumbnail,
       excerpt: form.excerpt,
       konten: form.konten,
-      tags: form.tags? form.tags.split(',').map(t=>t.trim()).filter(Boolean) : [],
+      tags: form.tags || "", // <--- STRING, JANGAN DI-SPLIT JADI ARRAY
       is_published: form.is_published,
       meta_title: form.meta_title || form.judul,
       meta_description: form.meta_description || form.excerpt || cleanText
@@ -86,8 +85,15 @@ export default function Page(){
       headers:{Authorization:`Bearer ${tok()}`, 'Content-Type':'application/json'},
       body:JSON.stringify(payload)
     })
-    if(!res.ok){ alert(await res.text()); setLoading(false); return }
-    resetForm(); load(); setLoading(false)
+    if(!res.ok){
+      const err = await res.text()
+      alert(err)
+      setLoading(false)
+      return
+    }
+    resetForm()
+    load()
+    setLoading(false)
   }
 
   const inp="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm text-white outline-none focus:border-[#D4AF37]"
@@ -110,8 +116,8 @@ export default function Page(){
 
         <div><div className={label}>JUDUL *</div><input value={form.judul} onChange={e=>setForm({...form,judul:e.target.value})} className={inp} placeholder="Contoh: Harga Roster Minimalis di Padang 2026" required/></div>
         <div className="grid grid-cols-2 gap-2">
-          <div><div className={label}>KATEGORI *</div><input value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} className={inp} placeholder="material" required/></div>
-          <div><div className={label}>TAGS (pisah koma)</div><input value={form.tags} onChange={e=>setForm({...form,tags:e.target.value})} className={inp} placeholder="roster, padang, tahan gempa"/></div>
+          <div><div className={label}>KATEGORI *</div><input value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} className={inp} placeholder="properti" required/></div>
+          <div><div className={label}>TAGS (pisah koma)</div><input value={form.tags} onChange={e=>setForm({...form,tags:e.target.value})} className={inp} placeholder="rumah tahan gempa padang, rumah aman banjir padang"/></div>
         </div>
 
         <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-3 rounded-xl space-y-3">
@@ -126,14 +132,13 @@ export default function Page(){
 
         <div className="bg-white/5 border border-white/10 p-3 rounded-xl space-y-3">
           <div className="flex justify-between items-center">
-            <p className="text-[11px] font-black text-white tracking-widest">📝 KONTEN (Foto jadi besar otomatis)</p>
+            <p className="text-[11px] font-black text-white tracking-widest">📝 KONTEN (Foto jadi besar otomatis 1200px)</p>
             <label className="bg-[#D4AF37]/20 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] font-black cursor-pointer">
               {up==='konten_img'?'Uploading...':'+ Gambar Isi Besar'}
               <input type="file" accept="image/*" className="hidden" onChange={e=>upload('konten_img',e.target.files[0])}/>
             </label>
           </div>
-          <textarea value={form.konten} onChange={e=>setForm({...form,konten:e.target.value})} className={`${inp} h-64 font-mono text-xs`} placeholder="Tulis artikel... setiap upload gambar otomatis jadi BESAR w-full"/>
-          <p className="text-[9px] text-white/30">Tips SEO: Gambar otomatis w_1200 biar tajam di Google & HP</p>
+          <textarea value={form.konten} onChange={e=>setForm({...form,konten:e.target.value})} className={`${inp} h-64 font-mono text-xs`} placeholder="Tulis artikel..."/>
         </div>
 
         <div className="grid grid-cols-1 gap-2">
@@ -155,7 +160,7 @@ export default function Page(){
               <p className="text-[11px] text-zinc-500">{i.kategori} • {i.is_published?'✅ Publish':'⛔ Draft'} • {i.views||0} views</p>
             </div>
             <div className="flex flex-col gap-1.5">
-              <button onClick={()=>{setForm({judul:i.judul||'',kategori:i.kategori||'',thumbnail:i.thumbnail||'',excerpt:i.excerpt||'',konten:i.konten||'',tags:Array.isArray(i.tags)?i.tags.join(', '):i.tags||'',is_published:!!i.is_published,meta_title:i.meta_title||'',meta_description:i.meta_description||''}); setEditId(i.id); window.scrollTo({top:0,behavior:'smooth'})}} className="bg-white/10 px-3 py-1.5 rounded-full text-[10px] font-black text-white hover:bg-white/20">EDIT</button>
+              <button onClick={()=>{setForm({judul:i.judul||'',kategori:i.kategori||'',thumbnail:i.thumbnail||'',excerpt:i.excerpt||'',konten:i.konten||'',tags:i.tags||'',is_published:!!i.is_published,meta_title:i.meta_title||'',meta_description:i.meta_description||''}); setEditId(i.id); window.scrollTo({top:0,behavior:'smooth'})}} className="bg-white/10 px-3 py-1.5 rounded-full text-[10px] font-black text-white hover:bg-white/20">EDIT</button>
               <button onClick={async()=>{if(!confirm('Hapus?'))return; await fetch(`${API}/blogs/${i.id}/`,{method:'DELETE',headers:{Authorization:`Bearer ${tok()}`}});load()}} className="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-[10px] font-black hover:bg-red-500/30">HAPUS</button>
             </div>
           </div>
@@ -165,4 +170,4 @@ export default function Page(){
     </div>
   </AdminLayout>
   )
-        }
+            }
