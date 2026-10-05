@@ -116,7 +116,10 @@ export default function BlogPage(){
           <div className="grid md:grid-cols-2 gap-6 mt-6">
             {paginated.map(b=>(
               <Link key={b.id} href={`/blogs/${b.slug}`} className={`rounded-[20px] overflow-hidden border group ${isDark?'bg-[#121214] border-white/10':'bg-white border-[#D4AF37]/20'} hover:border-[#D4AF37] transition`}>
-                <img src={b.thumbnail} alt={b.judul} className="h-[190px] w-full object-cover group-hover:scale-105 transition duration-500 bg-zinc-900"/>
+                {/* FIX ANTI KEPOTONG - GANTI DARI h-[190px] JADI ASPECT + OBJECT-TOP */}
+                <div className="w-full aspect-[4/3] overflow-hidden bg-zinc-900">
+                  <img src={b.thumbnail} alt={b.judul} className="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"/>
+                </div>
                 <div className="p-4">
                   <div className="flex gap-2 items-center">
                     <span className="bg-[#D4AF37]/20 text-[#D4AF37] text-[9px] font-black px-2 py-1 rounded-full uppercase">{b.kategori||'BLOG'}</span>
@@ -130,7 +133,6 @@ export default function BlogPage(){
             ))}
           </div>
 
-          {/* PAGINATION - KAYAK SCREENSHOT */}
           <div className="flex gap-2 mt-10 flex-wrap items-center border-t-4 border-[#2563EB] pt-6">
             {Array.from({length: Math.min(totalPages,4)}).map((_,i)=>{
               const p = i+1
@@ -144,7 +146,7 @@ export default function BlogPage(){
           </div>
         </div>
 
-        {/* KANAN - SIDEBAR KAYA SCREENSHOT */}
+        {/* KANAN */}
         <div className="space-y-8">
           <div>
             <h3 className="font-black text-[22px]">Pencarian</h3>
@@ -164,7 +166,8 @@ export default function BlogPage(){
               <div className="space-y-4">
                 {items.slice(0,3).map(b=>(
                   <Link key={b.id} href={`/blogs/${b.slug}`} className="flex gap-3 group border-b border-dashed border-black/20 pb-4 last:border-0">
-                    <img src={b.thumbnail} className="w-[88px] h-[68px] rounded-lg object-cover bg-zinc-200 shrink-0"/>
+                    {/* FIX SIDEBAR JUGA */}
+                    <img src={b.thumbnail} className="w-[88px] h-[68px] rounded-lg object-cover object-top bg-zinc-200 shrink-0"/>
                     <div>
                       <h4 className="font-bold text-[14px] leading-snug group-hover:text-[#B8960C] line-clamp-2">{b.judul}</h4>
                       <div className="flex items-center gap-1 mt-1 opacity-60 text-[12px]">📅 {b.created_at? new Date(b.created_at).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'}):'Jun 23, 2025'}</div>
@@ -199,4 +202,4 @@ export default function BlogPage(){
       </a>
     </main>
   )
-    }
+}
