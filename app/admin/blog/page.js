@@ -6,41 +6,21 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.ap
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET
 
-// CLEANER ANTI <div>&nbsp; & style bocor
 function cleanHTML(dirty){
   if(!dirty) return ''
-  let s = dirty
-  // buang &nbsp; berantakan
-  s = s.replace(/&nbsp;/gi, ' ')
-  // ganti div jadi p biar gak numpuk
-  s = s.replace(/<div><br><\/div>/gi, '')
-  s = s.replace(/<div>\s*<\/div>/gi, '')
-  s = s.replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>')
-  // buang font, span yang gak perlu
-  s = s.replace(/<font[^>]*>/gi, '').replace(/<\/font>/gi, '')
-  s = s.replace(/<span[^>]*>/gi, '').replace(/<\/span>/gi, '')
-  // buang style berantakan tailwind
-  s = s.replace(/style="[^"]*"/gi, (m)=>{
-    // keep only if ada width 100% (gambar)
-    if(m.includes('width:100%')) return m
-    return ''
-  })
-  // buang class shadow-lg dll yang bikin --tw- bocor
-  s = s.replace(/class="[^"]*"/gi, (m)=>{
-    if(m.includes('rounded')) return '' // buang semua class, nanti di slug dirender ulang bersih
-    return ''
-  })
-  s = s.replace(/<p>\s*<\/p>/gi, '')
-  s = s.replace(/\n{3,}/g, '\n')
+  let s = dirty.replace(/&nbsp;/gi,' ')
+  s = s.replace(/<div><br><\/div>/gi,'').replace(/<div>\s*<\/div>/gi,'')
+  s = s.replace(/<div>/gi,'<p>').replace(/<\/div>/gi,'</p>')
+  s = s.replace(/<font[^>]*>/gi,'').replace(/<\/font>/gi,'')
+  s = s.replace(/<span[^>]*>/gi,'').replace(/<\/span>/gi,'')
+  s = s.replace(/class="[^"]*"/gi,'')
+  s = s.replace(/style="[^"]*"/gi,'')
+  s = s.replace(/<p>\s*<\/p>/gi,'')
   return s.trim()
 }
 
 function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
-  useEffect(()=>{
-    // INI KUNCI BIAR ENTER JADI <p> BUKAN <div>
-    document.execCommand('defaultParagraphSeparator', false, 'p')
-  },[])
-
+  useEffect(()=>{ document.execCommand('defaultParagraphSeparator', false, 'p') },[])
   const saveSelection = () => {
     const sel = window.getSelection()
     if(sel && sel.rangeCount > 0 && editorRef.current){
@@ -50,20 +30,15 @@ function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
       }
     }
   }
-
   const exec = (cmd, val=null)=>{
     editorRef.current.focus()
     if(savedRangeRef.current){
-      const sel = window.getSelection()
-      sel.removeAllRanges()
-      sel.addRange(savedRangeRef.current)
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedRangeRef.current)
     }
     document.execCommand(cmd, false, val)
-    saveSelection()
-    onChange(editorRef.current.innerHTML)
+    saveSelection(); onChange(editorRef.current.innerHTML)
   }
-
-  const btn = `w-8 h-8 rounded-lg font-black text-[12px] flex items-center justify-center transition border ${isDark? 'bg-white/10 border-white/10 text-white hover:bg-[#D4AF37] hover:text-black' : 'bg-black/5 border-black/10 text-black hover:bg-black hover:text-white'}`
+  const btn = `w-8 h-8 rounded-lg font-black text-[12px] flex items-center justify-center border ${isDark? 'bg-white/10 border-white/10 text-white hover:bg-[#D4AF37] hover:text-black' : 'bg-black/5 border-black/10 text-black hover:bg-black hover:text-white'}`
   const btnGold = "w-8 h-8 bg-[#D4AF37] text-black rounded-lg font-black text-[12px] flex items-center justify-center border border-[#D4AF37]"
 
   return(
@@ -73,9 +48,9 @@ function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
         <button type="button" onClick={()=>exec('italic')} className={`${btn} italic`}>I</button>
         <button type="button" onClick={()=>exec('underline')} className={`${btn} underline`}>U</button>
         <div className={`w-[1px] h-8 mx-1 ${isDark?'bg-white/10':'bg-black/10'}`}></div>
+        <button type="button" onClick={()=>exec('formatBlock','<p>')} className={`${btn} w-10`}>P</button>
         <button type="button" onClick={()=>exec('formatBlock','<h2>')} className={`${btn} w-10`}>H2</button>
         <button type="button" onClick={()=>exec('formatBlock','<h3>')} className={`${btn} w-10`}>H3</button>
-        <button type="button" onClick={()=>exec('formatBlock','<p>')} className={`${btn} w-10`}>P</button>
         <div className={`w-[1px] h-8 mx-1 ${isDark?'bg-white/10':'bg-black/10'}`}></div>
         <button type="button" onClick={()=>exec('insertUnorderedList')} className={btn}>•≡</button>
         <button type="button" onClick={()=>exec('insertOrderedList')} className={btn}>1≡</button>
@@ -84,6 +59,7 @@ function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
         <div className={`w-[1px] h-8 mx-1 ${isDark?'bg-white/10':'bg-black/10'}`}></div>
         <button type="button" onClick={()=>exec('foreColor','#D4AF37')} className={btnGold}>A</button>
         <button type="button" onClick={()=>exec('foreColor', isDark? 'white':'black')} className={`w-8 h-8 rounded-lg font-black text-[12px] border ${isDark?'bg-white text-black':'bg-black text-white'}`}>A</button>
+        <button type="button" onClick={()=>exec('foreColor','#B22222')} className={`${btn} text-red-500`}>A</button>
         <button type="button" onClick={()=>exec('removeFormat')} className={`${btn} text-[10px]`}>✖</button>
       </div>
       <div
@@ -91,18 +67,8 @@ function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
         contentEditable
         suppressContentEditableWarning
         onInput={(e)=> { saveSelection(); onChange(e.currentTarget.innerHTML) }}
-        onMouseUp={saveSelection}
-        onKeyUp={saveSelection}
-        onBlur={saveSelection}
-        onFocus={saveSelection}
-        className={`min-h-[380px] p-4 text-[14px] outline-none leading-relaxed max-w-none
-        ${isDark? 'text-white bg-[#0A0A0F]':'text-black bg-[#FFFBF0]'}
-        [&_h2]:text-[18px] [&_h2]:font-black [&_h2]:text-[#D4AF37] [&_h2]:mt-6 [&_h2]:mb-3
-        [&_h3]:text-[15px] [&_h3]:font-bold [&_h3]:mt-4 [&_h3]:mb-2
-        [&_p]:mb-3 [&_p]:leading-relaxed
-        [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3
-        [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3
-        [&_img]:rounded-2xl [&_img]:my-6 [&_img]:w-full [&_img]:block [&_img]:h-auto [&_img]:object-contain`}
+        onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection} onFocus={saveSelection}
+        className={`min-h-[380px] p-4 text-[14px] outline-none leading-relaxed ${isDark? 'text-white bg-[#0A0A0F]':'text-black bg-[#FFFBF0]'}`}
       />
     </div>
   )
@@ -111,10 +77,7 @@ function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
 export default function Page(){
   const [data,setData]=useState([])
   const [theme,setTheme]=useState('dark')
-  const [form,setForm]=useState({
-    judul:'', slug:'', kategori:'', thumbnail:'', excerpt:'', konten:'', tags:'',
-    is_published:false, meta_title:'', meta_description:'', focus_keyword:''
-  })
+  const [form,setForm]=useState({judul:'', slug:'', kategori:'', thumbnail:'', excerpt:'', konten:'', tags:'', is_published:false, meta_title:'', meta_description:'', focus_keyword:''})
   const [editId,setEditId]=useState(null)
   const [loading,setLoading]=useState(false)
   const [up,setUp]=useState('')
@@ -122,26 +85,16 @@ export default function Page(){
   const savedRangeRef = useRef(null)
   const tok=()=>document.cookie.match(/admin_token=([^;]+)/)?.[1]||''
 
-  useEffect(()=>{
-    const saved = localStorage.getItem('admin_theme') || 'dark'
-    setTheme(saved)
-    load()
-  },[])
-
-  const toggleTheme = ()=>{
-    const n = theme==='dark'?'light':'dark'
-    setTheme(n); localStorage.setItem('admin_theme',n)
-  }
+  useEffect(()=>{ const saved = localStorage.getItem('admin_theme') || 'dark'; setTheme(saved); load() },[])
+  const toggleTheme = ()=>{ const n = theme==='dark'?'light':'dark'; setTheme(n); localStorage.setItem('admin_theme',n) }
   const isDark = theme==='dark'
 
   const load=async()=>{
     try{
       const r=await fetch(`${API}/blogs/?all=true`,{headers:{Authorization:`Bearer ${tok()}`},cache:'no-store'})
-      const j=await r.json()
-      setData(Array.isArray(j)?j:j.blogs||j.data||[])
+      const j=await r.json(); setData(Array.isArray(j)?j:j.blogs||j.data||[])
     }catch(e){}
   }
-
   const makeSlug = (s)=> s.toLowerCase().replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-')
   const wordCount = form.konten.replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length
   const seoStatus = wordCount >= 900? '✅ SEO BAGUS' : wordCount >= 500? '⚠️ KURANG' : '❌ TIPIS BANGET'
@@ -149,63 +102,31 @@ export default function Page(){
   const saveCursorBeforePicker = () => {
     if(!editorRef.current) return
     const sel = window.getSelection()
-    if(sel && sel.rangeCount>0){
-      const range = sel.getRangeAt(0)
-      if(editorRef.current.contains(range.commonAncestorContainer)){
-        savedRangeRef.current = range.cloneRange()
-        return
-      }
+    if(sel && sel.rangeCount>0 && editorRef.current.contains(sel.getRangeAt(0).commonAncestorContainer)){
+      savedRangeRef.current = sel.getRangeAt(0).cloneRange(); return
     }
-    const range = document.createRange()
-    range.selectNodeContents(editorRef.current)
-    range.collapse(false)
-    savedRangeRef.current = range
+    const range = document.createRange(); range.selectNodeContents(editorRef.current); range.collapse(false); savedRangeRef.current = range
   }
 
   const upload=async(field,file)=>{
-    if(!file) return
-    setUp(field)
-    const fd=new FormData()
-    fd.append('file',file)
-    fd.append('upload_preset',PRESET)
-    fd.append('folder',`pasa-gadang/blog/${field}`)
+    if(!file) return; setUp(field)
+    const fd=new FormData(); fd.append('file',file); fd.append('upload_preset',PRESET); fd.append('folder',`pasa-gadang/blog/${field}`)
     try{
       const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd})
       const d=await res.json()
       if(d.secure_url){
         const bigUrl = d.secure_url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/')
         if(field==='konten_img'){
-          if(editorRef.current){
-            editorRef.current.focus()
-            const sel = window.getSelection()
-            sel.removeAllRanges()
-            if(savedRangeRef.current){
-              sel.addRange(savedRangeRef.current)
-            } else {
-              const r = document.createRange()
-              r.selectNodeContents(editorRef.current)
-              r.collapse(false)
-              sel.addRange(r)
-            }
-            // FIX: JANGAN PAKE class shadow-lg LAGI, PAKE STYLE BERSIH LANGSUNG
-            const html = `<p><br></p><img src="${bigUrl}" alt="${form.judul}" style="width:100%;height:auto;object-fit:contain;border-radius:20px;margin:24px 0;display:block;background:#F5F5F0" loading="lazy" /><p><br></p>`
-            document.execCommand('insertHTML', false, html)
-            setForm(f=>({...f, konten: editorRef.current.innerHTML}))
-          }
-        } else {
-          setForm(f=>({...f,[field]:bigUrl}))
-        }
+          editorRef.current.focus(); const sel=window.getSelection(); sel.removeAllRanges(); if(savedRangeRef.current) sel.addRange(savedRangeRef.current)
+          const html = `<p><br></p><img src="${bigUrl}" alt="${form.judul}" loading="lazy" /><p><br></p>`
+          document.execCommand('insertHTML', false, html); setForm(f=>({...f, konten: editorRef.current.innerHTML}))
+        } else { setForm(f=>({...f,[field]:bigUrl})) }
       }
     }catch(e){ alert(e.message) }
     setUp('')
   }
 
-  const resetForm=()=>{
-    setForm({judul:'',slug:'',kategori:'',thumbnail:'',excerpt:'',konten:'',tags:'',is_published:false, meta_title:'', meta_description:'', focus_keyword:''})
-    setEditId(null)
-    if(editorRef.current) editorRef.current.innerHTML = ''
-    savedRangeRef.current = null
-  }
+  const resetForm=()=>{ setForm({judul:'',slug:'',kategori:'',thumbnail:'',excerpt:'',konten:'',tags:'',is_published:false, meta_title:'', meta_description:'', focus_keyword:''}); setEditId(null); if(editorRef.current) editorRef.current.innerHTML=''; savedRangeRef.current=null }
 
   const submit=async(e)=>{
     e.preventDefault()
@@ -213,20 +134,9 @@ export default function Page(){
     const rawKonten = editorRef.current? editorRef.current.innerHTML : form.konten
     if(!rawKonten) return alert('Konten wajib!')
     setLoading(true)
-
-    // INI YANG FIX - BERSIHIN DULU SEBELUM SAVE KE API
     const finalKonten = cleanHTML(rawKonten)
-
     const cleanText = finalKonten.replace(/<[^>]*>?/gm, '').substring(0,160)
-    const finalSlug = form.slug || makeSlug(form.judul)
-    const payload={
-      judul: form.judul, slug: finalSlug, kategori: form.kategori,
-      thumbnail: form.thumbnail, excerpt: form.excerpt, konten: finalKonten,
-      tags: form.tags || "", is_published: form.is_published,
-      meta_title: form.meta_title || form.judul,
-      meta_description: form.meta_description || form.excerpt || cleanText,
-      focus_keyword: form.focus_keyword || ""
-    }
+    const payload={judul: form.judul, slug: form.slug||makeSlug(form.judul), kategori: form.kategori, thumbnail: form.thumbnail, excerpt: form.excerpt, konten: finalKonten, tags: form.tags||"", is_published: form.is_published, meta_title: form.meta_title||form.judul, meta_description: form.meta_description||form.excerpt||cleanText, focus_keyword: form.focus_keyword||""}
     const url = editId? `${API}/blogs/${editId}/` : `${API}/blogs/`
     const res=await fetch(url,{method:editId?'PUT':'POST',headers:{Authorization:`Bearer ${tok()}`, 'Content-Type':'application/json'},body:JSON.stringify(payload)})
     if(!res.ok){ alert(await res.text()); setLoading(false); return }
@@ -254,11 +164,9 @@ export default function Page(){
           <p className="text-[11px] font-black tracking-[0.3em] text-[#D4AF37]">{editId?`EDIT #${editId}`:'TULIS BARU'}</p>
           <label className={`text-[10px] font-black flex gap-2 cursor-pointer ${isDark?'text-white':'text-black'}`}><input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/>PUBLISH</label>
         </div>
-
         <div className={`p-2.5 rounded-xl border text-[10px] font-black flex justify-between ${wordCount>=900?'bg-green-500/20 border-green-500/30 text-green-500':'bg-red-500/20 border-red-500/30 text-red-500'}`}>
           <span>{wordCount} KATA</span><span>{seoStatus}</span><span className="opacity-60">TARGET 900+</span>
         </div>
-
         <div><div className={label}>JUDUL *</div><input value={form.judul} onChange={e=>setForm({...form,judul:e.target.value, slug: makeSlug(e.target.value), meta_title: e.target.value.substring(0,60)})} className={inp} required/></div>
         <div className="grid grid-cols-2 gap-2">
           <div><div className={label}>SLUG</div><input value={form.slug} onChange={e=>setForm({...form,slug:makeSlug(e.target.value)})} className={inp}/></div>
@@ -278,17 +186,13 @@ export default function Page(){
 
         <div className={`border p-3 rounded-xl space-y-3 ${isDark?'bg-white/5 border-white/10':'bg-black/5 border-black/10'}`}>
           <div className="flex justify-between items-center">
-            <p className={`text-[11px] font-black ${isDark?'text-white':'text-black'}`}>📝 KONTEN - KLIK DULU BARU TAMBAH GAMBAR</p>
-            <label
-              onMouseDown={saveCursorBeforePicker}
-              onTouchStart={saveCursorBeforePicker}
-              className="bg-[#D4AF37]/20 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] font-black cursor-pointer border border-[#D4AF37]/30">
+            <p className={`text-[11px] font-black ${isDark?'text-white':'text-black'}`}>📝 KONTEN - P, H2, B, I, U, Warna</p>
+            <label onMouseDown={saveCursorBeforePicker} onTouchStart={saveCursorBeforePicker} className="bg-[#D4AF37]/20 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] font-black cursor-pointer border border-[#D4AF37]/30">
               {up==='konten_img'?'+ Uploading...':'+ Gambar'}
               <input type="file" accept="image/*" className="hidden" onChange={e=>upload('konten_img',e.target.files[0])}/>
             </label>
           </div>
           <RichEditor isDark={isDark} editorRef={editorRef} savedRangeRef={savedRangeRef} onChange={(html)=> setForm(f=>({...f, konten: html}))} />
-          <p className="text-[9px] opacity-60">Cara: Tap di tengah tulisan dulu, baru tap Gambar. Tulisan bawah otomatis kegeser.</p>
         </div>
 
         <div className={`grid grid-cols-1 gap-2 p-3 rounded-xl border ${isDark?'bg-black/30 border-white/10':'bg-black/5 border-black/10'}`}>
@@ -321,4 +225,4 @@ export default function Page(){
   </AdminLayout>
   </div>
   )
-        }
+}
