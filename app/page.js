@@ -61,7 +61,6 @@ export default function Home(){
   }
   const isDark = theme==='dark'
 
-  // --- LOGIKA SORTING BARU: TERJUAL PALING BELAKANG ---
   const sortedProperties = [...properties].sort((a,b)=>{
     const aBadge = (a.badge||'').toLowerCase()
     const aStatus = (a.status_properti||'').toLowerCase()
@@ -109,7 +108,16 @@ export default function Home(){
 
   return (
     <main className={`${isDark? 'bg-[#0B0B0F] text-white' : 'bg-[#FFFBF0] text-black'} min-h-screen transition-colors duration-300`}>
-      <style>{`@keyframes float{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}@keyframes dash{0%{stroke-dashoffset:24}100%{stroke-dashoffset:0}}.scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}`}</style>
+      <style>{`
+        @keyframes float{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
+        @keyframes dash{0%{stroke-dashoffset:24}100%{stroke-dashoffset:0}}
+        @keyframes smokeUp{0%{transform:translateY(20px) translateX(0) scale(0.8) rotate(0deg);opacity:0}20%{opacity:0.8}100%{transform:translateY(-120px) translateX(15px) scale(2.2) rotate(25deg);opacity:0}}
+        @keyframes smokeUp2{0%{transform:translateY(15px) translateX(0) scale(0.6);opacity:0}30%{opacity:0.7}100%{transform:translateY(-110px) translateX(-18px) scale(2) rotate(-20deg);opacity:0}}
+        @keyframes goldPulse{0%,100%{box-shadow:0 0 0 3px #D4AF37,0 0 20px rgba(212,175,55,0.7),0 0 50px rgba(212,175,55,0.5),0 0 80px rgba(255,0,0,0.4);transform:scale(1) rotate(-18deg)}50%{box-shadow:0 0 0 4px #FFEB7F,0 0 40px rgba(212,175,55,1),0 0 80px rgba(212,175,55,0.8),0 0 120px rgba(255,50,50,0.6);transform:scale(1.08) rotate(-18deg)}}
+        @keyframes shineSweep{0%{transform:translateX(-150%) skewX(-20deg)}100%{transform:translateX(200%) skewX(-20deg)}}
+        @keyframes floatEpic{0%,100%{transform:translateY(0) rotate(-18deg)}50%{transform:translateY(-6px) rotate(-18deg)}}
+       .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
+      `}</style>
 
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/" className="flex flex-col leading-none">
@@ -194,14 +202,36 @@ export default function Home(){
               <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
                 <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" onClick={()=>openZoom(imgs,0)}>
                   <img src={imgs[0]} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
-                  {badgeRaw && (
+                  {badgeRaw &&!isTerjual && (
                     <div className="absolute top-3 left-3 z-20">
-                      <div className={`text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg ${isTerjual? 'bg-gradient-to-r from-red-600 to-orange-600 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : 'bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]'}`}>
+                      <div className="text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]">
                         🔥 {badgeRaw.toUpperCase()}
                       </div>
                     </div>
                   )}
-                  {isTerjual && <div className="absolute inset-0 bg-black/40 flex items-center justify-center"><span className="bg-red-600 text-white font-black px-4 py-1 rounded-full text-[12px] rotate-[-12deg] border-2 border-white">TERJUAL</span></div>}
+
+                  {/* STEMPEL EPIC BULAT ASAP MERAH-EMAS */}
+                  {isTerjual && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden bg-black/20">
+                      <div className="absolute w-[180px] h-[180px] pointer-events-none">
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70px] h-[70px] rounded-full bg-gradient-to-t from-[#FF0000] via-[#D4AF37] to-transparent blur-[12px] opacity-70" style={{animation:'smokeUp 2.2s ease-out infinite'}}></div>
+                        <div className="absolute bottom-0 left-[45%] w-[50px] h-[80px] rounded-full bg-gradient-to-t from-[#B91C1C] via-[#FF7A00] to-[#FFEB7F] blur-[14px] opacity-60" style={{animation:'smokeUp2 2.8s ease-out infinite 0.4s'}}></div>
+                        <div className="absolute bottom-0 right-[40%] w-[60px] h-[90px] rounded-full bg-gradient-to-t from-[#FF0000] via-[#D4AF37] to-transparent blur-[16px] opacity-50" style={{animation:'smokeUp 2.5s ease-out infinite 0.8s'}}></div>
+                      </div>
+                      <div className="absolute w-[160px] h-[160px] rounded-full bg-gradient-to-br from-[#FFEB7F] via-[#D4AF37] to-[#FF0000] blur-[18px] opacity-60 animate-pulse"></div>
+                      <div className="relative w-[125px] h-[125px]" style={{animation:'floatEpic 2.5s ease-in-out infinite'}}>
+                        <div className="absolute inset-0 rounded-full" style={{animation:'goldPulse 1.8s ease-in-out infinite'}}></div>
+                        <div className="relative w-full h-full rounded-full bg-[radial-gradient(circle_at_30%_30%,#FF3B3B,#B91C1C)] border-[3px] border-white flex flex-col items-center justify-center overflow-hidden" style={{boxShadow:'0 0 0 3px #D4AF37, inset 0 3px 10px rgba(255,255,255,0.4)', animation:'goldPulse 1.8s ease-in-out infinite'}}>
+                          <div className="absolute inset-0 w-[40%] h-full bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-60" style={{animation:'shineSweep 2.2s ease-in-out infinite'}}></div>
+                          <div className="absolute inset-[6px] rounded-full border border-dashed border-white/70"></div>
+                          <span className="text-[7px] font-black tracking-[0.35em] text-[#FFEB7F]">★ TERJUAL ★</span>
+                          <span className="text-[20px] font-black text-white leading-none mt-1 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">TERJUAL</span>
+                          <div className="w-[55%] h-[2px] bg-[#FFEB7F] mt-1 shadow-[0_0_8px_#FFEB7F]"></div>
+                          <span className="text-[6px] font-bold tracking-[0.25em] text-white/90 mt-1">PASA GADANG</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <div className="font-bold text-[14px] leading-tight line-clamp-2 min-h-[36px]">{p.judul}</div>
@@ -274,7 +304,6 @@ export default function Home(){
         </div>
       </div>
 
-      {/* --- FOOTER SEO PALING PENTING BUAT KEYWORD PADANG --- */}
       <footer className={`${isDark?'bg-[#121214] border-white/10':'bg-black border-black/10'} border-t`}>
         <div className="max-w-[400px] mx-auto px-6 py-10">
           <div className="text-center mb-8">
@@ -286,7 +315,6 @@ export default function Home(){
             <p className="text-[11px] font-bold tracking-[0.2em] mt-2 text-zinc-400">Jual Properti / Rumah di Padang, Sumatera Barat</p>
             <p className="text-[11px] mt-3 text-zinc-500 leading-relaxed">Mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini. Spesialis Rumah Gadang Modern & Roster Minimalis #1 di Padang.</p>
           </div>
-
           <div className="grid grid-cols-2 gap-6 text-[11px]">
             <div>
               <h4 className="font-black mb-3 text-[#D4AF37]">CARI DI PADANG</h4>
@@ -308,7 +336,6 @@ export default function Home(){
               </ul>
             </div>
           </div>
-
           <div className="mt-8 pt-6 border-t border-white/10 text-center">
             <p className="text-[10px] text-zinc-500">📍 Padang, Sumatera Barat | WA 0897-9879-518</p>
             <p className="text-[9px] text-zinc-600 mt-2 tracking-widest">© 2026 PasaGadang.com - Jual Properti Rumah di Padang Sumatera Barat</p>
