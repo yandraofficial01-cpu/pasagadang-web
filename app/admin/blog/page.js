@@ -118,7 +118,6 @@ export default function Page(){
     resetForm(); load(); setLoading(false)
   }
 
-  // INI YANG BENERIN TERANG/GELAP - JANGAN HARDCODE
   const inp = isDark? "w-full max-w-full min-w-0 bg-black/50 border border-white/10 p-3 rounded-xl text-sm text-white outline-none" : "w-full max-w-full min-w-0 bg-white border border-black/10 p-3 rounded-xl text-sm text-black outline-none"
   const label = isDark? "text-[10px] font-black tracking-widest text-white/40 mb-1" : "text-[10px] font-black tracking-widest text-black/50 mb-1"
   const card = isDark? "bg-[#16161E] border-[#D4AF37]/20" : "bg-white border-black/10 shadow-lg"
@@ -182,7 +181,10 @@ export default function Page(){
             <div key={i.id} className={`border p-3 rounded-2xl flex gap-3 items-center w-full max-w-full min-w-0 overflow-hidden ${isDark?'bg-black/60 border-white/5':'bg-[#FFFBF0] border-black/5'}`}>
               <img src={i.thumbnail} className="w-12 h-12 rounded-xl object-cover shrink-0"/>
               <div className="flex-1 min-w-0 overflow-hidden"><p className={`text-sm font-black truncate ${isDark?'text-white':'text-black'}`}>{i.judul}</p><p className="text-[10px] text-zinc-500 truncate">{i.kategori} • {i.slug}</p></div>
-              <button onClick={()=>{setForm({judul:i.judul||'',slug:i.slug||'',kategori:i.kategori||'',thumbnail:i.thumbnail||'',excerpt:i.excerpt||'',konten:i.konten||'',tags:i.tags||'',is_published:!!i.is_published,meta_title:i.meta_title||'',meta_description:i.meta_description||'',focus_keyword:i.focus_keyword||''}); setEditId(i.id); setTimeout(()=>{ if(editorRef.current) editorRef.current.innerHTML = i.konten||'' },100); window.scrollTo({top:0,behavior:'smooth'})}} className={`shrink-0 px-3 py-1.5 rounded-full text-[10px] font-black ${isDark?'bg-white/10 text-white':'bg-black/10 text-black'}`}>EDIT</button>
+              <div className="flex flex-col gap-1.5 shrink-0">
+                <button onClick={()=>{setForm({judul:i.judul||'',slug:i.slug||'',kategori:i.kategori||'',thumbnail:i.thumbnail||'',excerpt:i.excerpt||'',konten:i.konten||'',tags:i.tags||'',is_published:!!i.is_published,meta_title:i.meta_title||'',meta_description:i.meta_description||'',focus_keyword:i.focus_keyword||''}); setEditId(i.id); setTimeout(()=>{ if(editorRef.current) editorRef.current.innerHTML = i.konten||'' },100); window.scrollTo({top:0,behavior:'smooth'})}} className={`px-3 py-1.5 rounded-full text-[10px] font-black ${isDark?'bg-white/10 text-white':'bg-black/10 text-black'}`}>EDIT</button>
+                <button onClick={async()=>{if(!confirm('Hapus '+i.judul+'?'))return; await fetch(`${API}/blogs/${i.id}/`,{method:'DELETE',headers:{Authorization:`Bearer ${tok()}`}}); load()}} className="bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-full text-[10px] font-black">HAPUS</button>
+              </div>
             </div>
           ))}
           </div>
@@ -192,4 +194,4 @@ export default function Page(){
   </AdminLayout>
   </div>
   )
-}
+                                                }
