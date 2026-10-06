@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "RUMAH IMPIAN MULAI 300JT-AN - Pasa Gadang Padang",
-  description: "RUMAH IMPIAN MULAI 300JT-AN. BAHAN ESTETIK UNTUK PROPERTI CANTIKMU ADA DI SINI. Jual Properti Rumah Gadang Modern, Roster Minimalis & Material Estetik #1 di Padang, Sumatera Barat!",
+  title: "Jual Properti / Rumah di Padang, Sumatera Barat",
+  description: "Jual properti / rumah di Padang, Sumatera Barat mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini.",
   verification: {
     google: "sBpare7PyIDICjHvIs8mKgjMncTu7BsrHeOJ5vzFEYY",
   },
@@ -14,8 +14,8 @@ export const metadata = {
     shortcut: "/icon.png",
   },
   openGraph: {
-    title: "RUMAH IMPIAN MULAI 300JT-AN - Pasa Gadang",
-    description: "BAHAN ESTETIK UNTUK PROPERTI CANTIKMU ADA DI SINI. Properti Rumah Gadang Modern mulai 300jt & Roster Minimalis terlengkap di Padang!",
+    title: "Jual Properti / Rumah di Padang, Sumatera Barat",
+    description: "Jual properti / rumah di Padang, Sumatera Barat mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini.",
     url: "https://pasagadang.com",
     siteName: "Pasa Gadang",
     images: [
@@ -23,10 +23,11 @@ export const metadata = {
         url: "/icon.png",
         width: 512,
         height: 512,
-        alt: "Pasa Gadang - Rumah Impian Mulai 300 Jt-an",
+        alt: "Jual Properti Rumah di Padang Sumatera Barat",
       },
     ],
     type: "website",
+    locale: "id_ID",
   },
 };
 
