@@ -15,42 +15,26 @@ function LogoPasagadang(){
         <span style={{color:COLORS.red}}>DANG</span>
         <span className="text-[10px] ml-1 mt-1 tracking-widest" style={{color:COLORS.red}}>.COM</span>
       </div>
-      <div className="relative w-[165px] h-[8px] mt-[2px]">
-        <svg viewBox="0 0 165 10" className="w-full h-full">
-          <path d="M0 6 Q22 0 44 4 T88 4 T132 3 T165 1 Q132 7 88 7 T44 7 T0 6" fill="#D4AF37" opacity="0.9"/>
-          <path d="M18 9 Q40 6 62 7.5 T106 7.5 T148 6 Q106 10 62 10.5 T18 9" fill="#D4AF37" opacity="0.8"/>
-        </svg>
-      </div>
+      <div className="relative w-[165px] h-[8px] mt-[2px]"><svg viewBox="0 0 165 10" className="w-full h-full"><path d="M0 6 Q22 0 44 4 T88 4 T132 3 T165 1 Q132 7 88 7 T44 7 T0 6" fill="#D4AF37" opacity="0.9"/></svg></div>
     </div>
   )
 }
 
-// === INI YANG FIX LINK ERROR %3Ca ===
 function safeRender(html){
   if(!html) return ''
-  let s = html.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&')
-  const imgMap = []
-  const linkMap = []
-
-  // Simpan dulu semua <a> dan <img> yang sudah ada biar tidak rusak
-  s = s.replace(/<a\b[^>]*>.*?<\/a>/gis, (m)=>{ linkMap.push(m); return `__LINK_${linkMap.length-1}__` })
-  s = s.replace(/<img[^>]*>/gi, (m)=>{ imgMap.push(m); return `__IMG_${imgMap.length-1}__` })
-
-  // Baru auto-link URL polosan
+  let s = html.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').replace(/<div><br><\/div>/gi,'').replace(/<div>\s*<\/div>/gi,'')
+  const imgMap=[], linkMap=[]
+  s = s.replace(/<a\b[^>]*>.*?<\/a>/gis, m=>{linkMap.push(m); return `__LINK_${linkMap.length-1}__`})
+  s = s.replace(/<img[^>]*>/gi, m=>{imgMap.push(m); return `__IMG_${imgMap.length-1}__`})
   s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
   s = s.replace(/(https?:\/\/[^\s<")]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#D4AF37;text-decoration:underline;word-break:break-all;font-weight:900">$1</a>')
-
-  // Balikin lagi
-  s = s.replace(/__LINK_(\d+)__/g, (_, i)=> linkMap[Number(i)] || '')
-  s = s.replace(/__IMG_(\d+)__/g, (_, i)=>{
-    let tag = imgMap[Number(i)] || ''
-    if(!tag.includes('style=')){
-      tag = tag.replace('<img', '<img style="width:100%;height:auto;object-fit:contain;border-radius:20px;margin:20px 0;display:block;background:#18181b" loading="lazy"')
-    }
-    tag = tag.replace(/class="[^"]*"/g, '')
-    return tag
+  s = s.replace(/__LINK_(\d+)__/g, (_,i)=>linkMap[Number(i)]||'')
+  s = s.replace(/__IMG_(\d+)__/g, (_,i)=>{
+    let tag = imgMap[Number(i)]||''
+    if(!tag.includes('object-contain')) tag = tag.replace('<img', '<img style="width:100%;height:auto;object-fit:contain;border-radius:20px;margin:24px 0;display:block;background:#F5F5F0" loading="lazy"')
+    return tag.replace(/class="[^"]*"/g,'')
   })
-  return s
+  return s.replace(/<div>/gi,'<p>').replace(/<\/div>/gi,'</p>').replace(/<p>\s*<\/p>/gi,'')
 }
 
 export default function DetailBlog(){
@@ -61,23 +45,17 @@ export default function DetailBlog(){
   const [isDark, setIsDark] = useState(false)
   const [open, setOpen] = useState(false)
 
-  useEffect(()=>{
-    const saved = localStorage.getItem('theme') || localStorage.getItem('pg-theme') || 'light'
-    setIsDark(saved==='dark')
-  },[])
-  useEffect(()=>{ localStorage.setItem('theme', isDark?'dark':'light'); localStorage.setItem('pg-theme', isDark?'dark':'light') },[isDark])
-
+  useEffect(()=>{ setIsDark((localStorage.getItem('theme')||'light')==='dark') },[])
+  useEffect(()=>{ localStorage.setItem('theme', isDark?'dark':'light') },[isDark])
   useEffect(()=>{
     if(!slug) return
-    const load = async()=>{
+    ;(async()=>{
       try{
         const r = await fetch(`${API}/blogs/${slug}`, { cache: 'no-store' })
-        if(!r.ok) throw new Error(await r.text())
         const j = await r.json()
-        setData(j.blog || j.data || j)
+        setData(j.blog||j.data||j)
       }catch(e){ setErr(e.message) }finally{ setLoading(false) }
-    }
-    load()
+    })()
   },[slug])
 
   const b = data
@@ -85,109 +63,128 @@ export default function DetailBlog(){
   const muted = isDark? 'text-white/70' : 'text-black/70'
   const cardBg = isDark? 'bg-[#16161E] border-white/10' : 'bg-white border-black/10 shadow-[0_10px_40px_rgba(0,0,0,0.06)]'
 
-  const hasNumberedList = useMemo(()=>{
-    const c = b?.konten || ''
-    return (c.match(/\b[1-5]\.\s/g) || []).length >= 2
-  },[b])
-
-  const points = useMemo(()=>{
-    if(!b?.konten ||!hasNumberedList) return []
-    return b.konten.split(/(?=\b[1-5]\.\s)/g)
-  },[b, hasNumberedList])
+  const hasNumberedList = useMemo(()=> (b?.konten||'').match(/\b[1-5]\.\s/g)?.length >=2,[b])
+  const points = useMemo(()=>!b?.konten||!hasNumberedList?[]:b.konten.split(/(?=\b[1-5]\.\s)/g),[b,hasNumberedList])
 
   if(loading) return <div className={`min-h-screen p-10 ${themeBg}`}>Loading {slug}...</div>
   if(err) return <div className={`min-h-screen p-10 ${themeBg}`}>Error: {err}</div>
   if(!b) return <div className={`min-h-screen p-10 ${themeBg}`}>Blog tidak ditemukan</div>
 
   return(
-    <div className={`min-h-screen transition-colors ${themeBg} pb-24`}>
-      <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
+    <div className={`min-h-screen w-full max-w-[100vw] overflow-x-clip ${themeBg} pb-24`}>
+      <style>{`
+        html,body{max-width:100vw;overflow-x:hidden!important}
+        strong,b{font-weight:900!important;color:${isDark?'#fff':'#111'}}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+        @keyframes shine{0%{transform:translateX(-100%) skewX(-12deg)}100%{transform:translateX(200%) skewX(-12deg)}}
+      .animate-float{animation:float 4s ease-in-out infinite}
+      .animate-float-delay{animation:float 4.5s ease-in-out infinite}
+      .shine-effect{position:absolute;top:0;left:0;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent);transform:translateX(-100%);pointer-events:none}
+      .group:hover.shine-effect{animation:shine 1s ease}
+      `}</style>
+
+      <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-4 md:px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/"><LogoPasagadang/></Link>
         <div className="flex gap-2 items-center">
-          <button onClick={()=>setIsDark(!isDark)} className={`w-10 h-10 rounded-full border flex items-center justify-center ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>{isDark?'☀️':'🌙'}</button>
-          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>
-            <span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span>
-            <span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span>
-            <span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span>
-          </button>
+          <button onClick={()=>setIsDark(!isDark)} className="w-11 h-11 rounded-full bg-white border border-black/5 flex items-center justify-center text-[18px]">{isDark?'☀️':'🌙'}</button>
+          <button onClick={()=>setOpen(!open)} className="w-11 h-11 rounded-full bg-white border border-black/5 flex flex-col items-center justify-center gap-1.5"><span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span><span className={`w-5 h-[2px] bg-black ${open?'opacity-0':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span></button>
         </div>
       </nav>
 
       {open && (
-        <div className={`px-6 py-4 shadow-xl border-b ${isDark?'bg-[#121214] border-white/10':'bg-white border-black/5'}`}>
-          <Link href="/blogs" onClick={()=>setOpen(false)} className="flex justify-between py-4 font-black text-[14px] border-b border-black/5">← KEMBALI KE BLOG</Link>
-          <Link href="/properties" onClick={()=>setOpen(false)} className="flex justify-between py-4 font-black text-[14px]">01 • PROPERTI</Link>
+        <div className="w-full bg-white border-b border-black/5 shadow-xl animate-float">
+          <div className="px-6 max-w-7xl mx-auto">
+            <Link href="/properties" onClick={()=>setOpen(false)} className="flex justify-between py-[22px] border-b border-black/10 font-black text-[18px] text-black">01 • PROPERTI <span className="opacity-30">→</span></Link>
+            <Link href="/estetika" onClick={()=>setOpen(false)} className="flex justify-between py-[22px] border-b border-black/10 font-black text-[18px] text-black">02 • ESTETIKA <span className="opacity-30">→</span></Link>
+            <Link href="/materials" onClick={()=>setOpen(false)} className="flex justify-between py-[22px] border-b border-black/10 font-black text-[18px] text-black">03 • MATERIAL <span className="opacity-30">→</span></Link>
+            <Link href="/blogs" onClick={()=>setOpen(false)} className="flex justify-between py-[22px] font-black text-[18px] text-black">04 • BLOG <span className="opacity-30">→</span></Link>
+          </div>
+          <div className="p-6 max-w-7xl mx-auto"><Link href="/" onClick={()=>setOpen(false)} className="w-full bg-black text-white rounded-full py-4 flex justify-center font-black text-[13px] tracking-widest hover:bg-[#D4AF37] hover:text-black transition">← KEMBALI KE BERANDA</Link></div>
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto p-5 md:p-10">
-        <div className="flex gap-2 mb-6">
-          <span className="bg-[#D4AF37] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase">{b.kategori||'BLOG'}</span>
-          <span className={`text-[11px] ${muted}`}>👁️ {b.views||0} views • {b.created_at? new Date(b.created_at).toLocaleDateString('id-ID') : ''}</span>
-        </div>
-
-        <h1 className="text-[30px] md:text-[42px] font-black leading-[0.95] tracking-tight">{b.judul}</h1>
+      <div className="max-w-[780px] mx-auto p-4 md:p-8 w-full min-w-0">
+        <div className="flex gap-2 mb-6 flex-wrap"><span className="bg-[#D4AF37] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">{b.kategori||'BLOG'}</span><span className={`text-[11px] ${muted} font-bold`}>👁️ {b.views||0} views • {b.created_at? new Date(b.created_at).toLocaleDateString('id-ID'):''}</span></div>
+        <h1 className="text-[30px] md:text-[42px] font-black leading-[0.95] tracking-tight break-words">{b.judul}</h1>
         {b.excerpt && <p className={`mt-5 italic border-l-4 pl-4 text-[17px] leading-relaxed ${muted}`} style={{borderColor:'#D4AF37'}}>{b.excerpt}</p>}
+        <div className="w-full mt-8 rounded-[28px] border overflow-hidden bg-[#F5F5F0] border-black/10"><img src={b.thumbnail} alt={b.judul} className="w-full h-auto object-contain block"/></div>
 
-        <div className="w-full mt-8 rounded-[28px] border overflow-hidden bg-zinc-900 flex items-center justify-center" style={{borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)'}}>
-          <img src={b.thumbnail} alt={b.judul} className="w-full h-auto object-contain max-h-[600px]" />
-        </div>
-
-        {!hasNumberedList? (
-          <div className={`mt-8 text-[17px] leading-[1.9] prose max-w-none ${isDark?'prose-invert':''} prose-strong:font-black prose-strong:text-[#111] prose-img:rounded-[20px] prose-a:text-[#D4AF37]`} dangerouslySetInnerHTML={{__html: safeRender(b.konten)}} />
-        ) : (
+        {!hasNumberedList? <div className={`mt-8 text-[17px] leading-[1.9] break-words ${muted}`} dangerouslySetInnerHTML={{__html: safeRender(b.konten)}}/> : (
           <div className="mt-8 space-y-6">
-            <div className={`text-[17px] leading-[1.9] ${muted}`} dangerouslySetInnerHTML={{__html: safeRender(points[0])}}/>
+            <div className={`text-[17px] leading-[1.9] break-words ${muted}`} dangerouslySetInnerHTML={{__html: safeRender(points[0])}}/>
             {points.slice(1).map((raw,i)=>{
               const clean = raw.replace(/^\d+\.\s*/,'').trim()
-              const lines = clean.split('\n').filter(Boolean)
-              const firstLine = lines[0] || clean.split('.')[0]
+              const firstLine = clean.split('\n')[0]||clean.split('.')[0]
               const rest = clean.replace(firstLine,'').trim()
               return(
-                <div key={i} className={`rounded-[24px] p-6 border ${cardBg}`}>
-                  <div className="flex gap-3 items-start">
-                    <div className="w-9 h-9 rounded-full bg-[#D4AF37] text-black font-black flex items-center justify-center shrink-0 text-[14px]">{i+1}</div>
-                    <h2 className="font-black text-[20px] leading-tight tracking-tight" style={{fontWeight:900}}>{firstLine}</h2>
-                  </div>
-                  {rest && <div className={`mt-4 text-[16px] leading-[1.8] ${muted} prose-strong:font-black prose-strong:text-black`} dangerouslySetInnerHTML={{__html: safeRender(rest)}}/>}
+                <div key={i} className={`group relative rounded-[24px] p-6 border ${cardBg} animate-float overflow-hidden hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(212,175,55,0.18)] transition-all duration-500`} style={{animationDelay:`${i*0.15}s`}}>
+                  <div className="shine-effect"></div>
+                  <div className="flex gap-3 items-start relative z-10"><div className="w-9 h-9 rounded-full bg-[#D4AF37] text-black font-black flex items-center justify-center shrink-0">{i+1}</div><h2 className="font-black text-[20px] leading-tight tracking-tight">{firstLine}</h2></div>
+                  {rest && <div className={`mt-4 text-[16px] leading-[1.8] break-words ${muted} relative z-10`} dangerouslySetInnerHTML={{__html: safeRender(rest)}}/>}
                 </div>
               )
             })}
           </div>
         )}
 
-        <div className="mt-12 space-y-4">
-          <div className={`group relative p-6 rounded-[24px] border overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(212,175,55,0.2)] ${cardBg} animate-float`}>
-            <p className="relative font-black text-[13px] tracking-widest flex items-center gap-2">🟡 BUTUH BAHAN BANGUNAN?</p>
-            <p className={`relative text-[13px] mt-1 ${muted}`}>Konsultasi gratis roster & batu alam Pasa Gadang. Hemat 30% biaya bahan.</p>
-            <div className="relative flex gap-2 mt-4">
-              <a href="/materials" className="flex-1 text-center bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black">LIHAT KATALOG →</a>
-              <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20dari%20blog" target="_blank" className="flex-1 text-center bg-[#25D366] text-white px-5 py-3 rounded-full text-[11px] font-black">WA 08979879518</a>
-            </div>
-          </div>
-          <div className={`group relative p-6 rounded-[24px] border overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] ${cardBg} animate-float-delay`}>
-            <p className="relative font-black text-[13px] tracking-widest flex items-center gap-2">✨ PERCANTIK PROPERTI ANDA?</p>
-            <p className={`relative text-[13px] mt-1 ${muted}`}>Percantik Properti anda lebih estetik dengan bahan roster dan batu alam, granite.</p>
-            <div className="relative flex gap-2 mt-4">
-              <a href="/estetika" className="flex-1 text-center bg-[#111] dark:bg-white text-white dark:text-black px-5 py-3 rounded-full text-[11px] font-black">LIHAT ESTETIKA →</a>
-              <a href="https://wa.me/628979879518?text=Halo%20mau%20konsultasi%20estetika%20roster" target="_blank" className="flex-1 text-center bg-[#D4AF37] text-black px-5 py-3 rounded-full text-[11px] font-black">KONSULTASI</a>
-            </div>
+        {/* === REKOMENDASI PREMIUM 3 KARTU ANIMASI === */}
+        <div className="mt-14">
+          <h3 className="font-black text-[11px] tracking-[0.35em] opacity-40 mb-4">REKOMENDASI UNTUK ANDA • JANGAN SKIP</h3>
+          <div className="grid gap-4">
+
+            <Link href="/properties" className="group relative rounded-[24px] p-[1.5px] bg-gradient-to-br from-[#D4AF37] to-[#8B6914] hover:shadow-[0_20px_60px_rgba(212,175,55,0.4)] hover:scale-[1.02] transition-all duration-500 animate-float overflow-hidden block">
+              <div className={`rounded-[22px] p-6 ${isDark?'bg-[#16161E]':'bg-white'} relative overflow-hidden h-full`}>
+                <div className="shine-effect"></div>
+                <div className="flex justify-between items-start relative z-10">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black tracking-[0.3em] text-[#D4AF37]">01 • PROPERTI SIAP HUNI</p>
+                    <p className="font-black text-[19px] leading-[1.1] mt-2">Rumah 300 Jt-an Legal di Padang<br/>Bisa KPR & Cicil Syariah</p>
+                    <p className={`text-[12px] mt-2 ${muted}`}>Manggis, Kuranji, Balai Baru - SHM jelas, tidak tipu-tipu</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center group-hover:bg-[#D4AF37] group-hover:text-black group-hover:rotate-45 transition-all duration-500 shrink-0">→</div>
+                </div>
+                <div className="mt-4 flex gap-2 relative z-10"><span className="bg-[#D4AF37] text-black px-5 py-2.5 rounded-full text-[11px] font-black">LIHAT PROPERTI →</span><span className="px-4 py-2.5 rounded-full text-[11px] font-black border border-black/10 opacity-60">AMAN</span></div>
+              </div>
+            </Link>
+
+            <Link href="/estetika" className="group relative rounded-[24px] p-[1px] bg-black/10 hover:bg-black/20 hover:shadow-[0_20px_60px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-all duration-500 animate-float block" style={{animationDelay:'0.2s'}}>
+              <div className={`rounded-[23px] p-6 ${cardBg} relative overflow-hidden h-full`}>
+                <div className="shine-effect"></div>
+                <div className="flex justify-between items-start relative z-10">
+                  <div>
+                    <p className="text-[10px] font-black tracking-[0.3em] opacity-50">02 • ESTETIKA MINANG MODERN</p>
+                    <p className="font-black text-[19px] leading-[1.1] mt-2">Bikin Rumah Makin Cakep<br/>Pakai Roster & Batu Alam</p>
+                    <p className={`text-[12px] mt-2 ${muted}`}>Fasad adem, Instagramable, nilai jual naik 40%</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-white border border-black/10 text-black flex items-center justify-center group-hover:bg-black group-hover:text-white group-hover:rotate-12 transition-all duration-500">✨</div>
+                </div>
+                <div className="mt-4 flex gap-2 relative z-10"><span className="bg-black text-white px-5 py-2.5 rounded-full text-[11px] font-black">LIHAT ESTETIKA →</span></div>
+              </div>
+            </Link>
+
+            <Link href="/materials" className="group relative rounded-[24px] p-[1px] bg-gradient-to-br from-[#25D366]/40 to-[#128C7E]/20 hover:from-[#25D366]/60 hover:shadow-[0_20px_60px_rgba(37,211,102,0.3)] hover:scale-[1.02] transition-all duration-500 animate-float block" style={{animationDelay:'0.4s'}}>
+              <div className={`rounded-[23px] p-6 ${cardBg} relative overflow-hidden h-full`}>
+                <div className="shine-effect"></div>
+                <div className="flex justify-between items-start relative z-10">
+                  <div>
+                    <p className="text-[10px] font-black tracking-[0.3em] text-[#25D366]">03 • MATERIAL & BAHAN BANGUNAN</p>
+                    <p className="font-black text-[19px] leading-[1.1] mt-2">Hemat 30% Biaya Bahan<br/>Langsung Dari Gudang</p>
+                    <p className={`text-[12px] mt-2 ${muted}`}>Roster, bata, semen, granite - free konsultasi</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-[#25D366] text-white flex items-center justify-center group-hover:scale-110 transition-all duration-500">🟡</div>
+                </div>
+                <div className="mt-4 flex gap-2 relative z-10"><span className="bg-[#D4AF37] text-black px-5 py-2.5 rounded-full text-[11px] font-black">LIHAT KATALOG →</span><a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20dari%20blog" onClick={e=>e.stopPropagation()} target="_blank" className="bg-[#25D366] text-white px-5 py-2.5 rounded-full text-[11px] font-black">WA GRATIS</a></div>
+              </div>
+            </Link>
+
           </div>
         </div>
+
+        <Link href="/blogs" className="mt-10 inline-flex text-[12px] font-black tracking-widest opacity-50 hover:opacity-100 transition">← KEMBALI KE BLOG</Link>
       </div>
 
-      <a href="https://wa.me/628979879518" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white animate-bounce-slow">💬</a>
-
-      <style>{`
-        strong, b { font-weight: 900!important; color: ${isDark?'#fff':'#111'}; }
-       .prose strong { font-weight: 900!important; }
-        @keyframes float { 0%,100%{ transform: translateY(0px) } 50%{ transform: translateY(-3px) } }
-        @keyframes float-delay { 0%,100%{ transform: translateY(0px) } 50%{ transform: translateY(-4px) } }
-        @keyframes bounce-slow { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } }
-       .animate-float { animation: float 4s ease-in-out infinite; }
-       .animate-float-delay { animation: float-delay 4.5s ease-in-out infinite; }
-       .animate-bounce-slow { animation: bounce-slow 2.5s ease-in-out infinite; }
-      `}</style>
+      <footer className="mt-16 bg-[#111] text-white py-8 text-center text-[11px] opacity-40">© 2026 PasaGadang.com - Dibuat dengan bangga di Padang</footer>
+      <a href="https://wa.me/628979879518" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white">💬</a>
     </div>
   )
-  }
+                }
