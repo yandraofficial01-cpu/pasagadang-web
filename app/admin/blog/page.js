@@ -6,27 +6,16 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.ap
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET
 
-// --- RICH EDITOR FIX - BISA INSERT DI KURSOR ---
-function RichEditor({value, onChange, isDark, editorRef, savedRangeRef}){
-
+function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
   const saveSelection = () => {
     const sel = window.getSelection()
-    if(sel && sel.rangeCount > 0){
+    if(sel && sel.rangeCount > 0 && editorRef.current){
       const range = sel.getRangeAt(0)
-      if(editorRef.current && editorRef.current.contains(range.commonAncestorContainer)){
+      if(editorRef.current.contains(range.commonAncestorContainer) || editorRef.current===range.commonAncestorContainer){
         savedRangeRef.current = range.cloneRange()
       }
     }
   }
-
-  useEffect(()=>{
-    if(editorRef.current && editorRef.current.innerHTML!== value){
-      // jangan timpa kalo lagi fokus ngetik
-      if(document.activeElement!== editorRef.current){
-        editorRef.current.innerHTML = value || ''
-      }
-    }
-  },[value])
 
   const exec = (cmd, val=null)=>{
     editorRef.current.focus()
@@ -66,12 +55,11 @@ function RichEditor({value, onChange, isDark, editorRef, savedRangeRef}){
       <div
         ref={editorRef}
         contentEditable
-        onInput={(e)=> {
-          saveSelection()
-          onChange(e.currentTarget.innerHTML)
-        }}
+        suppressContentEditableWarning
+        onInput={(e)=> { saveSelection(); onChange(e.currentTarget.innerHTML) }}
         onMouseUp={saveSelection}
         onKeyUp={saveSelection}
+        onBlur={saveSelection}
         onFocus={saveSelection}
         className={`min-h-[380px] p-4 text-[14px] outline-none leading-relaxed max-w-none
         ${isDark? 'text-white bg-[#0A0A0F]':'text-black bg-[#FFFBF0]'}
@@ -80,8 +68,7 @@ function RichEditor({value, onChange, isDark, editorRef, savedRangeRef}){
         [&_p]:mb-3 [&_p]:leading-relaxed
         [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3
         [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3
-        [&_img]:rounded-2xl [&_img]:my-6 [&_img]:w-full`}
-        placeholder="Tulis artikel..."
+        [&_img]:rounded-2xl [&_img]:my-6 [&_img]:w-full [&_img]:block`}
       />
     </div>
   )
@@ -125,6 +112,23 @@ export default function Page(){
   const wordCount = form.konten.replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length
   const seoStatus = wordCount >= 900? '✅ SEO BAGUS' : wordCount >= 500? '⚠️ KURANG' : '❌ TIPIS BANGET'
 
+  const saveCursorBeforePicker = () => {
+    if(!editorRef.current) return
+    const sel = window.getSelection()
+    if(sel && sel.rangeCount>0){
+      const range = sel.getRangeAt(0)
+      if(editorRef.current.contains(range.commonAncestorContainer)){
+        savedRangeRef.current = range.cloneRange()
+        return
+      }
+    }
+    // kalo belum ada selection, taruh di akhir
+    const range = document.createRange()
+    range.selectNodeContents(editorRef.current)
+    range.collapse(false)
+    savedRangeRef.current = range
+  }
+
   const upload=async(field,file)=>{
     if(!file) return
     setUp(field)
@@ -138,25 +142,24 @@ export default function Page(){
       if(d.secure_url){
         const bigUrl = d.secure_url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/')
         if(field==='konten_img'){
-          // INSERT DI POSISI KURSOR
-          const imgTag = `<img src="${bigUrl}" alt="${form.judul}" class="rounded-2xl my-6 w-full h-auto shadow-lg" loading="lazy" /><p><br></p>`
+          // === LOGIKA GESER TULISAN ===
           if(editorRef.current){
             editorRef.current.focus()
-            // restore selection terakhir
+            const sel = window.getSelection()
+            sel.removeAllRanges()
             if(savedRangeRef.current){
-              const sel = window.getSelection()
-              sel.removeAllRanges()
               sel.addRange(savedRangeRef.current)
-            }
-            const success = document.execCommand('insertHTML', false, imgTag)
-            if(success){
-              setForm(f=>({...f, konten: editorRef.current.innerHTML}))
             } else {
-              // fallback
-              setForm(f=>({...f, konten: f.konten + imgTag}))
+              const r = document.createRange()
+              r.selectNodeContents(editorRef.current)
+              r.collapse(false)
+              sel.addRange(r)
             }
-          } else {
-            setForm(f=>({...f, konten: f.konten + imgTag}))
+            // ini yang bikin tulisan kegeser, bukan ketimpa
+            const html = `<br><img src="${bigUrl}" alt="${form.judul}" class="rounded-2xl my-6 w-full h-auto shadow-lg block" loading="lazy" /><br><br>`
+            document.execCommand('insertHTML', false, html)
+            // update state dari DOM asli
+            setForm(f=>({...f, konten: editorRef.current.innerHTML}))
           }
         } else {
           setForm(f=>({...f,[field]:bigUrl}))
@@ -169,18 +172,21 @@ export default function Page(){
   const resetForm=()=>{
     setForm({judul:'',slug:'',kategori:'',thumbnail:'',excerpt:'',konten:'',tags:'',is_published:false, meta_title:'', meta_description:'', focus_keyword:''})
     setEditId(null)
+    if(editorRef.current) editorRef.current.innerHTML = ''
+    savedRangeRef.current = null
   }
 
   const submit=async(e)=>{
     e.preventDefault()
     if(!form.judul ||!form.thumbnail) return alert('Judul & Thumbnail wajib!')
-    if(!form.konten) return alert('Konten wajib!')
+    const finalKonten = editorRef.current? editorRef.current.innerHTML : form.konten
+    if(!finalKonten) return alert('Konten wajib!')
     setLoading(true)
-    const cleanText = form.konten.replace(/<[^>]*>?/gm, '').substring(0,160)
+    const cleanText = finalKonten.replace(/<[^>]*>?/gm, '').substring(0,160)
     const finalSlug = form.slug || makeSlug(form.judul)
     const payload={
       judul: form.judul, slug: finalSlug, kategori: form.kategori,
-      thumbnail: form.thumbnail, excerpt: form.excerpt, konten: form.konten,
+      thumbnail: form.thumbnail, excerpt: form.excerpt, konten: finalKonten,
       tags: form.tags || "", is_published: form.is_published,
       meta_title: form.meta_title || form.judul,
       meta_description: form.meta_description || form.excerpt || cleanText,
@@ -237,13 +243,17 @@ export default function Page(){
 
         <div className={`border p-3 rounded-xl space-y-3 ${isDark?'bg-white/5 border-white/10':'bg-black/5 border-black/10'}`}>
           <div className="flex justify-between items-center">
-            <p className={`text-[11px] font-black ${isDark?'text-white':'text-black'}`}>📝 KONTEN - MODE {isDark?'GELAP':'TERANG'}</p>
-            <label className="bg-[#D4AF37]/20 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] font-black cursor-pointer border border-[#D4AF37]/30">
+            <p className={`text-[11px] font-black ${isDark?'text-white':'text-black'}`}>📝 KONTEN - KLIK DULU BARU + GAMBAR</p>
+            <label
+              onMouseDown={saveCursorBeforePicker}
+              onTouchStart={saveCursorBeforePicker}
+              className="bg-[#D4AF37]/20 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] font-black cursor-pointer border border-[#D4AF37]/30">
               {up==='konten_img'?'+ Uploading...':'+ Gambar'}
               <input type="file" accept="image/*" className="hidden" onChange={e=>upload('konten_img',e.target.files[0])}/>
             </label>
           </div>
-          <RichEditor value={form.konten} onChange={(html)=> setForm(f=>({...f, konten: html}))} isDark={isDark} editorRef={editorRef} savedRangeRef={savedRangeRef} />
+          <RichEditor isDark={isDark} editorRef={editorRef} savedRangeRef={savedRangeRef} onChange={(html)=> setForm(f=>({...f, konten: html}))} />
+          <p className="text-[9px] opacity-60">Cara: Tap di tengah tulisan (walaupun space kecil) -> langsung tap + Gambar -> gambar masuk & tulisan bawah kegeser.</p>
         </div>
 
         <div className={`grid grid-cols-1 gap-2 p-3 rounded-xl border ${isDark?'bg-black/30 border-white/10':'bg-black/5 border-black/10'}`}>
@@ -265,7 +275,7 @@ export default function Page(){
               <p className="text-[11px] text-zinc-500">{i.kategori} • {i.is_published?'✅':'⛔'} • {i.slug}</p>
             </div>
             <div className="flex flex-col gap-1.5">
-              <button onClick={()=>{setForm({judul:i.judul||'',slug:i.slug||'',kategori:i.kategori||'',thumbnail:i.thumbnail||'',excerpt:i.excerpt||'',konten:i.konten||'',tags:i.tags||'',is_published:!!i.is_published,meta_title:i.meta_title||'',meta_description:i.meta_description||'',focus_keyword:i.focus_keyword||''}); setEditId(i.id); window.scrollTo({top:0,behavior:'smooth'})}} className={`px-3 py-1.5 rounded-full text-[10px] font-black ${isDark?'bg-white/10 text-white':'bg-black/10 text-black'}`}>EDIT</button>
+              <button onClick={()=>{setForm({judul:i.judul||'',slug:i.slug||'',kategori:i.kategori||'',thumbnail:i.thumbnail||'',excerpt:i.excerpt||'',konten:i.konten||'',tags:i.tags||'',is_published:!!i.is_published,meta_title:i.meta_title||'',meta_description:i.meta_description||'',focus_keyword:i.focus_keyword||''}); setEditId(i.id); setTimeout(()=>{ if(editorRef.current) editorRef.current.innerHTML = i.konten||'' },100); window.scrollTo({top:0,behavior:'smooth'})}} className={`px-3 py-1.5 rounded-full text-[10px] font-black ${isDark?'bg-white/10 text-white':'bg-black/10 text-black'}`}>EDIT</button>
               <button onClick={async()=>{if(!confirm('Hapus?'))return; await fetch(`${API}/blogs/${i.id}/`,{method:'DELETE',headers:{Authorization:`Bearer ${tok()}`}});load()}} className="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-[10px] font-black">HAPUS</button>
             </div>
           </div>
