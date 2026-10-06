@@ -122,7 +122,6 @@ export default function Page(){
         return
       }
     }
-    // kalo belum ada selection, taruh di akhir
     const range = document.createRange()
     range.selectNodeContents(editorRef.current)
     range.collapse(false)
@@ -142,7 +141,6 @@ export default function Page(){
       if(d.secure_url){
         const bigUrl = d.secure_url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/')
         if(field==='konten_img'){
-          // === LOGIKA GESER TULISAN ===
           if(editorRef.current){
             editorRef.current.focus()
             const sel = window.getSelection()
@@ -155,10 +153,8 @@ export default function Page(){
               r.collapse(false)
               sel.addRange(r)
             }
-            // ini yang bikin tulisan kegeser, bukan ketimpa
             const html = `<br><img src="${bigUrl}" alt="${form.judul}" class="rounded-2xl my-6 w-full h-auto shadow-lg block" loading="lazy" /><br><br>`
             document.execCommand('insertHTML', false, html)
-            // update state dari DOM asli
             setForm(f=>({...f, konten: editorRef.current.innerHTML}))
           }
         } else {
@@ -243,7 +239,7 @@ export default function Page(){
 
         <div className={`border p-3 rounded-xl space-y-3 ${isDark?'bg-white/5 border-white/10':'bg-black/5 border-black/10'}`}>
           <div className="flex justify-between items-center">
-            <p className={`text-[11px] font-black ${isDark?'text-white':'text-black'}`}>📝 KONTEN - KLIK DULU BARU + GAMBAR</p>
+            <p className={`text-[11px] font-black ${isDark?'text-white':'text-black'}`}>📝 KONTEN - KLIK DULU BARU TAMBAH GAMBAR</p>
             <label
               onMouseDown={saveCursorBeforePicker}
               onTouchStart={saveCursorBeforePicker}
@@ -253,7 +249,7 @@ export default function Page(){
             </label>
           </div>
           <RichEditor isDark={isDark} editorRef={editorRef} savedRangeRef={savedRangeRef} onChange={(html)=> setForm(f=>({...f, konten: html}))} />
-          <p className="text-[9px] opacity-60">Cara: Tap di tengah tulisan (walaupun space kecil) -> langsung tap + Gambar -> gambar masuk & tulisan bawah kegeser.</p>
+          <p className="text-[9px] opacity-60">Cara: Tap di tengah tulisan dulu, baru tap Gambar. Tulisan bawah otomatis kegeser.</p>
         </div>
 
         <div className={`grid grid-cols-1 gap-2 p-3 rounded-xl border ${isDark?'bg-black/30 border-white/10':'bg-black/5 border-black/10'}`}>
