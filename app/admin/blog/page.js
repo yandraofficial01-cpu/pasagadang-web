@@ -6,21 +6,37 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.ap
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET
 
-// --- RICH EDITOR DENGAN MODE GELAP TERANG ---
-function RichEditor({value, onChange, isDark}){
-  const editorRef = useRef(null)
+// --- RICH EDITOR FIX - BISA INSERT DI KURSOR ---
+function RichEditor({value, onChange, isDark, editorRef, savedRangeRef}){
+
+  const saveSelection = () => {
+    const sel = window.getSelection()
+    if(sel && sel.rangeCount > 0){
+      const range = sel.getRangeAt(0)
+      if(editorRef.current && editorRef.current.contains(range.commonAncestorContainer)){
+        savedRangeRef.current = range.cloneRange()
+      }
+    }
+  }
 
   useEffect(()=>{
     if(editorRef.current && editorRef.current.innerHTML!== value){
-      if(!editorRef.current.innerHTML || (value && value.includes('<'))){
+      // jangan timpa kalo lagi fokus ngetik
+      if(document.activeElement!== editorRef.current){
         editorRef.current.innerHTML = value || ''
       }
     }
   },[value])
 
   const exec = (cmd, val=null)=>{
-    document.execCommand(cmd, false, val)
     editorRef.current.focus()
+    if(savedRangeRef.current){
+      const sel = window.getSelection()
+      sel.removeAllRanges()
+      sel.addRange(savedRangeRef.current)
+    }
+    document.execCommand(cmd, false, val)
+    saveSelection()
     onChange(editorRef.current.innerHTML)
   }
 
@@ -50,7 +66,13 @@ function RichEditor({value, onChange, isDark}){
       <div
         ref={editorRef}
         contentEditable
-        onInput={(e)=> onChange(e.currentTarget.innerHTML)}
+        onInput={(e)=> {
+          saveSelection()
+          onChange(e.currentTarget.innerHTML)
+        }}
+        onMouseUp={saveSelection}
+        onKeyUp={saveSelection}
+        onFocus={saveSelection}
         className={`min-h-[380px] p-4 text-[14px] outline-none leading-relaxed max-w-none
         ${isDark? 'text-white bg-[#0A0A0F]':'text-black bg-[#FFFBF0]'}
         [&_h2]:text-[18px] [&_h2]:font-black [&_h2]:text-[#D4AF37] [&_h2]:mt-6 [&_h2]:mb-3
@@ -75,6 +97,8 @@ export default function Page(){
   const [editId,setEditId]=useState(null)
   const [loading,setLoading]=useState(false)
   const [up,setUp]=useState('')
+  const editorRef = useRef(null)
+  const savedRangeRef = useRef(null)
   const tok=()=>document.cookie.match(/admin_token=([^;]+)/)?.[1]||''
 
   useEffect(()=>{
@@ -114,8 +138,26 @@ export default function Page(){
       if(d.secure_url){
         const bigUrl = d.secure_url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/')
         if(field==='konten_img'){
-          const tag = `<img src="${bigUrl}" alt="${form.judul}" class="rounded-2xl my-6 w-full h-auto shadow-lg" loading="lazy" /><p><br></p>`
-          setForm(f=>({...f, konten: f.konten + tag}))
+          // INSERT DI POSISI KURSOR
+          const imgTag = `<img src="${bigUrl}" alt="${form.judul}" class="rounded-2xl my-6 w-full h-auto shadow-lg" loading="lazy" /><p><br></p>`
+          if(editorRef.current){
+            editorRef.current.focus()
+            // restore selection terakhir
+            if(savedRangeRef.current){
+              const sel = window.getSelection()
+              sel.removeAllRanges()
+              sel.addRange(savedRangeRef.current)
+            }
+            const success = document.execCommand('insertHTML', false, imgTag)
+            if(success){
+              setForm(f=>({...f, konten: editorRef.current.innerHTML}))
+            } else {
+              // fallback
+              setForm(f=>({...f, konten: f.konten + imgTag}))
+            }
+          } else {
+            setForm(f=>({...f, konten: f.konten + imgTag}))
+          }
         } else {
           setForm(f=>({...f,[field]:bigUrl}))
         }
@@ -201,7 +243,7 @@ export default function Page(){
               <input type="file" accept="image/*" className="hidden" onChange={e=>upload('konten_img',e.target.files[0])}/>
             </label>
           </div>
-          <RichEditor value={form.konten} onChange={(html)=> setForm(f=>({...f, konten: html}))} isDark={isDark} />
+          <RichEditor value={form.konten} onChange={(html)=> setForm(f=>({...f, konten: html}))} isDark={isDark} editorRef={editorRef} savedRangeRef={savedRangeRef} />
         </div>
 
         <div className={`grid grid-cols-1 gap-2 p-3 rounded-xl border ${isDark?'bg-black/30 border-white/10':'bg-black/5 border-black/10'}`}>
@@ -234,4 +276,4 @@ export default function Page(){
   </AdminLayout>
   </div>
   )
-}
+  }
