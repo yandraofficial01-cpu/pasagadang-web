@@ -49,7 +49,7 @@ export default function Home(){
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
     if(!API) return
-    fetch(`${API}/properties/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{})
+    fetch(`${API}/properties/?is_published=true&limit=20`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{})
     fetch(`${API}/materials/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setMaterials(j.data||j.items||j||[])).catch(()=>{})
     fetch(`${API}/estetikas/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setEstetikas(j.data||j.items||j||[])).catch(()=>{})
     fetch(`${API}/blogs/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setBlogs(j.data||j.items||j||[])).catch(()=>{})
@@ -60,6 +60,19 @@ export default function Home(){
     setTheme(n); localStorage.setItem('theme',n)
   }
   const isDark = theme==='dark'
+
+  // --- LOGIKA SORTING BARU: TERJUAL PALING BELAKANG ---
+  const sortedProperties = [...properties].sort((a,b)=>{
+    const aBadge = (a.badge||'').toLowerCase()
+    const aStatus = (a.status_properti||'').toLowerCase()
+    const aSold = aBadge.includes('terjual') || aStatus.includes('terjual')
+    const bBadge = (b.badge||'').toLowerCase()
+    const bStatus = (b.status_properti||'').toLowerCase()
+    const bSold = bBadge.includes('terjual') || bStatus.includes('terjual')
+    if(aSold &&!bSold) return 1
+    if(!aSold && bSold) return -1
+    return 0
+  })
 
   const waLink = (p)=>{
     const raw = String(p.wa_number||'08979879518').replace(/[^0-9]/g,'')
@@ -147,7 +160,7 @@ export default function Home(){
           </div>
           <Link href="/properties" className="absolute top-[12px] left-1/2 -translate-x-1/2 w-[200px] z-20">
             <div className={`p-3.5 rounded-[20px] flex justify-between items-center border shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${isDark?'bg-white text-black border-white':'bg-white text-black border-black/5'}`}>
-              <div><div className="text-[10px] font-black opacity-50">01 • {properties.length} UNIT</div><div className="font-black text-[14px] mt-0.5">PROPERTI</div></div><div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-[12px]">→</div>
+              <div><div className="text-[10px] font-black opacity-50">01 • {sortedProperties.length} UNIT</div><div className="font-black text-[14px] mt-0.5">PROPERTI</div></div><div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
           <Link href="/blogs" className="absolute top-1/2 left-0 -translate-y-1/2 w-[140px] z-30">
@@ -168,12 +181,12 @@ export default function Home(){
         </div>
       </div>
 
-      <div className="max-w-[400px] mx-auto px-6 pb-20 space-y-8 mt-2">
+      <div className="max-w-[400px] mx-auto px-6 pb-10 space-y-8 mt-2">
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[16px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2">
             {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[260px] h-[380px] border rounded-[22px] animate-pulse ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
-            properties.map(p=>{
+            sortedProperties.map(p=>{
               const imgs = [p.thumbnail, p.foto_1, p.foto_2, p.foto_3, p.foto_4].filter(Boolean)
               const badgeRaw = (p.badge || '').toString()
               const isTerjual = badgeRaw.toLowerCase().includes('terjual') || (p.status_properti||'').toLowerCase().includes('terjual')
@@ -181,28 +194,24 @@ export default function Home(){
               <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
                 <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" onClick={()=>openZoom(imgs,0)}>
                   <img src={imgs[0]} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
-                  {/* HANYA BADGE API UNGU/MERAH - JUAL, KURANJI•SHM, FOTO COUNT DIHAPUS */}
                   {badgeRaw && (
                     <div className="absolute top-3 left-3 z-20">
-                      <div className={`text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg animate-pulse
-                        ${isTerjual? 'bg-gradient-to-r from-red-600 to-orange-600 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : 'bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]'}`}>
+                      <div className={`text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg ${isTerjual? 'bg-gradient-to-r from-red-600 to-orange-600 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : 'bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]'}`}>
                         🔥 {badgeRaw.toUpperCase()}
                       </div>
                     </div>
                   )}
+                  {isTerjual && <div className="absolute inset-0 bg-black/40 flex items-center justify-center"><span className="bg-red-600 text-white font-black px-4 py-1 rounded-full text-[12px] rotate-[-12deg] border-2 border-white">TERJUAL</span></div>}
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <div className="font-bold text-[14px] leading-tight line-clamp-2 min-h-[36px]">{p.judul}</div>
                   <div className="font-black text-[17px] mt-2" style={{color:COLORS.gold}}>Rp {Number(p.harga_cash||0).toLocaleString('id-ID')}</div>
-
-                  {/* LT LB KT KM DIBIKIN JELAS - BUKAN SINGKATAN LAGI */}
                   <div className={`grid grid-cols-2 gap-2 mt-3 text-[10px] p-2.5 rounded-xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}>
                     <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Luas Tanah</div><div className="font-black text-[12px] mt-0.5">{p.luas_tanah||0}m²</div></div>
                     <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Luas Bangunan</div><div className="font-black text-[12px] mt-0.5">{p.luas_bangunan||0}m²</div></div>
                     <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Tidur</div><div className="font-black text-[12px] mt-0.5">{p.kamar_tidur||0} Kamar</div></div>
                     <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Mandi</div><div className="font-black text-[12px] mt-0.5">{p.kamar_mandi||0} Kamar</div></div>
                   </div>
-
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <a href={waLink(p)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
                     <Link href={`/properties/${p.slug||p.id}`} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>DETAIL</Link>
@@ -264,6 +273,48 @@ export default function Home(){
           </div>
         </div>
       </div>
+
+      {/* --- FOOTER SEO PALING PENTING BUAT KEYWORD PADANG --- */}
+      <footer className={`${isDark?'bg-[#121214] border-white/10':'bg-black border-black/10'} border-t`}>
+        <div className="max-w-[400px] mx-auto px-6 py-10">
+          <div className="text-center mb-8">
+            <div className="flex font-black text-[22px] tracking-tight justify-center">
+              <span style={{color:'#B22222'}}>PA</span>
+              <span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGA</span>
+              <span style={{color:'#B22222'}}>DANG</span>
+            </div>
+            <p className="text-[11px] font-bold tracking-[0.2em] mt-2 text-zinc-400">Jual Properti / Rumah di Padang, Sumatera Barat</p>
+            <p className="text-[11px] mt-3 text-zinc-500 leading-relaxed">Mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini. Spesialis Rumah Gadang Modern & Roster Minimalis #1 di Padang.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6 text-[11px]">
+            <div>
+              <h4 className="font-black mb-3 text-[#D4AF37]">CARI DI PADANG</h4>
+              <ul className="space-y-2 text-zinc-400 font-bold">
+                <li><Link href="/properties?kecamatan=koto tangah" className="hover:text-white">Rumah di Koto Tangah</Link></li>
+                <li><Link href="/properties?kecamatan=kuranji" className="hover:text-white">Rumah di Kuranji</Link></li>
+                <li><Link href="/properties?kecamatan=lubuk begalung" className="hover:text-white">Rumah di Lubuk Begalung</Link></li>
+                <li><Link href="/properties?kecamatan=pauh" className="hover:text-white">Rumah di Pauh</Link></li>
+                <li><Link href="/properties?kecamatan=nanggalo" className="hover:text-white">Rumah di Nanggalo</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-black mb-3 text-[#D4AF37]">MATERIAL</h4>
+              <ul className="space-y-2 text-zinc-400 font-bold">
+                <li><Link href="/estetika" className="hover:text-white">Roster Minimalis</Link></li>
+                <li><Link href="/estetika" className="hover:text-white">Batu Alam & Granit</Link></li>
+                <li><Link href="/materials" className="hover:text-white">Semen & Besi</Link></li>
+                <li><Link href="/blogs" className="hover:text-white">Blog Properti Padang</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-white/10 text-center">
+            <p className="text-[10px] text-zinc-500">📍 Padang, Sumatera Barat | WA 0897-9879-518</p>
+            <p className="text-[9px] text-zinc-600 mt-2 tracking-widest">© 2026 PasaGadang.com - Jual Properti Rumah di Padang Sumatera Barat</p>
+          </div>
+        </div>
+      </footer>
 
       {zoomList.length>0 && (
         <div onClick={closeZoom} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-4">
