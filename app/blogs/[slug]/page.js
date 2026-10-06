@@ -20,20 +20,30 @@ function LogoPasagadang(){
   )
 }
 
-// FIX BRUTAL ANTI <div>&nbsp; & STYLE BOCOR
+// FIX FINAL - ANTI BOCOR + SESUAI LAYAR
 function brutalClean(html){
   if(!html) return ''
   let s = html
-  for(let i=0;i<3;i++){
+  for(let i=0;i<4;i++){
     s = s.replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&quot;/gi,'"').replace(/&#39;/gi,"'").replace(/&amp;/gi,'&')
   }
   s = s.replace(/&nbsp;/gi,' ')
 
   const imgs=[]
+  // 1. ambil dari tag <img src>
   s = s.replace(/<img[^>]*src=["']([^"']+)["'][^>]*>/gi, (_,src)=>{
-    const cleanSrc = src.split('"')[0].split(' ')[0]
+    const cleanSrc = src.split('"')[0].split("'")[0].split(' ')[0].trim()
+    if(!cleanSrc.includes('cloudinary')) return `__IMG_${imgs.length}__`
     imgs.push(cleanSrc)
     return `__IMG_${imgs.length-1}__`
+  })
+  // 2. ambil URL polos cloudinary yang jadi teks (kasus artikel lama lu)
+  s = s.replace(/https:\/\/res\.cloudinary\.com\/[^\s"'<>]+/gi, (url)=>{
+    let clean = url.split('"')[0].split("'")[0].split(' ')[0]
+    if(!/\.(jpg|jpeg|png|webp)/i.test(clean)) return ''
+    if(imgs.includes(clean)) return ''
+    imgs.push(clean)
+    return `\n__IMG_${imgs.length-1}__\n`
   })
 
   s = s.replace(/<\/?div[^>]*>/gi, '\n')
@@ -44,20 +54,22 @@ function brutalClean(html){
   s = s.replace(/radius:[^;"]*;?/gi, '')
   s = s.replace(/--tw-[^;"]*;?/gi, '')
   s = s.replace(/shadow:[^;"]*;?/gi, '')
+  s = s.replace(/<[^>]+>/g,'\n')
+  s = s.replace(/\*\*/g,'')
 
   let parts = s.split('\n').map(t=>t.trim()).filter(t=>t.length>2)
   let out = parts.map(p=>{
     if(p.startsWith('__IMG_')) return p
-    if(/<\/?(h2|h3|ul|ol|li|p|a|strong|b)/i.test(p)) return p
     return `<p>${p}</p>`
   }).join('\n')
 
   out = out.replace(/__IMG_(\d+)__/g, (_,i)=>{
     const src = imgs[Number(i)]
-    return `<img src="${src}" alt="blog pasagadang" style="width:100%;height:auto;object-fit:contain;border-radius:20px;margin:24px 0;display:block;background:#F5F5F0" loading="lazy" />`
+    if(!src) return ''
+    return `<img src="${src}" alt="blog pasagadang" style="width:100%;max-width:100%;height:auto;object-fit:contain;border-radius:20px;margin:24px 0;display:block;background:#F5F5F0" loading="lazy" />`
   })
-  out = out.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" style="color:#D4AF37;font-weight:900;text-decoration:underline;word-break:break-all">$1</a>')
   out = out.replace(/<p>\s*<\/p>/gi,'')
+  out = out.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" style="color:#D4AF37;font-weight:900;text-decoration:underline;word-break:break-all">$1</a>')
   return out
 }
 
@@ -89,7 +101,6 @@ export default function DetailBlog(){
   const themeBg = isDark? 'bg-[#0A0A0A] text-white' : 'bg-[#FFFBF0] text-[#111]'
   const muted = isDark? 'text-white/70' : 'text-black/70'
   const cardBg = isDark? 'bg-[#16161E] border-white/10' : 'bg-white border-black/10 shadow-[0_10px_40px_rgba(0,0,0,0.06)]'
-
   const hasNumberedList = useMemo(()=> (cleaned.match(/\b[1-5]\.\s/g)||[]).length >=2,[cleaned])
   const points = useMemo(()=>!hasNumberedList?[]:cleaned.split(/(?=\b[1-5]\.\s)/g),[cleaned, hasNumberedList])
 
@@ -102,17 +113,16 @@ export default function DetailBlog(){
       <style>{`
         html,body{max-width:100vw;overflow-x:hidden!important}
         strong,b{font-weight:900!important;color:${isDark?'#fff':'#111'}}
-       .blog-content p{margin-bottom:18px;line-height:1.9;font-size:16px}
-       .blog-content h2{font-size:22px;font-weight:900;margin:28px 0 14px;color:#D4AF37}
-       .blog-content img{width:100%!important;height:auto!important;object-fit:contain!important;border-radius:20px;margin:24px 0!important;background:#F5F5F0;display:block}
+      .blog-content p{margin-bottom:18px;line-height:1.9;font-size:16px;word-break:break-word;overflow-wrap:anywhere}
+      .blog-content h2{font-size:22px;font-weight:900;margin:28px 0 14px;color:#D4AF37}
+      .blog-content img{width:100%!important;max-width:100%!important;height:auto!important;object-fit:contain!important;border-radius:20px;margin:24px 0!important;background:#F5F5F0;display:block}
         @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
         @keyframes shine{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
         @keyframes bounce-slow{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-      .animate-float{animation:float 4s ease-in-out infinite}
-      .animate-float-delay{animation:float 4.5s ease-in-out infinite}
-      .animate-bounce-slow{animation:bounce-slow 2.5s ease-in-out infinite}
-      .shine-effect{position:absolute;top:0;left:0;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent);transform:translateX(-100%);pointer-events:none}
-      .group:hover.shine-effect{animation:shine 1s ease}
+     .animate-float{animation:float 4s ease-in-out infinite}
+     .animate-float-delay{animation:float 4.5s ease-in-out infinite}
+     .animate-bounce-slow{animation:bounce-slow 2.5s ease-in-out infinite}
+     .shine-effect{position:absolute;top:0;left:0;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent);transform:translateX(-100%);pointer-events:none;animation:shine 3s infinite}
       `}</style>
 
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-4 md:px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -139,11 +149,10 @@ export default function DetailBlog(){
         <div className="flex gap-2 mb-6 flex-wrap"><span className="bg-[#D4AF37] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">{b.kategori||'BLOG'}</span><span className={`text-[11px] ${muted} font-bold`}>👁️ {b.views||0} views • {b.created_at? new Date(b.created_at).toLocaleDateString('id-ID'):''}</span></div>
         <h1 className="text-[30px] md:text-[42px] font-black leading-[0.95] tracking-tight break-words">{b.judul}</h1>
         {b.excerpt && <p className={`mt-5 italic border-l-4 pl-4 text-[17px] leading-relaxed ${muted}`} style={{borderColor:'#D4AF37'}}>{b.excerpt}</p>}
-
         <div className="w-full mt-8 rounded-[28px] border overflow-hidden bg-[#F5F5F0] border-black/10"><img src={b.thumbnail} alt={b.judul} className="w-full h-auto object-contain block"/></div>
 
         {!hasNumberedList? (
-          <div className="mt-8 blog-content" dangerouslySetInnerHTML={{__html: cleaned}} />
+          <div className="mt-8 blog-content w-full max-w-full overflow-hidden" dangerouslySetInnerHTML={{__html: cleaned}} />
         ) : (
           <div className="mt-8 space-y-6">
             <div className={`text-[17px] leading-[1.9] break-words ${muted} blog-content`} dangerouslySetInnerHTML={{__html: points[0]}}/>
