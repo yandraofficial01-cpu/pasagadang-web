@@ -55,9 +55,19 @@ export default function BlogPage(){
   },[blogs])
 
   const filtered = useMemo(()=> blogs.filter(b=> (kat==='semua' || (b.kategori||'').toLowerCase()===kat.toLowerCase()) && (search==='' || b.judul.toLowerCase().includes(search.toLowerCase()))),[blogs,kat,search])
-  const groupedByCat = useMemo(()=>{ const g={}; blogs.forEach(b=>{ const k=b.kategori||'Lainnya'; if(!g[k]) g[k]=[]; g[k].push(b)}); return g },[blogs])
+
+  // GROUPED - SORT PALING BANYAK + MINIMAL 5
+  const groupedByCat = useMemo(()=>{
+    const g={};
+    blogs.forEach(b=>{ const k=b.kategori||'Lainnya'; if(!g[k]) g[k]=[]; g[k].push(b)})
+    const sorted = Object.entries(g).sort((a,b)=>b[1].length - a[1].length)
+    return Object.fromEntries(sorted)
+  },[blogs])
+
   const totalPages = Math.ceil(filtered.length / perPage) || 1
   const paginated = filtered.slice((page-1)*perPage, page*perPage)
+
+  const waGlobal = encodeURIComponent(`Halo Pasa Gadang 👋\nSaya baca blog di pasagadang.com/blogs\nMau tanya soal rumah 300 Jt-an di Padang yang aman & legal, bisa KPR Syariah`)
 
   if(loading) return <div className="min-h-screen w-screen flex flex-col gap-3 items-center justify-center bg-[#FFFBF0] text-black"><div className="w-10 h-10 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin"></div><p className="text-[10px] tracking-[0.4em] font-black animate-pulse">PASA GADANG</p></div>
 
@@ -72,10 +82,10 @@ export default function BlogPage(){
         html,body{max-width:100vw;overflow-x:hidden!important}
         *{min-width:0}
         img{max-width:100%}
-      .scrollbar-hide::-webkit-scrollbar{display:none}
-      .scrollbar-hide{scrollbar-width:none}
+     .scrollbar-hide::-webkit-scrollbar{display:none}
+     .scrollbar-hide{scrollbar-width:none}
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-      .anim{animation:fadeUp.5s ease both}
+     .anim{animation:fadeUp.5s ease both}
       `}</style>
 
       <nav className={`sticky top-0 z-50 w-full backdrop-blur-xl border-b px-4 md:px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -169,9 +179,10 @@ export default function BlogPage(){
             </div>
           </div>
 
-          {Object.entries(groupedByCat).slice(0,2).map(([catName, items])=>(
+          {/* FIX: TADI SLICE 0,2 JADI CUMA 2 - SEKARANG 5 KATEGORI MINIMAL */}
+          {Object.entries(groupedByCat).slice(0,5).map(([catName, items])=>(
             <div key={catName} className={`p-5 rounded-[20px] border ${cardBg}`}>
-              <h3 className={`font-black text-[12px] tracking-[0.2em] uppercase flex gap-2 items-center ${textMain}`}><span className="w-1 h-4 bg-[#D4AF37] rounded-full"></span>{catName}</h3>
+              <h3 className={`font-black text-[12px] tracking-[0.2em] uppercase flex gap-2 items-center ${textMain}`}><span className="w-1 h-4 bg-[#D4AF37] rounded-full"></span>{catName} <span className="opacity-40 text-[10px]">({items.length})</span></h3>
               <div className="mt-4 space-y-4">
                 {items.slice(0,3).map(b=>(
                   <Link key={b.id} href={`/blogs/${b.slug}`} className="flex gap-3 group">
@@ -196,7 +207,7 @@ export default function BlogPage(){
             <LogoPasagadang />
             <p className="text-[12px] leading-relaxed opacity-60 mt-4 max-w-[320px]">Platform properti asli Padang. Membantu kamu cari rumah Minang yang aman, legal, dan bisa cicil 300 Jt-an tanpa tertipu developer abal-abal.</p>
             <div className="flex gap-2 mt-5">
-              <a href="https://wa.me/628979879518" className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center font-black text-[12px]">WA</a>
+              <a href={`https://wa.me/628979879518?text=${waGlobal}`} target="_blank" className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center font-black text-[12px]">WA</a>
               <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[12px]">IG</a>
               <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[12px]">TT</a>
             </div>
@@ -229,7 +240,7 @@ export default function BlogPage(){
       </footer>
 
       <button onClick={()=>window.scrollTo({top:0, behavior:'smooth'})} className="fixed bottom-24 right-5 z-[90] w-11 h-11 rounded-full bg-black text-white flex items-center justify-center shadow-xl">↑</button>
-      <a href="https://wa.me/628979879518" target="_blank" className="fixed bottom-6 right-5 z-[90] w-[56px] h-[56px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.5)] border-[3px] border-white">W</a>
+      <a href={`https://wa.me/628979879518?text=${waGlobal}`} target="_blank" className="fixed bottom-6 right-5 z-[90] w-[56px] h-[56px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.5)] border-[3px] border-white">W</a>
     </main>
   )
     }
