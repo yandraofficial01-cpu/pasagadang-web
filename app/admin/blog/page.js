@@ -6,7 +6,41 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.ap
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET
 
+// CLEANER ANTI <div>&nbsp; & style bocor
+function cleanHTML(dirty){
+  if(!dirty) return ''
+  let s = dirty
+  // buang &nbsp; berantakan
+  s = s.replace(/&nbsp;/gi, ' ')
+  // ganti div jadi p biar gak numpuk
+  s = s.replace(/<div><br><\/div>/gi, '')
+  s = s.replace(/<div>\s*<\/div>/gi, '')
+  s = s.replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>')
+  // buang font, span yang gak perlu
+  s = s.replace(/<font[^>]*>/gi, '').replace(/<\/font>/gi, '')
+  s = s.replace(/<span[^>]*>/gi, '').replace(/<\/span>/gi, '')
+  // buang style berantakan tailwind
+  s = s.replace(/style="[^"]*"/gi, (m)=>{
+    // keep only if ada width 100% (gambar)
+    if(m.includes('width:100%')) return m
+    return ''
+  })
+  // buang class shadow-lg dll yang bikin --tw- bocor
+  s = s.replace(/class="[^"]*"/gi, (m)=>{
+    if(m.includes('rounded')) return '' // buang semua class, nanti di slug dirender ulang bersih
+    return ''
+  })
+  s = s.replace(/<p>\s*<\/p>/gi, '')
+  s = s.replace(/\n{3,}/g, '\n')
+  return s.trim()
+}
+
 function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
+  useEffect(()=>{
+    // INI KUNCI BIAR ENTER JADI <p> BUKAN <div>
+    document.execCommand('defaultParagraphSeparator', false, 'p')
+  },[])
+
   const saveSelection = () => {
     const sel = window.getSelection()
     if(sel && sel.rangeCount > 0 && editorRef.current){
@@ -68,7 +102,7 @@ function RichEditor({isDark, editorRef, savedRangeRef, onChange}){
         [&_p]:mb-3 [&_p]:leading-relaxed
         [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3
         [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3
-        [&_img]:rounded-2xl [&_img]:my-6 [&_img]:w-full [&_img]:block`}
+        [&_img]:rounded-2xl [&_img]:my-6 [&_img]:w-full [&_img]:block [&_img]:h-auto [&_img]:object-contain`}
       />
     </div>
   )
@@ -153,7 +187,8 @@ export default function Page(){
               r.collapse(false)
               sel.addRange(r)
             }
-            const html = `<br><img src="${bigUrl}" alt="${form.judul}" class="rounded-2xl my-6 w-full h-auto shadow-lg block" loading="lazy" /><br><br>`
+            // FIX: JANGAN PAKE class shadow-lg LAGI, PAKE STYLE BERSIH LANGSUNG
+            const html = `<p><br></p><img src="${bigUrl}" alt="${form.judul}" style="width:100%;height:auto;object-fit:contain;border-radius:20px;margin:24px 0;display:block;background:#F5F5F0" loading="lazy" /><p><br></p>`
             document.execCommand('insertHTML', false, html)
             setForm(f=>({...f, konten: editorRef.current.innerHTML}))
           }
@@ -175,9 +210,13 @@ export default function Page(){
   const submit=async(e)=>{
     e.preventDefault()
     if(!form.judul ||!form.thumbnail) return alert('Judul & Thumbnail wajib!')
-    const finalKonten = editorRef.current? editorRef.current.innerHTML : form.konten
-    if(!finalKonten) return alert('Konten wajib!')
+    const rawKonten = editorRef.current? editorRef.current.innerHTML : form.konten
+    if(!rawKonten) return alert('Konten wajib!')
     setLoading(true)
+
+    // INI YANG FIX - BERSIHIN DULU SEBELUM SAVE KE API
+    const finalKonten = cleanHTML(rawKonten)
+
     const cleanText = finalKonten.replace(/<[^>]*>?/gm, '').substring(0,160)
     const finalSlug = form.slug || makeSlug(form.judul)
     const payload={
@@ -282,4 +321,4 @@ export default function Page(){
   </AdminLayout>
   </div>
   )
-  }
+}
