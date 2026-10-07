@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 export default function PropertiesPage(){
   const [data,setData]=useState([])
+  const [isLoading,setIsLoading]=useState(true) // <- FIX 1: loading beneran
   const [zoomFotos,setZoomFotos]=useState([])
   const [zoomIdx,setZoomIdx]=useState(0)
   const [theme,setTheme]=useState('light')
@@ -18,7 +19,12 @@ export default function PropertiesPage(){
   useEffect(()=>{
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
-    fetch(`${API}/properties?is_published=true`).then(r=>r.json()).then(j=>setData(j.data||j||[]))
+    setIsLoading(true)
+    fetch(`${API}/properties?is_published=true`)
+     .then(r=>r.json())
+     .then(j=>setData(j.data||j||[]))
+     .catch(()=>{})
+     .finally(()=>setIsLoading(false)) // <- FIX 2: matiin loading abis fetch
   },[API])
 
   const toggleTheme = ()=>{
@@ -28,7 +34,6 @@ export default function PropertiesPage(){
 
   const getFotos=(p)=>[p.thumbnail,p.foto_1,p.foto_2,p.foto_3,p.foto_4,p.foto_5,p.foto_6,p.foto_7,p.foto_8].filter(Boolean)
 
-  // PARSER SINKRON SAMA SLUG - FIX KOMA
   const getMapData = (p)=>{
     if(!p?.fasilitas) return { mapUrl: null, mapImg: null, fasilitasBersih: '', list: [] }
     const m = p.fasilitas.match(/\[MAP:(.*?)\]/)
@@ -43,7 +48,7 @@ export default function PropertiesPage(){
 
   const filteredData = useMemo(()=>{
     return data.filter(p=>{
-      const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase())
+      const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase().trim())
       const status = (p.status_properti || p.status || 'Ready').toLowerCase()
       const matchStatus = filterStatus==='Semua' || status.includes(filterStatus.toLowerCase())
       return matchSearch && matchStatus
@@ -55,6 +60,19 @@ export default function PropertiesPage(){
     const wa62=raw.startsWith('0')?'62'+raw.slice(1):raw
     const text = encodeURIComponent(`Halo Pasa Gadang, saya mau tanya ${p.judul} di ${p.kecamatan} - LT ${p.luas_tanah}m² LB ${p.luas_bangunan}m² Rp ${Number(p.harga_cash||0).toLocaleString('id-ID')}\nLink: https://pasagadang-web.vercel.app/properties/${p.slug}`)
     return `https://wa.me/${wa62}?text=${text}`
+  }
+
+  // LOADING COMPONENT - PERSIS SCREENSHOT LU
+  if(isLoading){
+    return (
+      <main className={`min-h-screen flex flex-col items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
+        <div className="relative w-12 h-12 mb-4">
+          <div className="absolute inset-0 border-2 border-[#F5E6C8] rounded-full"></div>
+          <div className="absolute inset-0 border-2 border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+        </div>
+        <p className={`text-[12px] tracking-[0.4em] font-black ${isDark?'text-white':'text-[#333]'}`}>PASA GADANG</p>
+      </main>
+    )
   }
 
   return (
@@ -107,12 +125,32 @@ export default function PropertiesPage(){
 
             return (
               <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
-                <div className="h-[260px] relative cursor-pointer" onClick={()=>{setZoomFotos(fotos); setZoomIdx(0)}}>
+                <div className="h-[260px] relative cursor-pointer" onClick={()=>{if(!isTerjual){setZoomFotos(fotos); setZoomIdx(0)}}}>
                   <img src={fotos[0]} className="w-full h-full object-cover"/>
-                  {/* CUMA BADGE API UNGU/MERAH */}
-                  {badgeRaw && (
+
+                  {/* BADGE KECIL UNGU KALO BUKAN TERJUAL */}
+                  {badgeRaw &&!isTerjual && (
                     <div className="absolute top-4 left-4 z-20">
-                      <div className={`text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase border border-white shadow-lg animate-bounce ${isTerjual? 'bg-gradient-to-r from-red-600 to-orange-600 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : 'bg-gradient-to-r from-purple-600 to-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.8)]'}`}>🔥 {badgeRaw.toUpperCase()}</div>
+                      <div className="text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase border border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">🔥 {badgeRaw.toUpperCase()}</div>
+                    </div>
+                  )}
+
+                  {/* BADGE TERJUAL BULAT GEDE - PERSIS SCREENSHOT */}
+                  {isTerjual && (
+                    <div className="absolute inset-0 z-20">
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-[#D4AF37] blur-[25px] opacity-60 rounded-full scale-125"></div>
+                          <div className="relative w-[175px] h-[175px] rounded-full bg-[#CC0000] border-[6px] border-[#D4AF37] flex flex-col items-center justify-center rotate-[-15deg] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+                            <div className="absolute inset-[8px] rounded-full border border-dashed border-white/60"></div>
+                            <div className="text-[#FFEB7F] text-[11px] font-black tracking-[0.2em]">★ TERJUAL ★</div>
+                            <div className="text-white text-[28px] font-black tracking-tight leading-none mt-1">TERJUAL</div>
+                            <div className="w-[70%] h-[2.5px] bg-[#D4AF37] my-1.5"></div>
+                            <div className="text-[#FFEB7F] text-[9px] font-black tracking-[0.35em]">PASA GADANG</div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -135,7 +173,6 @@ export default function PropertiesPage(){
                     </div>
                   ) : null}
 
-                  {/* MAP TAMPIL DI LIST - FOTO CROP MANUAL SAMA KAYAK SLUG */}
                   {mapData.mapImg && (
                     <div className="mt-3 rounded-[16px] overflow-hidden border-2 border-[#D4AF37]/30">
                       <a href={realMapLink} target="_blank" className="block relative group">
@@ -160,7 +197,7 @@ export default function PropertiesPage(){
           })}
         </div>
 
-        {filteredData.length===0 && (
+        {filteredData.length===0 &&!isLoading && (
           <div className="text-center py-20 opacity-50">
             <p className="text-[40px]">🏠</p>
             <p className="font-black mt-3">Gak ada properti {filterStatus} yang cocok "{search}"</p>
@@ -186,4 +223,4 @@ export default function PropertiesPage(){
       )}
     </main>
   )
-  }
+    }
