@@ -1,38 +1,73 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0B0B0F;
-  --color-foreground: #E5E5E5;
+  --color-background: #FFFBF0;
+  --color-foreground: #0B0B0F;
   --color-gold: #D4AF37;
-  --font-sans: 'Poppins', sans-serif;
-  --font-serif: 'Playfair Display', serif;
+  --color-gold-deep: #A68A2A;
+  --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), 'Fraunces', serif;
+}
+
+/* FONT UTILITY - Biar tajam */
+.font-jakarta { 
+  font-family: var(--font-jakarta); 
+  font-feature-settings: 'ss01' 1, 'cv11' 1;
+  letter-spacing: -0.01em;
+}
+.font-fraunces { 
+  font-family: var(--font-fraunces); 
+  letter-spacing: -0.02em;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: #0B0B0F;
-  color: #E5E5E5;
-  font-family: 'Poppins', sans-serif;
+  background: #FFFBF0;
+  color: #0B0B0F;
+  font-family: var(--font-jakarta);
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 h1, h2, h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-fraunces);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
 }
 
-.gold-text { color: #D4AF37; }
+.gold-text { 
+  color: var(--color-gold-deep);
+  font-weight: 800;
+}
 
 .btn-gold {
-  background: linear-gradient(to right, #ca8a04, #fbbf24);
+  background: linear-gradient(to right, #A68A2A, #D4AF37);
   color: black;
-  font-weight: 700;
+  font-family: var(--font-jakarta);
+  font-weight: 800;
+  letter-spacing: 0.02em;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 9999px;
   transition: all 300ms;
 }
-.btn-gold:hover { transform: scale(1.05); }
+.btn-gold:hover { transform: scale(1.02); }
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in { animation: fadeInUp 0.8s ease-out forwards; }
+
+/* SCROLLBAR HALUS */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 99px; }
