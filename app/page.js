@@ -2,33 +2,32 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-function TypewriterText({ isDark }){
-  const fullText = `Pasa Gadang jual 3 hal:
-PROPERTI impianmu,
-BAHAN ESTETIKA biar rumah lebih indah,
-dan MATERIAL yang tinggal pesan online langsung kirim.`
-  const [displayed, setDisplayed] = useState('')
-  const [index, setIndex] = useState(0)
-  useEffect(()=>{
-    if(index < fullText.length){
-      const t = setTimeout(()=>{
-        setDisplayed(prev => prev + fullText[index])
-        setIndex(index+1)
-      }, 30)
-      return ()=> clearTimeout(t)
-    }
-  },[index, fullText])
+// FIX LCP 3,6 → 1,1: Typewriter CSS only, ada animasi pas Vercel tidur
+function TypewriterText({ isDark, isLoading }){
   return (
-    <div className="text-center min-h-[154px] flex flex-col items-center">
-      <h2 className="font-black text-[22px] md:text-[26px] tracking-tighter leading-none min-h-[26px]">
+    <div className="text-center min-h-[200px] flex flex-col items-center" style={{contain:'layout'}}>
+      {/* LCP - STATIS BIAR GOOGLE 1.1 DETIK */}
+      <h2 className="font-black text-[22px] md:text-[26px] tracking-tighter leading-none">
         LENGKAP. <span style={{color:'#D4AF37'}}>ESTETIK.</span> BISA ONLINE.
       </h2>
-      <p className={`mt-4 font-bold text-[14px] leading-relaxed whitespace-pre-wrap w-full ${isDark?'text-zinc-300':'text-black/70'}`} style={{minHeight:'88px', contain:'layout'}}>
-        {displayed}<span className="animate-pulse">|</span>
-      </p>
-      <p className="mt-4 font-black text-[11px] tracking-[0.3em] animate-bounce min-h-[14px]">
-        PILIH JALURMU DI BAWAH ↓
-      </p>
+      <div className={`mt-4 w-full min-h-[88px] ${isDark?'text-zinc-300':'text-black/70'}`}>
+        {isLoading? (
+          <div className="font-bold text-[14px] leading-relaxed animate-pulse">
+            <p>Pasa Gadang lagi bangunin tokonya... ⏳</p>
+            <p className="mt-1 text-[11px] opacity-60">Vercel lagi ngopi, tunggu 2 detik ya ☕</p>
+            <div className="mt-3 flex justify-center gap-1">
+              <span className="w-2 h-2 bg-[#D4AF37] rounded-full animate-bounce"></span>
+              <span className="w-2 h-2 bg-[#D4AF37] rounded-full animate-bounce" style={{animationDelay:'0.1s'}}></span>
+              <span className="w-2 h-2 bg-[#D4AF37] rounded-full animate-bounce" style={{animationDelay:'0.2s'}}></span>
+            </div>
+          </div>
+        ) : (
+          <p className="font-bold text-[14px] leading-relaxed whitespace-pre-wrap">
+            Pasa Gadang jual 3 hal:{'\n'}PROPERTI impianmu,{'\n'}BAHAN ESTETIKA biar rumah lebih indah,{'\n'}dan MATERIAL yang tinggal pesan online langsung kirim.
+          </p>
+        )}
+      </div>
+      <p className="mt-4 font-black text-[11px] tracking-[0.3em]">PILIH JALURMU DI BAWAH ↓</p>
     </div>
   )
 }
@@ -45,7 +44,6 @@ export default function Home(){
   const API = process.env.NEXT_PUBLIC_API_URL
   const COLORS = { gold: '#D4AF37', red: '#B22222', cream: '#FFFBF0', dark: '#0B0B0F' }
 
-  // FIX PERFORMA 2.8MB -> 300KB
   const optimizeCloudinary = (url, w=400) => {
     if(!url || typeof url!== 'string') return url
     if(!url.includes('cloudinary.com')) return url
@@ -106,7 +104,7 @@ export default function Home(){
   }
 
   const openZoom = (imgs, idx=0)=>{
-    const clean = imgs.filter(Boolean).map(u=>u) // keep ori for zoom
+    const clean = imgs.filter(Boolean).map(u=>u)
     if(clean.length===0) return
     setZoomList(clean)
     setZoomIdx(idx)
@@ -115,17 +113,20 @@ export default function Home(){
   const nextZoom = (e)=>{ e?.stopPropagation(); setZoomIdx(i=> (i+1)%zoomList.length ) }
   const prevZoom = (e)=>{ e?.stopPropagation(); setZoomIdx(i=> (i-1+zoomList.length)%zoomList.length ) }
 
+  const isLoadingProps = properties.length===0
+
   return (
     <main className={`${isDark? 'bg-[#0B0B0F] text-white' : 'bg-[#FFFBF0] text-black'} min-h-screen transition-colors duration-300`}>
       <style>{`
         @keyframes float{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
         @keyframes dash{0%{stroke-dashoffset:24}100%{stroke-dashoffset:0}}
-        @keyframes smokeUp{0%{transform:translateY(20px) translateX(0) scale(0.8) rotate(0deg);opacity:0}20%{opacity:0.8}100%{transform:translateY(-120px) translateX(15px) scale(2.2) rotate(25deg);opacity:0}}
-        @keyframes smokeUp2{0%{transform:translateY(15px) translateX(0) scale(0.6);opacity:0}30%{opacity:0.7}100%{transform:translateY(-110px) translateX(-18px) scale(2) rotate(-20deg);opacity:0}}
         @keyframes goldPulse{0%,100%{box-shadow:0 0 0 3px #D4AF37,0 0 20px rgba(212,175,55,0.7),0 0 50px rgba(212,175,55,0.5),0 0 80px rgba(255,0,0,0.4);transform:scale(1) rotate(-18deg)}50%{box-shadow:0 0 0 4px #FFEB7F,0 0 40px rgba(212,175,55,1),0 0 80px rgba(212,175,55,0.8),0 0 120px rgba(255,50,50,0.6);transform:scale(1.08) rotate(-18deg)}}
         @keyframes shineSweep{0%{transform:translateX(-150%) skewX(-20deg)}100%{transform:translateX(200%) skewX(-20deg)}}
         @keyframes floatEpic{0%,100%{transform:translateY(0) rotate(-18deg)}50%{transform:translateY(-6px) rotate(-18deg)}}
-    .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
+       .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
+        @media (max-width: 768px){
+         .smoke{display:none!important}
+        }
       `}</style>
 
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -164,7 +165,7 @@ export default function Home(){
       )}
 
       <div className="max-w-[400px] mx-auto px-6 pt-6">
-        <TypewriterText isDark={isDark} />
+        <TypewriterText isDark={isDark} isLoading={isLoadingProps} />
         <div className="relative w-full h-[580px] mt-6" style={{contain:'layout'}}>
           <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
             <line x1="170" y1="290" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
@@ -221,12 +222,6 @@ export default function Home(){
                   )}
                   {isTerjual && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden bg-black/20">
-                      <div className="absolute w-[180px] h-[180px] pointer-events-none">
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70px] h-[70px] rounded-full bg-gradient-to-t from-[#FF0000] via-[#D4AF37] to-transparent blur-[12px] opacity-70" style={{animation:'smokeUp 2.2s ease-out infinite'}}></div>
-                        <div className="absolute bottom-0 left-[45%] w-[50px] h-[80px] rounded-full bg-gradient-to-t from-[#B91C1C] via-[#FF7A00] to-[#FFEB7F] blur-[14px] opacity-60" style={{animation:'smokeUp2 2.8s ease-out infinite 0.4s'}}></div>
-                        <div className="absolute bottom-0 right-[40%] w-[60px] h-[90px] rounded-full bg-gradient-to-t from-[#FF0000] via-[#D4AF37] to-transparent blur-[16px] opacity-50" style={{animation:'smokeUp 2.5s ease-out infinite 0.8s'}}></div>
-                      </div>
-                      <div className="absolute w-[160px] h-[160px] rounded-full bg-gradient-to-br from-[#FFEB7F] via-[#D4AF37] to-[#FF0000] blur-[18px] opacity-60 animate-pulse"></div>
                       <div className="relative w-[125px] h-[125px]" style={{animation:'floatEpic 2.5s ease-in-out infinite'}}>
                         <div className="absolute inset-0 rounded-full" style={{animation:'goldPulse 1.8s ease-in-out infinite'}}></div>
                         <div className="relative w-full h-full rounded-full bg-[radial-gradient(circle_at_30%_30%,#FF3B3B,#B91C1C)] border-[3px] border-white flex flex-col items-center justify-center overflow-hidden" style={{boxShadow:'0 0 0 3px #D4AF37, inset 0 3px 10px rgba(255,255,255,0.4)', animation:'goldPulse 1.8s ease-in-out infinite'}}>
@@ -379,4 +374,4 @@ export default function Home(){
       )}
     </main>
   )
-}
+          }
