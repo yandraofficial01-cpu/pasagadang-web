@@ -45,6 +45,14 @@ export default function Home(){
   const API = process.env.NEXT_PUBLIC_API_URL
   const COLORS = { gold: '#D4AF37', red: '#B22222', cream: '#FFFBF0', dark: '#0B0B0F' }
 
+  // FIX PERFORMA 2.8MB -> 300KB
+  const optimizeCloudinary = (url, w=400) => {
+    if(!url || typeof url!== 'string') return url
+    if(!url.includes('cloudinary.com')) return url
+    if(url.includes('f_auto')) return url
+    return url.replace('/image/upload/', `/image/upload/f_auto,q_auto,w_${w},c_fill,dpr_auto/`)
+  }
+
   useEffect(()=>{
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
@@ -98,7 +106,7 @@ export default function Home(){
   }
 
   const openZoom = (imgs, idx=0)=>{
-    const clean = imgs.filter(Boolean)
+    const clean = imgs.filter(Boolean).map(u=>u) // keep ori for zoom
     if(clean.length===0) return
     setZoomList(clean)
     setZoomIdx(idx)
@@ -117,7 +125,7 @@ export default function Home(){
         @keyframes goldPulse{0%,100%{box-shadow:0 0 0 3px #D4AF37,0 0 20px rgba(212,175,55,0.7),0 0 50px rgba(212,175,55,0.5),0 0 80px rgba(255,0,0,0.4);transform:scale(1) rotate(-18deg)}50%{box-shadow:0 0 0 4px #FFEB7F,0 0 40px rgba(212,175,55,1),0 0 80px rgba(212,175,55,0.8),0 0 120px rgba(255,50,50,0.6);transform:scale(1.08) rotate(-18deg)}}
         @keyframes shineSweep{0%{transform:translateX(-150%) skewX(-20deg)}100%{transform:translateX(200%) skewX(-20deg)}}
         @keyframes floatEpic{0%,100%{transform:translateY(0) rotate(-18deg)}50%{transform:translateY(-6px) rotate(-18deg)}}
-     .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
+    .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
       `}</style>
 
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -195,14 +203,15 @@ export default function Home(){
           <div className="flex justify-between items-center"><h2 className="font-black text-[16px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
           <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2 min-h-[422px]" style={{contain:'layout'}}>
             {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[270px] max-w-[270px] h-[422px] border rounded-[24px] animate-pulse shrink-0 ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
-            sortedProperties.map(p=>{
+            sortedProperties.map((p, idx)=>{
               const imgs = [p.thumbnail, p.foto_1, p.foto_2, p.foto_3, p.foto_4].filter(Boolean)
               const badgeRaw = (p.badge || '').toString()
               const isTerjual = badgeRaw.toLowerCase().includes('terjual') || (p.status_properti||'').toLowerCase().includes('terjual')
+              const isLCP = idx===0
               return(
               <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
                 <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" style={{aspectRatio:'270/210'}} onClick={()=>openZoom(imgs,0)}>
-                  <img src={imgs[0]} width="270" height="210" loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
+                  <img src={optimizeCloudinary(imgs[0], isLCP? 540 : 300)} width="270" height="210" loading={isLCP?"eager":"lazy"} fetchPriority={isLCP?"high":"low"} decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
                   {badgeRaw &&!isTerjual && (
                     <div className="absolute top-3 left-3 z-20">
                       <div className="text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">
@@ -263,11 +272,11 @@ export default function Home(){
               <div key={e.id} className={`min-w-[280px] max-w-[280px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
                 <div className="h-[220px] w-full flex overflow-hidden cursor-zoom-in" style={{aspectRatio:'280/220'}} onClick={()=>openZoom(allImgs,0)}>
                   <div className="w-1/2 h-full relative overflow-hidden bg-[#FAF7F0] border-r border-black/5">
-                    <img src={bahanImg} width="140" height="220" loading="lazy" decoding="async" alt="bahan" className="w-full h-full object-cover object-center"/>
+                    <img src={optimizeCloudinary(bahanImg, 280)} width="140" height="220" loading="lazy" decoding="async" alt="bahan" className="w-full h-full object-cover object-center"/>
                     <span className="absolute bottom-2.5 left-2.5 bg-black text-white text-[8px] font-black px-2.5 py-1 rounded-full">BAHAN</span>
                   </div>
                   <div className="w-1/2 h-full relative overflow-hidden bg-[#111]">
-                    <img src={jadiImg} width="140" height="220" loading="lazy" decoding="async" alt="terpasang" className="w-full h-full object-cover object-center"/>
+                    <img src={optimizeCloudinary(jadiImg, 280)} width="140" height="220" loading="lazy" decoding="async" alt="terpasang" className="w-full h-full object-cover object-center"/>
                     <span className="absolute bottom-2.5 left-2.5 bg-[#D4AF37] text-black text-[8px] font-black px-2.5 py-1 rounded-full">TERPASANG</span>
                     <span className="absolute top-2.5 right-2.5 bg-black/70 text-white text-[8px] px-2 py-1 rounded-full">🔍 {allImgs.length}</span>
                   </div>
@@ -294,7 +303,7 @@ export default function Home(){
               return(
               <div key={m.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', contain:'layout'}}>
                 <div className="h-[210px] bg-white relative flex items-center justify-center p-4 cursor-zoom-in" style={{aspectRatio:'270/210'}} onClick={()=>openZoom(imgs,0)}>
-                  <img src={imgs[0]} width="270" height="210" loading="lazy" decoding="async" alt={m.nama} className="w-full h-full object-contain"/>
+                  <img src={optimizeCloudinary(imgs[0], 400)} width="270" height="210" loading="lazy" decoding="async" alt={m.nama} className="w-full h-full object-contain"/>
                   <div className="absolute top-3 left-3 bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full">{m.kategori?.toUpperCase()} • {m.brand?.toUpperCase()}</div>
                   <div className="absolute top-3 right-3 bg-black/60 text-white text-[9px] px-2 py-1 rounded-full">🔍 {imgs.length}</div>
                 </div>
