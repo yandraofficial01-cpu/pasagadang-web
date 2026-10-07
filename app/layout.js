@@ -1,4 +1,20 @@
 import "./globals.css";
+import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google'
+
+// FONT TAJAM - Ini yang bikin tulisan lu premium kaya aplikasi bank
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['500','600','700','800','900'],
+  variable: '--font-jakarta',
+  display: 'swap',
+})
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['700','800','900'],
+  variable: '--font-fraunces',
+  display: 'swap',
+})
 
 export const metadata = {
   title: "Jual Properti / Rumah di Padang, Sumatera Barat",
@@ -33,8 +49,16 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id">
-      <body className="antialiased">{children}</body>
+    <html lang="id" className={`${jakarta.variable} ${fraunces.variable} antialiased`}>
+      <body 
+        className="font-jakarta antialiased bg-[#FFFBF0] text-black 
+        [text-rendering:optimizeLegibility] 
+        [-webkit-font-smoothing:antialiased] 
+        [-moz-osx-font-smoothing:grayscale]
+        [font-feature-settings:'ss01','ss02','cv01']"
+      >
+        {children}
+      </body>
     </html>
   );
 }
