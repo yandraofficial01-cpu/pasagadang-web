@@ -2,40 +2,28 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-function TypewriterText({ isDark, isLoading }){
+function TypewriterText({ isDark }){
   return (
-    <div className="text-center min-h-[210px] flex flex-col items-center" style={{contain:'layout'}}>
+    <div className="text-center min-h-[200px] flex flex-col items-center" style={{contain:'layout'}}>
       <h2 className="font-black text-[22px] md:text-[26px] tracking-tighter leading-none">
         LENGKAP. <span style={{color:'#D4AF37'}}>ESTETIK.</span> BISA ONLINE.
       </h2>
-      <div className={`mt-4 w-full min-h-[100px] ${isDark?'text-zinc-300':'text-black/70'}`}>
-        {isLoading? (
-          <div className="font-bold text-[14px] leading-relaxed">
-            <p className="animate-pulse">Pasa Gadang lagi bangunin tokonya... ⏳</p>
-            <p className="mt-1 text-[11px] opacity-60">Vercel lagi ngopi, tunggu 2 detik ya ☕</p>
-            <div className="mt-3 flex justify-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-[#D4AF37] rounded-full animate-bounce"></span>
-              <span className="w-2.5 h-2.5 bg-[#D4AF37] rounded-full animate-bounce [animation-delay:0.15s]"></span>
-              <span className="w-2.5 h-2.5 bg-[#D4AF37] rounded-full animate-bounce [animation-delay:0.3s]"></span>
-            </div>
-          </div>
-        ) : (
-          <div className="font-bold text-[14px] leading-relaxed">
-            <p className="t-line" style={{"--d":"0s"}}>Pasa Gadang jual 3 hal:</p>
-            <p className="t-line" style={{"--d":"0.6s"}}>PROPERTI impianmu,</p>
-            <p className="t-line" style={{"--d":"1.2s"}}>BAHAN ESTETIKA biar rumah lebih indah,</p>
-            <p className="t-line" style={{"--d":"1.8s"}}>dan MATERIAL yang tinggal pesan online langsung kirim.<span className="animate-pulse">|</span></p>
-          </div>
-        )}
+      <div className={`mt-4 w-full font-bold text-[14px] leading-relaxed flex flex-col items-center ${isDark?'text-zinc-300':'text-black/70'}`}>
+        <p className="t-line" style={{"--d":"0s"}}>Pasa Gadang jual 3 hal:</p>
+        <p className="t-line" style={{"--d":"0.7s"}}>PROPERTI impianmu,</p>
+        <p className="t-line" style={{"--d":"1.4s"}}>BAHAN ESTETIKA biar rumah indah,</p>
+        <p className="t-line" style={{"--d":"2.1s"}}>dan MATERIAL pesan online langsung kirim.<span className="cursor">|</span></p>
       </div>
       <p className="mt-4 font-black text-[11px] tracking-[0.3em]">PILIH JALURMU DI BAWAH ↓</p>
       <style>{`
-       .t-line{
-          overflow:hidden; white-space:nowrap; width:0; margin:0 auto;
-          animation: ketik 0.6s steps(30,end) forwards;
+      .t-line{
+          clip-path: inset(0 100% 0 0);
+          animation: reveal 0.8s steps(30,end) forwards;
           animation-delay: var(--d);
         }
-        @keyframes ketik{ from{width:0} to{width:100%} }
+        @keyframes reveal{ to{ clip-path: inset(0 0% 0 0); } }
+       .cursor{ animation: blink 1s infinite; }
+        @keyframes blink{ 0%,50%{opacity:1} 51%,100%{opacity:0} }
       `}</style>
     </div>
   )
@@ -50,7 +38,6 @@ export default function Home(){
   const [blogs, setBlogs] = useState([])
   const [zoomList, setZoomList] = useState([])
   const [zoomIdx, setZoomIdx] = useState(0)
-  const [isInitialLoading, setIsInitialLoading] = useState(true)
   const API = process.env.NEXT_PUBLIC_API_URL
   const COLORS = { gold: '#D4AF37', red: '#B22222', cream: '#FFFBF0', dark: '#0B0B0F' }
 
@@ -64,14 +51,11 @@ export default function Home(){
   useEffect(()=>{
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
-    if(!API){ setIsInitialLoading(false); return }
-
-    Promise.all([
-      fetch(`${API}/properties/?is_published=true&limit=20`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{}),
-      fetch(`${API}/materials/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setMaterials(j.data||j.items||j||[])).catch(()=>{}),
-      fetch(`${API}/estetikas/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setEstetikas(j.data||j.items||j||[])).catch(()=>{}),
-      fetch(`${API}/blogs/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setBlogs(j.data||j.items||j||[])).catch(()=>{})
-    ]).finally(()=> setTimeout(()=> setIsInitialLoading(false), 1300))
+    if(!API) return
+    fetch(`${API}/properties/?is_published=true&limit=20`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{})
+    fetch(`${API}/materials/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setMaterials(j.data||j.items||j||[])).catch(()=>{})
+    fetch(`${API}/estetikas/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setEstetikas(j.data||j.items||j||[])).catch(()=>{})
+    fetch(`${API}/blogs/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setBlogs(j.data||j.items||j||[])).catch(()=>{})
   },[API])
 
   const toggleTheme = ()=>{
@@ -134,7 +118,7 @@ export default function Home(){
         @keyframes goldPulse{0%,100%{box-shadow:0 0 0 3px #D4AF37,0 0 20px rgba(212,175,55,0.7),0 0 50px rgba(212,175,55,0.5),0 0 80px rgba(255,0,0,0.4);transform:scale(1) rotate(-18deg)}50%{box-shadow:0 0 0 4px #FFEB7F,0 0 40px rgba(212,175,55,1),0 0 80px rgba(212,175,55,0.8),0 0 120px rgba(255,50,50,0.6);transform:scale(1.08) rotate(-18deg)}}
         @keyframes shineSweep{0%{transform:translateX(-150%) skewX(-20deg)}100%{transform:translateX(200%) skewX(-20deg)}}
         @keyframes floatEpic{0%,100%{transform:translateY(0) rotate(-18deg)}50%{transform:translateY(-6px) rotate(-18deg)}}
-      .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
+     .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
       `}</style>
 
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -173,7 +157,7 @@ export default function Home(){
       )}
 
       <div className="max-w-[400px] mx-auto px-6 pt-6">
-        <TypewriterText isDark={isDark} isLoading={isInitialLoading} />
+        <TypewriterText isDark={isDark} />
         <div className="relative w-full h-[580px] mt-6" style={{contain:'layout'}}>
           <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
             <line x1="170" y1="290" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
@@ -382,4 +366,4 @@ export default function Home(){
       )}
     </main>
   )
-          }
+    }
