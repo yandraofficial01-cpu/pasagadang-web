@@ -19,14 +19,14 @@ dan MATERIAL yang tinggal pesan online langsung kirim.`
     }
   },[index, fullText])
   return (
-    <div className="text-center">
-      <h2 className="font-black text-[22px] md:text-[26px] tracking-tighter leading-none">
+    <div className="text-center min-h-[154px] flex flex-col items-center">
+      <h2 className="font-black text-[22px] md:text-[26px] tracking-tighter leading-none min-h-[26px]">
         LENGKAP. <span style={{color:'#D4AF37'}}>ESTETIK.</span> BISA ONLINE.
       </h2>
-      <p className={`mt-4 font-bold text-[14px] leading-relaxed whitespace-pre-wrap min-h-[72px] ${isDark?'text-zinc-300':'text-black/70'}`}>
+      <p className={`mt-4 font-bold text-[14px] leading-relaxed whitespace-pre-wrap w-full ${isDark?'text-zinc-300':'text-black/70'}`} style={{minHeight:'88px', contain:'layout'}}>
         {displayed}<span className="animate-pulse">|</span>
       </p>
-      <p className="mt-4 font-black text-[11px] tracking-[0.3em] animate-bounce">
+      <p className="mt-4 font-black text-[11px] tracking-[0.3em] animate-bounce min-h-[14px]">
         PILIH JALURMU DI BAWAH ↓
       </p>
     </div>
@@ -117,7 +117,7 @@ export default function Home(){
         @keyframes goldPulse{0%,100%{box-shadow:0 0 0 3px #D4AF37,0 0 20px rgba(212,175,55,0.7),0 0 50px rgba(212,175,55,0.5),0 0 80px rgba(255,0,0,0.4);transform:scale(1) rotate(-18deg)}50%{box-shadow:0 0 0 4px #FFEB7F,0 0 40px rgba(212,175,55,1),0 0 80px rgba(212,175,55,0.8),0 0 120px rgba(255,50,50,0.6);transform:scale(1.08) rotate(-18deg)}}
         @keyframes shineSweep{0%{transform:translateX(-150%) skewX(-20deg)}100%{transform:translateX(200%) skewX(-20deg)}}
         @keyframes floatEpic{0%,100%{transform:translateY(0) rotate(-18deg)}50%{transform:translateY(-6px) rotate(-18deg)}}
-      .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
+     .scroll-hide::-webkit-scrollbar{display:none}.scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
       `}</style>
 
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -157,7 +157,7 @@ export default function Home(){
 
       <div className="max-w-[400px] mx-auto px-6 pt-6">
         <TypewriterText isDark={isDark} />
-        <div className="relative w-full h-[580px] mt-6">
+        <div className="relative w-full h-[580px] mt-6" style={{contain:'layout'}}>
           <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
             <line x1="170" y1="290" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
             <line x1="170" y1="290" x2="170" y2="495" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.3s'}}/>
@@ -193,16 +193,16 @@ export default function Home(){
       <div className="max-w-[400px] mx-auto px-6 pb-10 space-y-8 mt-2">
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[16px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2">
-            {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[260px] h-[380px] border rounded-[22px] animate-pulse ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2 min-h-[422px]" style={{contain:'layout'}}>
+            {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[270px] max-w-[270px] h-[422px] border rounded-[24px] animate-pulse shrink-0 ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
             sortedProperties.map(p=>{
               const imgs = [p.thumbnail, p.foto_1, p.foto_2, p.foto_3, p.foto_4].filter(Boolean)
               const badgeRaw = (p.badge || '').toString()
               const isTerjual = badgeRaw.toLowerCase().includes('terjual') || (p.status_properti||'').toLowerCase().includes('terjual')
               return(
-              <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
-                <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" onClick={()=>openZoom(imgs,0)}>
-                  <img src={imgs[0]} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
+              <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
+                <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" style={{aspectRatio:'270/210'}} onClick={()=>openZoom(imgs,0)}>
+                  <img src={imgs[0]} width="270" height="210" loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
                   {badgeRaw &&!isTerjual && (
                     <div className="absolute top-3 left-3 z-20">
                       <div className="text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">
@@ -234,12 +234,12 @@ export default function Home(){
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <div className="font-bold text-[14px] leading-tight line-clamp-2 min-h-[36px]">{p.judul}</div>
-                  <div className="font-black text-[17px] mt-2" style={{color:COLORS.gold}}>Rp {Number(p.harga_cash||0).toLocaleString('id-ID')}</div>
+                  <div className="font-black text-[17px] mt-2 min-h-[26px]" style={{color:COLORS.gold}}>Rp {Number(p.harga_cash||0).toLocaleString('id-ID')}</div>
                   <div className={`grid grid-cols-2 gap-2 mt-3 text-[10px] p-2.5 rounded-xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}>
-                    <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Luas Tanah</div><div className="font-black text-[12px] mt-0.5">{p.luas_tanah||0}m²</div></div>
-                    <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Luas Bangunan</div><div className="font-black text-[12px] mt-0.5">{p.luas_bangunan||0}m²</div></div>
-                    <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Tidur</div><div className="font-black text-[12px] mt-0.5">{p.kamar_tidur||0} Kamar</div></div>
-                    <div className="bg-white/50 rounded-lg p-2 text-center"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Mandi</div><div className="font-black text-[12px] mt-0.5">{p.kamar_mandi||0} Kamar</div></div>
+                    <div className="bg-white/50 rounded-lg p-2 text-center min-h-[46px]"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Luas Tanah</div><div className="font-black text-[12px] mt-0.5">{p.luas_tanah||0}m²</div></div>
+                    <div className="bg-white/50 rounded-lg p-2 text-center min-h-[46px]"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Luas Bangunan</div><div className="font-black text-[12px] mt-0.5">{p.luas_bangunan||0}m²</div></div>
+                    <div className="bg-white/50 rounded-lg p-2 text-center min-h-[46px]"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Tidur</div><div className="font-black text-[12px] mt-0.5">{p.kamar_tidur||0} Kamar</div></div>
+                    <div className="bg-white/50 rounded-lg p-2 text-center min-h-[46px]"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Mandi</div><div className="font-black text-[12px] mt-0.5">{p.kamar_mandi||0} Kamar</div></div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <a href={waLink(p)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
@@ -251,32 +251,31 @@ export default function Home(){
           </div>
         </div>
 
-        {/* ESTETIKA - FIX FOTO BERANTAKAN */}
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">ESTETIKA <span style={{color:COLORS.gold}}>ROSTER • GRANIT</span></h2><Link href="/estetika" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2">
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px]" style={{contain:'layout'}}>
             {estetikas.map(e=>{
               const bahanImg = e.foto_bahan_1 || e.foto_bahan_2
               const jadiImg = e.foto_jadi_1 || e.foto_jadi_2 || e.foto_bahan_1
               const allImgs = [e.foto_bahan_1, e.foto_bahan_2, e.foto_jadi_1, e.foto_jadi_2, e.foto_jadi_3].filter(Boolean)
               const detailSlug = e.slug && String(e.slug).trim()!==''? e.slug : e.id
               return(
-              <div key={e.id} className={`min-w-[280px] max-w-[280px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)'}}>
-                <div className="h-[220px] w-full flex overflow-hidden cursor-zoom-in" onClick={()=>openZoom(allImgs,0)}>
+              <div key={e.id} className={`min-w-[280px] max-w-[280px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
+                <div className="h-[220px] w-full flex overflow-hidden cursor-zoom-in" style={{aspectRatio:'280/220'}} onClick={()=>openZoom(allImgs,0)}>
                   <div className="w-1/2 h-full relative overflow-hidden bg-[#FAF7F0] border-r border-black/5">
-                    <img src={bahanImg} alt="bahan" className="w-full h-full object-cover object-center"/>
+                    <img src={bahanImg} width="140" height="220" loading="lazy" decoding="async" alt="bahan" className="w-full h-full object-cover object-center"/>
                     <span className="absolute bottom-2.5 left-2.5 bg-black text-white text-[8px] font-black px-2.5 py-1 rounded-full">BAHAN</span>
                   </div>
                   <div className="w-1/2 h-full relative overflow-hidden bg-[#111]">
-                    <img src={jadiImg} alt="terpasang" className="w-full h-full object-cover object-center"/>
+                    <img src={jadiImg} width="140" height="220" loading="lazy" decoding="async" alt="terpasang" className="w-full h-full object-cover object-center"/>
                     <span className="absolute bottom-2.5 left-2.5 bg-[#D4AF37] text-black text-[8px] font-black px-2.5 py-1 rounded-full">TERPASANG</span>
                     <span className="absolute top-2.5 right-2.5 bg-black/70 text-white text-[8px] px-2 py-1 rounded-full">🔍 {allImgs.length}</span>
                   </div>
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <Link href={`/estetika/${detailSlug}`}><div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{e.nama}</div></Link>
-                  <div className="text-[10px] font-bold opacity-60 mt-1 uppercase">{e.kategori} • {e.ukuran}</div>
-                  <div className="font-black text-[16px] mt-2" style={{color:COLORS.gold}}>Rp {Number(e.harga||0).toLocaleString('id-ID')} / {e.satuan}</div>
+                  <div className="text-[10px] font-bold opacity-60 mt-1 uppercase min-h-[14px]">{e.kategori} • {e.ukuran}</div>
+                  <div className="font-black text-[16px] mt-2 min-h-[24px]" style={{color:COLORS.gold}}>Rp {Number(e.harga||0).toLocaleString('id-ID')} / {e.satuan}</div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <a href={waEstetika(e)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
                     <button onClick={()=>shareLink(`https://pasagadang-web.vercel.app/estetika/${detailSlug}`, e.nama)} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>↗ BAGIKAN</button>
@@ -289,20 +288,20 @@ export default function Home(){
 
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">MATERIAL <span style={{color:COLORS.gold}}>BANGUNAN</span></h2><Link href="/materials" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2">
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px]" style={{contain:'layout'}}>
             {materials.map(m=>{
               const imgs = [m.foto_1, m.foto_2, m.foto_3].filter(Boolean)
               return(
-              <div key={m.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37'}}>
-                <div className="h-[210px] bg-white relative flex items-center justify-center p-4 cursor-zoom-in" onClick={()=>openZoom(imgs,0)}>
-                  <img src={imgs[0]} className="w-full h-full object-contain"/>
+              <div key={m.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', contain:'layout'}}>
+                <div className="h-[210px] bg-white relative flex items-center justify-center p-4 cursor-zoom-in" style={{aspectRatio:'270/210'}} onClick={()=>openZoom(imgs,0)}>
+                  <img src={imgs[0]} width="270" height="210" loading="lazy" decoding="async" alt={m.nama} className="w-full h-full object-contain"/>
                   <div className="absolute top-3 left-3 bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full">{m.kategori?.toUpperCase()} • {m.brand?.toUpperCase()}</div>
                   <div className="absolute top-3 right-3 bg-black/60 text-white text-[9px] px-2 py-1 rounded-full">🔍 {imgs.length}</div>
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <Link href={`/materials/${m.slug||m.id}`}><div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{m.nama}</div></Link>
-                  <div className="text-[10px] font-bold opacity-60 mt-1">{m.brand}</div>
-                  <div className="font-black text-[15px] mt-2" style={{color:COLORS.gold}}>Rp {Number(m.harga||0).toLocaleString('id-ID')}</div>
+                  <div className="text-[10px] font-bold opacity-60 mt-1 min-h-[14px]">{m.brand}</div>
+                  <div className="font-black text-[15px] mt-2 min-h-[22px]" style={{color:COLORS.gold}}>Rp {Number(m.harga||0).toLocaleString('id-ID')}</div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <a href={waMaterial(m)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
                     <button onClick={()=>shareLink(`https://pasagadang-web.vercel.app/materials/${m.slug||m.id}`, m.nama)} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>↗ BAGIKAN</button>
@@ -358,7 +357,7 @@ export default function Home(){
           <button onClick={closeZoom} className="absolute top-6 right-6 bg-white text-black w-10 h-10 rounded-full font-black z-10">X</button>
           <button onClick={prevZoom} className="absolute left-3 md:left-8 bg-white/20 hover:bg-white text-white hover:text-black w-10 h-10 rounded-full font-black text-[20px] backdrop-blur z-10">‹</button>
           <div className="relative max-w-full max-h-[85vh] flex flex-col items-center" onClick={e=>e.stopPropagation()}>
-            <img src={zoomList[zoomIdx]} className="max-w-full max-h-[75vh] rounded-2xl object-contain border-2 border-[#D4AF37]"/>
+            <img src={zoomList[zoomIdx]} width="800" height="600" className="max-w-full max-h-[75vh] rounded-2xl object-contain border-2 border-[#D4AF37]"/>
             <div className="flex items-center gap-2 mt-4">
               <span className="text-white text-[12px] font-bold tracking-widest">{zoomIdx+1} / {zoomList.length}</span>
               <div className="flex gap-1.5 ml-2">
@@ -371,4 +370,4 @@ export default function Home(){
       )}
     </main>
   )
-      }
+}
