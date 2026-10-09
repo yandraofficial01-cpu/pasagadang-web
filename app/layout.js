@@ -3,23 +3,27 @@ import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google'
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['500','600','700','800'], // <- FIX: hapus 900, max 800
+  weight: ['500','600','700','800'],
   variable: '--font-jakarta',
   display: 'swap',
 })
 
 const fraunces = Fraunces({
   subsets: ['latin'],
-  weight: ['700','800','900'], // Fraunces ada 900 aman
+  weight: ['700','800','900'],
   variable: '--font-fraunces',
   display: 'swap',
 })
 
 export const metadata = {
+  metadataBase: new URL("https://pasagadang.com"),
   title: "Jual Properti / Rumah di Padang, Sumatera Barat",
   description: "Jual properti / rumah di Padang, Sumatera Barat mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini.",
   verification: {
     google: "sBpare7PyIDICjHvIs8mKgjMncTu7BsrHeOJ5vzFEYY",
+  },
+  alternates: {
+    canonical: "https://pasagadang.com",
   },
   icons: {
     icon: [
