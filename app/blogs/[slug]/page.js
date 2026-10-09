@@ -20,7 +20,6 @@ function LogoPasagadang(){
   )
 }
 
-// FINAL DOM CLEAN - FIX LINK & JARAK
 function domClean(html){
   if(!html) return ''
   let s = html
@@ -31,9 +30,14 @@ function domClean(html){
   s = s.replace(/src="<img src="/gi,'src="').replace(/src=""https/gi,'src="https')
   s = s.replace(/<img[^>]*src="[^"]*<img[^>]*src="([^"]+)"[^>]*>/gi,'<img src="$1">')
 
-  if(typeof document === 'undefined'){
-    return s
-  }
+  // AUTO-LINK DULU SEBELUM DI-PARSE - INI FIX LINK HITAM LU
+  s = s.replace(/(https:\/\/pasagadang\.com\/[^\s"<]+|pasagadang\.com\/[^\s"<]+)/gi, (url)=>{
+    if(s.includes(`href="${url}`)) return url
+    let href = url.startsWith('http')? url : 'https://' + url
+    return `<a href="${href}">${url}</a>`
+  })
+
+  if(typeof document === 'undefined') return s
 
   const div = document.createElement('div')
   div.innerHTML = s
@@ -41,9 +45,7 @@ function domClean(html){
   let out = ''
 
   function walk(node){
-    if(node.nodeType === 3){
-      return node.textContent || ''
-    }
+    if(node.nodeType === 3) return node.textContent || ''
     if(node.nodeName === 'IMG'){
       let src = node.getAttribute('src') || ''
       const m = src.match(/https:\/\/res\.cloudinary\.com\/[^\s"'<>]+\.(jpg|jpeg|png|webp)/i)
@@ -59,17 +61,16 @@ function domClean(html){
       return inner
     }
     if(node.nodeName === 'BR') return '<br/>'
-    // FIX LINK BRO - INI YANG BIKIN LINK LU GAK BIRU KEMARIN
     if(node.nodeName === 'A'){
       let inner = ''
       node.childNodes.forEach(c=>{ inner += walk(c) })
       if(!inner.trim()) return ''
-      let href = node.getAttribute('href') || node.textContent || ''
+      let href = node.getAttribute('href') || ''
+      if(!href) href = inner
       href = href.trim()
       if(href.includes('pasagadang.com') &&!href.startsWith('http')){
         href = 'https://' + href.replace(/^\/\//,'')
       }
-      if(!href.startsWith('http') &&!href.startsWith('/')) return inner
       return `<a href="${href}" target="_blank" rel="noopener noreferrer">${inner}</a>`
     }
     if(['P','H2','H3','UL','OL','LI'].includes(node.nodeName)){
@@ -77,22 +78,17 @@ function domClean(html){
       node.childNodes.forEach(c=>{ inner += walk(c) })
       if(!inner.trim()) return ''
       const tag = node.nodeName.toLowerCase()
+      // FIX ALINEA BOLD - KALO DALAMNYA ADA BOLD, KASIH CLASS NO-INDENT
+      const isBoldTitle = inner.includes('<strong>') || inner.includes('<b>') || inner.trim().startsWith('Mitos') || inner.trim().startsWith('Kesimpulan') || /^\d+\./.test(inner.trim())
+      if(tag === 'p' && isBoldTitle){
+        return `<p class="no-indent">${inner}</p>`
+      }
       return `<${tag}>${inner}</${tag}>`
     }
     if(['B','STRONG'].includes(node.nodeName)){
       let inner = ''
       node.childNodes.forEach(c=>{ inner += walk(c) })
       return inner? `<strong>${inner}</strong>` : ''
-    }
-    if(node.nodeName === 'I'){
-      let inner = ''
-      node.childNodes.forEach(c=>{ inner += walk(c) })
-      return inner? `<i>${inner}</i>` : ''
-    }
-    if(node.nodeName === 'U'){
-      let inner = ''
-      node.childNodes.forEach(c=>{ inner += walk(c) })
-      return inner? `<u>${inner}</u>` : ''
     }
     return ''
   }
@@ -160,21 +156,38 @@ export default function DetailBlog(){
         text-justify:inter-word;
         text-indent:28px;
       }
+     .blog-content p.no-indent{
+        text-indent:0!important;
+        text-align:left!important;
+        font-weight:900;
+        margin-top:22px;
+        line-height:1.4;
+      }
      .blog-content p:first-of-type{text-indent:0}
      .blog-content h2{font-size:24px;font-weight:900;margin:32px 0 14px;color:#D4AF37;line-height:1.2;text-align:left;text-indent:0}
-     .blog-content h3{font-size:20px;font-weight:800;margin:24px 0 12px;color:${isDark?'#fff':'#111'};text-indent:0}
+     .blog-content h3{font-size:20px;font-weight:800;margin:24px 0 12px;color:${isDark?'#fff':'#111'};text-indent:0;text-align:left}
      .blog-content b,.blog-content strong{font-weight:900!important;color:${isDark?'#fff':'#111'}}
-     .blog-content a{color:#2563EB!important;text-decoration:underline!important;font-weight:800!important;word-break:break-all}
-     .blog-content a:hover{color:#D4AF37!important}
+     .blog-content a{
+        color:#2563EB!important;
+        text-decoration:underline!important;
+        font-weight:800!important;
+        background:#DBEAFE!important;
+        padding:2px 8px!important;
+        border-radius:8px!important;
+        word-break:break-all;
+        text-indent:0!important;
+        display:inline-block;
+      }
+     .blog-content a:hover{color:#fff!important;background:#2563EB!important}
      .blog-content img{width:100%!important;max-width:100%!important;height:auto!important;object-fit:contain!important;border-radius:20px;margin:24px 0!important;background:#F5F5F0;display:block}
         @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
         @keyframes float-delay{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
         @keyframes shine{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
         @keyframes bounce-slow{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-    .animate-float{animation:float 4s ease-in-out infinite}
-    .animate-float-delay{animation:float-delay 4.5s ease-in-out infinite}
-    .animate-bounce-slow{animation:bounce-slow 2.5s ease-in-out infinite}
-    .shine-effect{position:absolute;top:0;left:0;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent);transform:translateX(-100%);pointer-events:none;animation:shine 3s infinite}
+     .animate-float{animation:float 4s ease-in-out infinite}
+     .animate-float-delay{animation:float-delay 4.5s ease-in-out infinite}
+     .animate-bounce-slow{animation:bounce-slow 2.5s ease-in-out infinite}
+     .shine-effect{position:absolute;top:0;left:0;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent);transform:translateX(-100%);pointer-events:none;animation:shine 3s infinite}
       `}</style>
 
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-4 md:px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -224,4 +237,4 @@ export default function DetailBlog(){
       <a href="https://wa.me/628979879518" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white animate-bounce-slow">💬</a>
     </div>
   )
-}
+                                                                                                                                             }
