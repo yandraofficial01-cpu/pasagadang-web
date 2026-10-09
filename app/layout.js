@@ -25,6 +25,17 @@ export const metadata = {
   alternates: {
     canonical: "https://pasagadang.com",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/icon.png", type: "image/png" },
@@ -39,9 +50,9 @@ export const metadata = {
     siteName: "Pasa Gadang",
     images: [
       {
-        url: "/icon.png",
-        width: 512,
-        height: 512,
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 675,
         alt: "Jual Properti Rumah di Padang Sumatera Barat",
       },
     ],
