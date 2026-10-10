@@ -18,10 +18,10 @@ const fraunces = Fraunces({
 export const metadata = {
   metadataBase: new URL("https://pasagadang.com"),
   title: {
-    default: "Pasagadang.com | Jual Roster & Properti Estetik di Padang",
+    default: "Pasagadang.com | Jual Properti/Rumah dan Material Estetik di Padang, Sumatera Barat",
     template: "%s | Pasagadang.com"
   },
-  description: "Pasagadang.com adalah pusat jual roster, ornamen & bahan bangunan estetik di Padang, Sumatera Barat. Jual properti / rumah mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini.",
+  description: "Jual properti/rumah dan material estetik di Padang, Sumatera Barat mulai 300JT-an. Legalitas aman, bisa KPR. Bahan bangunan estetik tersedia.",
   verification: {
     google: "sBpare7PyIDICjHvIs8mKgjMncTu7BsrHeOJ5vzFEYY",
   },
@@ -47,8 +47,8 @@ export const metadata = {
     shortcut: "/icon.png",
   },
   openGraph: {
-    title: "Pasagadang.com | Jual Roster & Properti Estetik di Padang",
-    description: "Pasagadang.com - Pusat roster & bahan bangunan estetik di Padang. Jual properti mulai 300JT-an.",
+    title: "Pasagadang.com | Jual Properti/Rumah dan Material Estetik di Padang, Sumatera Barat",
+    description: "Jual properti/rumah dan material estetik di Padang, Sumatera Barat mulai 300JT-an. Legalitas aman, bisa KPR.",
     url: "https://pasagadang.com",
     siteName: "Pasagadang.com",
     images: [
@@ -56,7 +56,7 @@ export const metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 675,
-        alt: "Pasagadang.com - Jual Roster & Properti di Padang",
+        alt: "Pasagadang.com - Jual Properti dan Material Estetik di Padang",
       },
     ],
     type: "website",
@@ -75,19 +75,19 @@ export default function RootLayout({ children }) {
       >
         {children}
 
-        {/* SCHEMA BRAND - INI YANG BIKIN LU NO.1 LAGI */}
+        {/* SCHEMA BRAND FINAL - PROPERTI + MATERIAL */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Store",
+              "@type": "RealEstateAgent",
               "name": "Pasagadang.com",
               "alternateName": "Pasa Gadang",
               "url": "https://pasagadang.com",
               "logo": "https://pasagadang.com/icon.png",
               "image": "https://pasagadang.com/og-image.jpg",
-              "description": "Toko roster dan bahan bangunan estetik di Padang",
+              "description": "Jual properti/rumah dan material estetik di Padang, Sumatera Barat",
               "address": {
                 "@type": "PostalAddress",
                 "addressLocality": "Padang",
