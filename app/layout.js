@@ -17,8 +17,11 @@ const fraunces = Fraunces({
 
 export const metadata = {
   metadataBase: new URL("https://pasagadang.com"),
-  title: "Jual Properti / Rumah di Padang, Sumatera Barat",
-  description: "Jual properti / rumah di Padang, Sumatera Barat mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini.",
+  title: {
+    default: "Pasagadang.com | Jual Roster & Properti Estetik di Padang",
+    template: "%s | Pasagadang.com"
+  },
+  description: "Pasagadang.com adalah pusat jual roster, ornamen & bahan bangunan estetik di Padang, Sumatera Barat. Jual properti / rumah mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini.",
   verification: {
     google: "sBpare7PyIDICjHvIs8mKgjMncTu7BsrHeOJ5vzFEYY",
   },
@@ -44,16 +47,16 @@ export const metadata = {
     shortcut: "/icon.png",
   },
   openGraph: {
-    title: "Jual Properti / Rumah di Padang, Sumatera Barat",
-    description: "Jual properti / rumah di Padang, Sumatera Barat mulai 300JT-an. Bahan estetik untuk properti cantikmu ada di sini.",
+    title: "Pasagadang.com | Jual Roster & Properti Estetik di Padang",
+    description: "Pasagadang.com - Pusat roster & bahan bangunan estetik di Padang. Jual properti mulai 300JT-an.",
     url: "https://pasagadang.com",
-    siteName: "Pasa Gadang",
+    siteName: "Pasagadang.com",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 675,
-        alt: "Jual Properti Rumah di Padang Sumatera Barat",
+        alt: "Pasagadang.com - Jual Roster & Properti di Padang",
       },
     ],
     type: "website",
@@ -71,6 +74,29 @@ export default function RootLayout({ children }) {
         [-moz-osx-font-smoothing:grayscale]"
       >
         {children}
+
+        {/* SCHEMA BRAND - INI YANG BIKIN LU NO.1 LAGI */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Store",
+              "name": "Pasagadang.com",
+              "alternateName": "Pasa Gadang",
+              "url": "https://pasagadang.com",
+              "logo": "https://pasagadang.com/icon.png",
+              "image": "https://pasagadang.com/og-image.jpg",
+              "description": "Toko roster dan bahan bangunan estetik di Padang",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Padang",
+                "addressRegion": "Sumatera Barat",
+                "addressCountry": "ID"
+              }
+            })
+          }}
+        />
       </body>
     </html>
   );
