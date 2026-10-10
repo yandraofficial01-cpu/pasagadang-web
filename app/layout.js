@@ -21,7 +21,7 @@ export const metadata = {
     default: "Pasagadang.com | Jual Properti/Rumah dan Material Estetik di Padang, Sumatera Barat",
     template: "%s | Pasagadang.com"
   },
-  description: "Jual properti/rumah dan material estetik di Padang, Sumatera Barat mulai 300JT-an. Legalitas aman, bisa KPR. Bahan bangunan estetik tersedia.",
+  description: "Jual properti/rumah dan material estetik di Padang, Sumatera Barat mulai 300JT-an. Legalitas aman, bisa KPR.",
   verification: {
     google: "sBpare7PyIDICjHvIs8mKgjMncTu7BsrHeOJ5vzFEYY",
   },
@@ -40,9 +40,7 @@ export const metadata = {
     },
   },
   icons: {
-    icon: [
-      { url: "/icon.png", type: "image/png" },
-    ],
+    icon: [{ url: "/icon.png", type: "image/png" }],
     apple: "/icon.png",
     shortcut: "/icon.png",
   },
@@ -51,14 +49,7 @@ export const metadata = {
     description: "Jual properti/rumah dan material estetik di Padang, Sumatera Barat mulai 300JT-an. Legalitas aman, bisa KPR.",
     url: "https://pasagadang.com",
     siteName: "Pasagadang.com",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 675,
-        alt: "Pasagadang.com - Jual Properti dan Material Estetik di Padang",
-      },
-    ],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 675, alt: "Pasagadang.com" }],
     type: "website",
     locale: "id_ID",
   },
@@ -67,15 +58,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="id" className={`${jakarta.variable} ${fraunces.variable} antialiased`}>
-      <body 
-        className="font-jakarta antialiased bg-[#FFFBF0] text-black 
-        [text-rendering:optimizeLegibility] 
-        [-webkit-font-smoothing:antialiased] 
-        [-moz-osx-font-smoothing:grayscale]"
-      >
+      <body className="font-jakarta antialiased bg-[#FFFBF0] text-black [text-rendering:optimizeLegibility] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]">
         {children}
-
-        {/* SCHEMA BRAND FINAL - PROPERTI + MATERIAL */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
