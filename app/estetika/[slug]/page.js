@@ -5,17 +5,16 @@ import { useParams } from 'next/navigation'
 
 export default function EstetikaDetail(){
   const { slug } = useParams()
-  const [item, setItem] = useState(null)
+  const [item, setItem] = useState<any>(null)
   const [qty, setQty] = useState(10)
   const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.app'
   const COLORS = { gold: '#D4AF37', red: '#B22222' }
-  const [zoom, setZoom] = useState(null)
+  const [zoom, setZoom] = useState<string | null>(null)
 
   useEffect(()=>{
     if(!slug) return
     const load = async ()=>{
       try{
-        // Coba fetch langsung by slug dulu, kalau gagal fallback cari di list
         let res = await fetch(`${API}/estetikas/${slug}`)
         if(res.ok){
           let j = await res.json()
@@ -24,7 +23,7 @@ export default function EstetikaDetail(){
           const res2 = await fetch(`${API}/estetikas?limit=100`)
           const j2 = await res2.json()
           const list = Array.isArray(j2)? j2 : j2.data||[]
-          const found = list.find(x => String(x.slug)===String(slug) || String(x.id)===String(slug))
+          const found = list.find((x:any) => String(x.slug)===String(slug) || String(x.id)===String(slug))
           if(found) setItem(found)
         }
       }catch(e){ console.log(e) }
@@ -32,23 +31,35 @@ export default function EstetikaDetail(){
     load()
   },[slug, API])
 
-  if(!item) return <div className="min-h-screen flex items-center justify-center bg-[#FFFBF0] font-black animate-pulse">LOADING {slug}...</div>
+  // === LOADING PREMIUM MUTER EMAS ===
+  if(!item) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FFFBF0]">
+      <div className="relative w-16 h-16">
+        <div className="absolute inset-0 rounded-full border-[4px] border-[#D4AF37]/20"></div>
+        <div className="absolute inset-0 rounded-full border-[4px] border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+      </div>
+      <div className="mt-5 flex font-black text-[22px] tracking-tighter">
+        <span style={{color:COLORS.red}}>PA</span>
+        <span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGA</span>
+        <span style={{color:COLORS.red}}>DANG</span>
+        <span className="text-[10px] ml-1 mt-1" style={{color:COLORS.red}}>.COM</span>
+      </div>
+      <p className="mt-2 text-[10px] font-black tracking-[0.3em] text-black/30 animate-pulse">MEMUAT {String(slug).toUpperCase()}...</p>
+    </div>
+  )
 
   const hasPromo = item.harga_promo && Number(item.harga_promo) < Number(item.harga)
   const hargaAktif = hasPromo? item.harga_promo : item.harga
   const total = Number(hargaAktif||0) * qty
-  const formatRupiah = (n)=> new Intl.NumberFormat('id-ID').format(n||0)
-
+  const formatRupiah = (n:any)=> new Intl.NumberFormat('id-ID').format(n||0)
   const wa62 = (()=>{ let r=String(item.wa_number||'08979879518').replace(/[^0-9]/g,''); return r.startsWith('0')? '62'+r.slice(1):r })()
   const waLink = `https://wa.me/${wa62}?text=${encodeURIComponent(`Halo Pasa Gadang saya mau pesan ${item.nama}\nJumlah: ${qty} ${item.satuan}\nTotal: Rp ${formatRupiah(total)}\nLink: ${typeof window!=='undefined'? window.location.href:''}`)}`
-
   const bahanImg = item.foto_bahan_1 || item.foto_bahan_2
   const jadiImg = item.foto_jadi_1 || item.foto_jadi_2 || item.foto_bahan_1
   const photos = [item.foto_bahan_1, item.foto_bahan_2, item.foto_jadi_1, item.foto_jadi_2, item.foto_jadi_3].filter(Boolean)
 
   return (
     <main className="min-h-screen bg-[#FFFBF0] text-black pb-24">
-      {/* NAVBAR */}
       <nav className="sticky top-0 z-50 bg-[#FFFBF0] border-b-[2.5px] border-[#D4AF37] px-4 md:px-10 py-3 flex justify-between items-center">
         <Link href="/" className="flex flex-col leading-none">
           <div className="flex font-black text-[22px] tracking-tighter">
@@ -61,74 +72,57 @@ export default function EstetikaDetail(){
         </Link>
         <Link href="/estetika" className="px-5 py-2.5 rounded-full font-black text-[11px] bg-black text-white">BACK</Link>
       </nav>
-
       <div className="max-w-6xl mx-auto p-0 md:p-10">
         <div className="grid md:grid-cols-2 gap-0 md:gap-8 border-x-[2.5px] md:border-0 border-[#D4AF37] bg-[#FFFBF0]">
-          {/* KIRI - FOTO - FIX KEPOTONG */}
           <div className="p-3 md:p-0">
             <div className="grid grid-cols-2 gap-3">
-              <div className="h-[340px] md:h-[400px] bg-[#FAF7F0] rounded-[22px] md:rounded-[24px] overflow-hidden border-[2.5px] border-[#D4AF37] relative cursor-zoom-in" onClick={()=>setZoom(bahanImg)}>
+              <div className="h-[340px] md:h-[400px] bg-[#FAF7F0] rounded-[22px] overflow-hidden border-[2.5px] border-[#D4AF37] relative cursor-zoom-in" onClick={()=>setZoom(bahanImg)}>
                 {bahanImg? <img src={bahanImg} className="w-full h-full object-cover object-center"/> : <div className="h-full flex items-center justify-center text-[11px]">No foto bahan</div>}
                 <span className="absolute bottom-3 left-3 bg-black text-white text-[10px] font-black px-4 py-1.5 rounded-full">BAHAN</span>
               </div>
-              <div className="h-[340px] md:h-[400px] bg-black rounded-[22px] md:rounded-[24px] overflow-hidden border-[2.5px] border-[#D4AF37] relative cursor-zoom-in" onClick={()=>setZoom(jadiImg)}>
+              <div className="h-[340px] md:h-[400px] bg-black rounded-[22px] overflow-hidden border-[2.5px] border-[#D4AF37] relative cursor-zoom-in" onClick={()=>setZoom(jadiImg)}>
                 {jadiImg? <img src={jadiImg} className="w-full h-full object-cover object-center"/> : <div className="h-full flex items-center justify-center text-white text-[11px]">No foto jadi</div>}
                 <span className="absolute bottom-3 left-3 bg-[#D4AF37] text-black text-[10px] font-black px-4 py-1.5 rounded-full">TERPASANG</span>
               </div>
             </div>
             {photos.length>2 && (
               <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide">
-                {photos.map((p,i)=><img key={i} src={p} onClick={()=>setZoom(p)} className="w-[72px] h-[72px] rounded-xl object-cover object-center border-[2.5px] border-[#D4AF37] cursor-pointer shrink-0"/>)}
+                {photos.map((p:any,i:number)=><img key={i} src={p} onClick={()=>setZoom(p)} className="w-[72px] h-[72px] rounded-xl object-cover object-center border-[2.5px] border-[#D4AF37] cursor-pointer shrink-0"/>)}
               </div>
             )}
           </div>
-
-          {/* KANAN - DETAIL - PERSIS SCREENSHOT ROSTER MIRING */}
           <div className="p-5 md:p-0">
             <h1 className="text-[28px] md:text-3xl font-black tracking-tight leading-tight font-serif">{item.nama}</h1>
             <p className="text-[11px] font-black tracking-[0.2em] opacity-60 mt-2 uppercase">{item.kategori} • {item.ukuran || '20x20x12 cm'} • {item.satuan}</p>
-
             <div className="mt-4 bg-[#FFF8EB] border border-[#F5E6C0] rounded-[18px] p-5">
               <p className="text-[11px] font-black tracking-[0.2em] text-[#B8960C]">DESKRIPSI</p>
-              <p className="text-[14px] font-medium leading-relaxed mt-3 whitespace-pre-wrap text-black">
-                {item.deskripsi || `UDAH HALUS LICIN BRO, GAK USAH ACI LAGI!\n\nRoster Miring ini dateng udah licin kinclong, tinggal pasang + cat aja. HEMAT 2x lipat!\n\n✅ Hemat biaya tukang aci\n✅ Hemat waktu 3 hari kerja\n✅ Udah di finishing halus dari pabrik\n✅ GARANSI 100% sampai alamat dalam kondisi baik\n\nCuma Rp ${formatRupiah(hargaAktif)}/${item.satuan} - Stock terbatas!`}
-              </p>
+              <p className="text-[14px] font-medium leading-relaxed mt-3 whitespace-pre-wrap text-black">{item.deskripsi}</p>
             </div>
-
             <div className="mt-4 bg-black text-white p-5 rounded-[18px]">
               <div className="text-[10px] font-black tracking-[0.2em] opacity-60">SPESIFIKASI</div>
               <div className="mt-3 flex gap-2 items-start">
                 <div className="w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center shrink-0"><span className="text-white text-[12px] font-black">✓</span></div>
                 <div className="text-[14px] font-black leading-tight">{item.spesifikasi || item.ukuran || '20x20x12 cm'}</div>
               </div>
-              <div className="mt-4 flex gap-2 flex-wrap">
-                <span className="bg-[#D4AF37] text-black text-[11px] font-black px-4 py-1.5 rounded-full">{(item.kategori||'ROSTER').toUpperCase()}</span>
-                {item.ukuran && <span className="bg-white/15 text-white text-[11px] font-bold px-4 py-1.5 rounded-full">{item.ukuran}</span>}
-              </div>
             </div>
-
             <div className="mt-6">
               {hasPromo && <p className="line-through text-[13px] font-bold opacity-40">Rp {formatRupiah(item.harga)}</p>}
               <p className="text-[34px] font-black tracking-tighter" style={{color:COLORS.gold}}>Rp {formatRupiah(hargaAktif)}</p>
               <p className="text-[11px] font-black tracking-widest opacity-50">PER {item.satuan?.toUpperCase()}</p>
             </div>
-
             <div className="mt-6 bg-white border-[2px] border-[#D4AF37] rounded-full p-1.5 flex items-center justify-between">
-              <button onClick={()=>setQty(q=>Math.max(1,q-1))} className="w-11 h-11 bg-[#FFFBF0] border border-black/10 rounded-full font-black text-[18px]">−</button>
+              <button onClick={()=>setQty((q:number)=>Math.max(1,q-1))} className="w-11 h-11 bg-[#FFFBF0] border border-black/10 rounded-full font-black text-[18px]">−</button>
               <span className="font-black text-[14px]">{qty} {item.satuan} = Rp {formatRupiah(total)}</span>
-              <button onClick={()=>setQty(q=>q+1)} className="w-11 h-11 bg-black text-white rounded-full font-black text-[18px]">+</button>
+              <button onClick={()=>setQty((q:number)=>q+1)} className="w-11 h-11 bg-black text-white rounded-full font-black text-[18px]">+</button>
             </div>
-
             <div className="grid grid-cols-[1.6fr_1fr] gap-3 mt-6">
               <a href={waLink} target="_blank" className="bg-[#25D366] text-white text-center py-4 rounded-full font-black text-[15px] shadow-[0_8px_20px_rgba(37,211,102,0.4)]">Whatsapp Pesan</a>
-              <button onClick={async()=>{ const url=window.location.href; if(navigator.share){ await navigator.share({title:item.nama, url}) } else { await navigator.clipboard.writeText(url); alert('Link disalin!')}}} className="bg-white border-[2px] border-black text-black py-4 rounded-full font-black text-[14px]">↗ Bagikan</button>
+              <button onClick={async()=>{ const url=window.location.href; if((navigator as any).share){ await (navigator as any).share({title:item.nama, url}) } else { await navigator.clipboard.writeText(url); alert('Link disalin!')}}} className="bg-white border-[2px] border-black text-black py-4 rounded-full font-black text-[14px]">↗ Bagikan</button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* ZOOM MODAL */}
-      {zoom && <div onClick={()=>setZoom(null)} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-6"><img src={zoom} className="max-w-full max-h-[85vh] rounded-[20px] border-[2.5px] border-[#D4AF37] object-contain"/><button className="absolute top-6 right-6 bg-white text-black w-10 h-10 rounded-full font-black">X</button></div>}
+      {zoom && <div onClick={()=>setZoom(null)} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-6"><img src={zoom} className="max-w-full max-h-[85vh] rounded-[20px] border-[2.5px] border-[#D4AF37] object-contain"/></div>}
     </main>
   )
-  }
+    }
