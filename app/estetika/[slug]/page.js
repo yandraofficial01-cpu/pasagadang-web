@@ -5,11 +5,11 @@ import { useParams } from 'next/navigation'
 
 export default function EstetikaDetail(){
   const { slug } = useParams()
-  const [item, setItem] = useState<any>(null)
+  const [item, setItem] = useState(null)
   const [qty, setQty] = useState(10)
   const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.app'
   const COLORS = { gold: '#D4AF37', red: '#B22222' }
-  const [zoom, setZoom] = useState<string | null>(null)
+  const [zoom, setZoom] = useState(null)
 
   useEffect(()=>{
     if(!slug) return
@@ -23,7 +23,7 @@ export default function EstetikaDetail(){
           const res2 = await fetch(`${API}/estetikas?limit=100`)
           const j2 = await res2.json()
           const list = Array.isArray(j2)? j2 : j2.data||[]
-          const found = list.find((x:any) => String(x.slug)===String(slug) || String(x.id)===String(slug))
+          const found = list.find(x => String(x.slug)===String(slug) || String(x.id)===String(slug))
           if(found) setItem(found)
         }
       }catch(e){ console.log(e) }
@@ -31,7 +31,6 @@ export default function EstetikaDetail(){
     load()
   },[slug, API])
 
-  // === LOADING PREMIUM MUTER EMAS ===
   if(!item) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#FFFBF0]">
       <div className="relative w-16 h-16">
@@ -42,16 +41,15 @@ export default function EstetikaDetail(){
         <span style={{color:COLORS.red}}>PA</span>
         <span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGA</span>
         <span style={{color:COLORS.red}}>DANG</span>
-        <span className="text-[10px] ml-1 mt-1" style={{color:COLORS.red}}>.COM</span>
       </div>
-      <p className="mt-2 text-[10px] font-black tracking-[0.3em] text-black/30 animate-pulse">MEMUAT {String(slug).toUpperCase()}...</p>
+      <p className="mt-2 text-[10px] font-black tracking-[0.3em] text-black/30 animate-pulse">MEMUAT {String(slug||'').toUpperCase()}...</p>
     </div>
   )
 
   const hasPromo = item.harga_promo && Number(item.harga_promo) < Number(item.harga)
   const hargaAktif = hasPromo? item.harga_promo : item.harga
   const total = Number(hargaAktif||0) * qty
-  const formatRupiah = (n:any)=> new Intl.NumberFormat('id-ID').format(n||0)
+  const formatRupiah = (n)=> new Intl.NumberFormat('id-ID').format(n||0)
   const wa62 = (()=>{ let r=String(item.wa_number||'08979879518').replace(/[^0-9]/g,''); return r.startsWith('0')? '62'+r.slice(1):r })()
   const waLink = `https://wa.me/${wa62}?text=${encodeURIComponent(`Halo Pasa Gadang saya mau pesan ${item.nama}\nJumlah: ${qty} ${item.satuan}\nTotal: Rp ${formatRupiah(total)}\nLink: ${typeof window!=='undefined'? window.location.href:''}`)}`
   const bahanImg = item.foto_bahan_1 || item.foto_bahan_2
@@ -87,7 +85,7 @@ export default function EstetikaDetail(){
             </div>
             {photos.length>2 && (
               <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide">
-                {photos.map((p:any,i:number)=><img key={i} src={p} onClick={()=>setZoom(p)} className="w-[72px] h-[72px] rounded-xl object-cover object-center border-[2.5px] border-[#D4AF37] cursor-pointer shrink-0"/>)}
+                {photos.map((p,i)=><img key={i} src={p} onClick={()=>setZoom(p)} className="w-[72px] h-[72px] rounded-xl object-cover object-center border-[2.5px] border-[#D4AF37] cursor-pointer shrink-0"/>)}
               </div>
             )}
           </div>
@@ -111,18 +109,18 @@ export default function EstetikaDetail(){
               <p className="text-[11px] font-black tracking-widest opacity-50">PER {item.satuan?.toUpperCase()}</p>
             </div>
             <div className="mt-6 bg-white border-[2px] border-[#D4AF37] rounded-full p-1.5 flex items-center justify-between">
-              <button onClick={()=>setQty((q:number)=>Math.max(1,q-1))} className="w-11 h-11 bg-[#FFFBF0] border border-black/10 rounded-full font-black text-[18px]">−</button>
+              <button onClick={()=>setQty(q=>Math.max(1,q-1))} className="w-11 h-11 bg-[#FFFBF0] border border-black/10 rounded-full font-black text-[18px]">−</button>
               <span className="font-black text-[14px]">{qty} {item.satuan} = Rp {formatRupiah(total)}</span>
-              <button onClick={()=>setQty((q:number)=>q+1)} className="w-11 h-11 bg-black text-white rounded-full font-black text-[18px]">+</button>
+              <button onClick={()=>setQty(q=>q+1)} className="w-11 h-11 bg-black text-white rounded-full font-black text-[18px]">+</button>
             </div>
             <div className="grid grid-cols-[1.6fr_1fr] gap-3 mt-6">
               <a href={waLink} target="_blank" className="bg-[#25D366] text-white text-center py-4 rounded-full font-black text-[15px] shadow-[0_8px_20px_rgba(37,211,102,0.4)]">Whatsapp Pesan</a>
-              <button onClick={async()=>{ const url=window.location.href; if((navigator as any).share){ await (navigator as any).share({title:item.nama, url}) } else { await navigator.clipboard.writeText(url); alert('Link disalin!')}}} className="bg-white border-[2px] border-black text-black py-4 rounded-full font-black text-[14px]">↗ Bagikan</button>
+              <button onClick={async()=>{ const url=window.location.href; if(navigator.share){ await navigator.share({title:item.nama, url}) } else { await navigator.clipboard.writeText(url); alert('Link disalin!')}}} className="bg-white border-[2px] border-black text-black py-4 rounded-full font-black text-[14px]">↗ Bagikan</button>
             </div>
           </div>
         </div>
       </div>
-      {zoom && <div onClick={()=>setZoom(null)} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-6"><img src={zoom} className="max-w-full max-h-[85vh] rounded-[20px] border-[2.5px] border-[#D4AF37] object-contain"/></div>}
+      {zoom && <div onClick={()=>setZoom(null)} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-6"><img src={zoom} className="max-w-full max-h-[85vh] rounded-[20px] border-[2.5px] border-[#D4AF37] object-contain"/><button className="absolute top-6 right-6 bg-white text-black w-10 h-10 rounded-full font-black">X</button></div>}
     </main>
   )
     }
