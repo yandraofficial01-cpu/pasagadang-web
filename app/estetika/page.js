@@ -23,6 +23,23 @@ function LogoPasagadang(){
   )
 }
 
+function PremiumLoading({isDark}){
+  return (
+    <div className={`min-h-screen flex flex-col items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
+      <div className="relative w-20 h-20">
+        <div className="absolute inset-0 border-[3px] border-[#D4AF37]/20 rounded-full"></div>
+        <div className="absolute inset-0 border-[3px] border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+        <div className="absolute inset-3 border-[3px] border-[#B22222]/20 rounded-full"></div>
+        <div className="absolute inset-3 border-[3px] border-t-[#B22222] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin [animation-direction:reverse] [animation-duration:0.8s]"></div>
+      </div>
+      <div className="mt-6 flex flex-col items-center">
+        <p className="font-black text-[11px] tracking-[0.3em]" style={{color:COLORS.gold}}>PASA GADANG</p>
+        <p className="text-[10px] font-bold tracking-widest opacity-50 mt-1 animate-pulse">MEMUAT ESTETIKA...</p>
+      </div>
+    </div>
+  )
+}
+
 export default function EstetikaPage(){
   const [estetikas, setEstetikas] = useState([])
   const [loading, setLoading] = useState(true)
@@ -41,7 +58,6 @@ export default function EstetikaPage(){
     if(saved) setCart(JSON.parse(saved))
   },[])
 
-  // FIX UTAMA: LOAD PER KATEGORI, BUKAN BARENG
   useEffect(()=>{
     async function getData(){
       setLoading(true)
@@ -77,6 +93,16 @@ export default function EstetikaPage(){
     })
   }
 
+  const shareItem = async (m) => {
+    const url = `${window.location.origin}/estetika/${m.slug||m.id}`
+    if(navigator.share){
+      try{ await navigator.share({title:m.nama, text:`Cek ${m.nama} di Pasa Gadang`, url}) }catch{}
+    } else {
+      await navigator.clipboard.writeText(url)
+      alert('Link disalin bro! Tinggal paste ke WA')
+    }
+  }
+
   const totalCart = cart.reduce((a,b)=>a+b.harga*b.qty,0)
   const getWA62=(num)=>{
     let raw=String(num||'08979879518').replace(/[^0-9]/g,'')
@@ -105,17 +131,12 @@ export default function EstetikaPage(){
   })
 
   const formatRupiah = (n) => new Intl.NumberFormat('id-ID').format(n||0)
-
   const parseSpec = (text)=>{
     if(!text) return []
-    return text
-    .split(/\n+/)
-    .map(t=> t.replace(/✅|✔️|✓|•|-/g,'').trim())
-    .filter(Boolean)
-    .flatMap(t=> t.split(',').map(x=>x.trim()).filter(Boolean))
+    return text.split(/\n+/).map(t=> t.replace(/✅|✔️|✓|•|-/g,'').trim()).filter(Boolean).flatMap(t=> t.split(',').map(x=>x.trim()).filter(Boolean))
   }
 
-  if(loading) return <div className={`min-h-screen flex items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}><p className="font-black animate-pulse">LOADING ESTETIKA...</p></div>
+  if(loading) return <PremiumLoading isDark={isDark} />
 
   return <main className={`${isDark? 'bg-[#0B0B0F] text-white' : 'bg-[#FFFBF0] text-black'} min-h-screen transition-colors duration-300 pb-24`}>
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -226,10 +247,12 @@ export default function EstetikaPage(){
                 <button onClick={()=>setCalc(s=>({...s,[m.id]:(s[m.id]||10)+1}))} className="w-10 h-10 bg-black text-white rounded-full font-black">+</button>
               </div>
 
-              <div className="grid grid-cols-[1fr_1fr] gap-2 mt-4">
+              {/* UPDATE: KERANJANG + BAGIKAN */}
+              <div className="grid grid-cols-[1fr_48px] gap-2 mt-4">
                 <button onClick={()=>addToCart(m)} className={`${isDark?'bg-white text-black':'bg-black text-white'} py-3 rounded-full font-black text-[13px]`}>+ Keranjang</button>
-                <a href={waLink(m,qty,total)} target="_blank" className="bg-[#25D366] text-white text-center py-3 rounded-full font-black text-[13px]">Whatsapp</a>
+                <button onClick={()=>shareItem(m)} className="w-[48px] h-[48px] bg-white border-2 border-[#D4AF37] rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-black transition">↗</button>
               </div>
+              <a href={waLink(m,qty,total)} target="_blank" className="bg-[#25D366] text-white text-center py-3 rounded-full font-black text-[13px] mt-2 block">Whatsapp</a>
             </div>
           </div>
         )})}
@@ -240,4 +263,4 @@ export default function EstetikaPage(){
       <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M19.05 4.91A9.93 9.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.14 1.6 5.94L0 24l6.35-1.66A11.9 11.9 0 0 0 12 23.88h.01c6.53 0 11.86-5.33 11.86-11.88 0-3.17-1.24-6.16-3.49-8.4Z"/></svg>
     </a>
   </main>
-}
+                            }
