@@ -37,18 +37,17 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default function Layout({ children }) { 
+export default function Layout({ children }) {
   return (
     <>
       {children}
-      {/* Google News Preferred Source Button - Pasa Gadang */}
-      <div className="max-w-3xl mx-auto px-4 pb-10">
+      <div className="max-w-[780px] mx-auto px-4 pb-10">
         <div className="mt-8 p-4 bg-[#FFF8E7] border border-[#F5E6C8] rounded-xl text-center">
-          <p className="text-sm font-semibold mb-2">Suka info properti & material estetik dari Pasa Gadang?</p>
-          <p className="text-xs text-gray-600 mb-3">Jadikan Pasa Gadang sumber pilihan di Google biar gak ketinggalan update harga.</p>
+          <p className="text-sm font-semibold mb-2">Suka info properti estetik dari Pasa Gadang?</p>
+          <p className="text-xs text-gray-600 mb-3">Jadikan sumber pilihan di Google.</p>
           <div google-add-preferred-source-btn=""></div>
         </div>
       </div>
     </>
-  ) 
-}
+  )
+    }
