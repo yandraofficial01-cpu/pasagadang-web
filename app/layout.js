@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google'
+import Script from 'next/script'
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -80,6 +81,11 @@ export default function RootLayout({ children }) {
               }
             })
           }}
+        />
+        <Script
+          async
+          src="https://news.google.com/swg/js/v1/publisher.js"
+          strategy="afterInteractive"
         />
       </body>
     </html>
