@@ -3,7 +3,6 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**' },
-      { protocol: 'http', hostname: '**' },
     ],
   },
   async rewrites() {
@@ -17,8 +16,24 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/index.html',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/index',
+        destination: '/',
+        permanent: true,
+      },
+      {
         source: '/:path*',
         has: [{ type: 'host', value: 'pasagadang-web.vercel.app' }],
+        destination: 'https://pasagadang.com/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.pasagadang.com' }],
         destination: 'https://pasagadang.com/:path*',
         permanent: true,
       },
