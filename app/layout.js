@@ -82,12 +82,32 @@ export default function RootLayout({ children }) {
             })
           }}
         />
+        {/* Google News - Preferred Source */}
         <Script
           async
           src="https://news.google.com/swg/js/v1/publisher.js"
           strategy="afterInteractive"
         />
+        {/* Google Reader Revenue Manager - Pasa Gadang */}
+        <Script
+          async
+          type="application/javascript"
+          src="https://news.google.com/swg/js/v1/swg-basic.js"
+          strategy="afterInteractive"
+        />
+        <Script id="swg-basic-pasa-gadang" strategy="afterInteractive">
+          {`
+            (self.SWG_BASIC = self.SWG_BASIC || []).push( basicSubscriptions => {
+              basicSubscriptions.init({
+                type: "NewsArticle",
+                isPartOfType: ["Product"],
+                isPartOfProductId: "CAowgv_HDA:openaccess",
+                clientOptions: { theme: "light", lang: "id" },
+              });
+            });
+          `}
+        </Script>
       </body>
     </html>
   );
-}
+            }
