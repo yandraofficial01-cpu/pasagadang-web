@@ -78,7 +78,12 @@ export default function BlogPage(){
 
   const waGlobal = encodeURIComponent(`Halo Pasa Gadang 👋\nSaya baca blog di pasagadang.com/blogs\nMau tanya soal rumah 300 Jt-an di Padang yang aman & legal, bisa KPR Syariah`)
 
-  if(loading) return <div className="min-h-screen w-screen flex-col gap-3 items-center justify-center bg-[#FFFBF0] text-black"><div className="w-10 h-10 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin"></div><p className="text-[10px] tracking-[0.4em] font-black animate-pulse">PASA GADANG</p></div>
+  if(loading) return (
+    <div className="fixed inset-0 z-[999] flex-col items-center justify-center gap-3 bg-[#FFFBF0] text-black">
+      <div className="w-10 h-10 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin"></div>
+      <p className="text-[10px] tracking-[0.4em] font-black animate-pulse">PASA GADANG</p>
+    </div>
+  )
 
   const cardBg = isDark? 'bg-[#16161E] border-white/10' : 'bg-white border-black/10'
   const textMain = isDark? 'text-white' : 'text-black'
@@ -91,10 +96,20 @@ export default function BlogPage(){
         html,body{max-width:100vw;overflow-x:hidden!important}
         *{min-width:0}
         img{max-width:100%}
-    .scrollbar-hide::-webkit-scrollbar{display:none}
-    .scrollbar-hide{scrollbar-width:none}
+   .scrollbar-hide::-webkit-scrollbar{display:none}
+   .scrollbar-hide{scrollbar-width:none}
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-    .anim{animation:fadeUp.5s ease both}
+   .anim{animation:fadeUp.5s ease both}
+    @keyframes goldShine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+   .title-blog{animation:fadeUp.7s ease both}
+   .title-gold{
+      background:linear-gradient(90deg,#8B6914,#D4AF37,#FFEB7F,#D4AF37,#8B6914);
+      background-size:200% auto;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      animation:goldShine 3s linear infinite, fadeUp.7s.15s ease both;
+    }
       `}</style>
 
       <nav className={`sticky top-0 z-50 w-full backdrop-blur-xl border-b px-4 md:px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -132,8 +147,11 @@ export default function BlogPage(){
 
       <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 grid lg:grid-cols-[1.8fr_0.9fr] gap-8 overflow-hidden">
         <div className="w-full min-w-0 overflow-hidden">
-          <h1 ref={listRef} className="text-[36px] md:text-[52px] font-black tracking-tighter leading-[0.85] anim scroll-mt-24">BLOG <span className="text-[#D4AF37]">PASA GADANG</span></h1>
-          <p className="mt-3 text-[11px] font-black tracking-[0.2em] uppercase opacity-50 anim">{filtered.length} dari {blogs.length} artikel • Tips rumah Minang • Padang</p>
+          <h1 ref={listRef} className="text-[34px] md:text-[56px] font-black tracking-tight leading-[0.95] scroll-mt-24">
+            <span className="title-blog inline-block">BLOG</span>{' '}
+            <span className="title-gold whitespace-nowrap">PASA GADANG</span>
+          </h1>
+          <p className="mt-3 text-[11px] font-black tracking-[0.2em] uppercase opacity-50 anim">{filtered.length} dari {blogs.length} artikel • {kat === 'semua'? 'Tips Properti' : kat} • Padang</p>
 
           <div className="flex gap-2 mt-6 overflow-x-auto scrollbar-hide w-full pb-2">
             {kategoriList.map(k=>(
