@@ -79,7 +79,7 @@ export default function BlogPage(){
   const waGlobal = encodeURIComponent(`Halo Pasa Gadang 👋\nSaya baca blog di pasagadang.com/blogs\nMau tanya soal rumah 300 Jt-an di Padang yang aman & legal, bisa KPR Syariah`)
 
   if(loading) return (
-    <div className="fixed inset-0 z-[999] flex-col items-center justify-center gap-3 bg-[#FFFBF0] text-black">
+    <div className="fixed inset-0 z-[9999] flex-col items-center justify-center gap-3 bg-[#FFFBF0] text-black">
       <div className="w-10 h-10 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin"></div>
       <p className="text-[10px] tracking-[0.4em] font-black animate-pulse">PASA GADANG</p>
     </div>
@@ -96,20 +96,21 @@ export default function BlogPage(){
         html,body{max-width:100vw;overflow-x:hidden!important}
         *{min-width:0}
         img{max-width:100%}
-   .scrollbar-hide::-webkit-scrollbar{display:none}
-   .scrollbar-hide{scrollbar-width:none}
+       .scrollbar-hide::-webkit-scrollbar{display:none}
+       .scrollbar-hide{scrollbar-width:none}
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-   .anim{animation:fadeUp.5s ease both}
-    @keyframes goldShine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-   .title-blog{animation:fadeUp.7s ease both}
-   .title-gold{
-      background:linear-gradient(90deg,#8B6914,#D4AF37,#FFEB7F,#D4AF37,#8B6914);
-      background-size:200% auto;
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-      animation:goldShine 3s linear infinite, fadeUp.7s.15s ease both;
-    }
+       .anim{animation:fadeUp.5s ease both}
+        @keyframes goldShine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+        @keyframes popTitle{0%{opacity:0;transform:translateY(18px) scale(0.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
+       .title-blog{animation:popTitle.6s cubic-bezier(.2,.8,.2,1) both}
+       .title-gold{
+          background:linear-gradient(90deg,#8B6914,#D4AF37,#FFEB7F,#D4AF37,#8B6914);
+          background-size:200% auto;
+          -webkit-background-clip:text;
+          background-clip:text;
+          color:transparent;
+          animation:goldShine 3s linear infinite, popTitle.6s.15s cubic-bezier(.2,.8,.2,1) both;
+        }
       `}</style>
 
       <nav className={`sticky top-0 z-50 w-full backdrop-blur-xl border-b px-4 md:px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
