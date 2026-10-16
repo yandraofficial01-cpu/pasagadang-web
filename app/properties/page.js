@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export default function PropertiesPage(){
   const [data,setData]=useState([])
-  const [isLoading,setIsLoading]=useState(true) // <- FIX 1: loading beneran
+  const [isLoading,setIsLoading]=useState(true)
   const [zoomFotos,setZoomFotos]=useState([])
   const [zoomIdx,setZoomIdx]=useState(0)
   const [theme,setTheme]=useState('light')
@@ -14,17 +14,17 @@ export default function PropertiesPage(){
   const API=process.env.NEXT_PUBLIC_API_URL
   const COLORS = { gold: '#D4AF37', red: '#B22222', cream: '#FFFBF0', dark: '#0B0B0F' }
   const isDark = theme==='dark'
-  const STATUS_LIST = ['Semua','Ready','On Progress','Indent','Terjual']
+  const STATUS_LIST = ['Semua','Ready','On Progress']
 
   useEffect(()=>{
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
     setIsLoading(true)
     fetch(`${API}/properties?is_published=true`)
-     .then(r=>r.json())
-     .then(j=>setData(j.data||j||[]))
-     .catch(()=>{})
-     .finally(()=>setIsLoading(false)) // <- FIX 2: matiin loading abis fetch
+    .then(r=>r.json())
+    .then(j=>setData(j.data||j||[]))
+    .catch(()=>{})
+    .finally(()=>setIsLoading(false))
   },[API])
 
   const toggleTheme = ()=>{
@@ -46,13 +46,55 @@ export default function PropertiesPage(){
     return { mapUrl, mapImg, fasilitasBersih, list }
   }
 
+  const isItemTerjual = (p)=>{
+    const badgeRaw = (p.badge || '').toString().toLowerCase()
+    const st = (p.status_properti || p.status || '').toLowerCase()
+    return badgeRaw.includes('terjual') || badgeRaw.includes('sold') || st.includes('terjual') || st.includes('sold')
+  }
+
   const filteredData = useMemo(()=>{
-    return data.filter(p=>{
+    const getStatus = (p)=> (p.status_properti || p.status || 'Ready').toLowerCase()
+
+    if(filterStatus === 'Ready'){
+      return data.filter(p=>{
+        const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase().trim())
+        return matchSearch && getStatus(p).includes('ready') &&!isItemTerjual(p)
+      })
+    }
+
+    if(filterStatus === 'On Progress'){
+      return data.filter(p=>{
+        const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase().trim())
+        return matchSearch && getStatus(p).includes('progress')
+      })
+    }
+
+    // SEMUA: cuma Ready + Terjual. On Progress & Indent gak ikut di sini.
+    const baseSemua = data.filter(p=>{
       const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase().trim())
-      const status = (p.status_properti || p.status || 'Ready').toLowerCase()
-      const matchStatus = filterStatus==='Semua' || status.includes(filterStatus.toLowerCase())
-      return matchSearch && matchStatus
+      if(!matchSearch) return false
+      const st = getStatus(p)
+      return st.includes('ready') || isItemTerjual(p)
     })
+
+    const readyList = baseSemua.filter(p =>!isItemTerjual(p))
+    const terjualList = baseSemua.filter(p => isItemTerjual(p))
+
+    const hasil = []
+    let iR = 0
+    let iT = 0
+    while(iR < readyList.length){
+      for(let k=0; k<4 && iR < readyList.length; k++){
+        hasil.push(readyList[iR++])
+      }
+      if(iT < terjualList.length){
+        hasil.push(terjualList[iT++])
+      }
+    }
+    while(iT < terjualList.length){
+      hasil.push(terjualList[iT++])
+    }
+    return hasil
   },[data, search, filterStatus])
 
   const waLink=(p)=>{
@@ -62,10 +104,9 @@ export default function PropertiesPage(){
     return `https://wa.me/${wa62}?text=${text}`
   }
 
-  // LOADING COMPONENT - PERSIS SCREENSHOT LU
   if(isLoading){
     return (
-      <main className={`min-h-screen flex flex-col items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
+      <main className={`min-h-screen flex-col items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
         <div className="relative w-12 h-12 mb-4">
           <div className="absolute inset-0 border-2 border-[#F5E6C8] rounded-full"></div>
           <div className="absolute inset-0 border-2 border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
@@ -84,7 +125,7 @@ export default function PropertiesPage(){
         </Link>
         <div className="flex gap-2">
           <button onClick={toggleTheme} className={`w-10 h-10 rounded-full border flex items-center justify-center ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>{isDark?'☀️':'🌙'}</button>
-          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}><span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span></button>
+          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}><span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span></button>
         </div>
       </nav>
 
@@ -124,26 +165,24 @@ export default function PropertiesPage(){
             const realMapLink = mapData.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||'')}`
 
             return (
-              <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
+              <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
                 <div className="h-[260px] relative cursor-pointer" onClick={()=>{if(!isTerjual){setZoomFotos(fotos); setZoomIdx(0)}}}>
                   <img src={fotos[0]} className="w-full h-full object-cover"/>
 
-                  {/* BADGE KECIL UNGU KALO BUKAN TERJUAL */}
                   {badgeRaw &&!isTerjual && (
                     <div className="absolute top-4 left-4 z-20">
-                      <div className="text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase border border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">🔥 {badgeRaw.toUpperCase()}</div>
+                      <div className="text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">🔥 {badgeRaw.toUpperCase()}</div>
                     </div>
                   )}
 
-                  {/* BADGE TERJUAL BULAT GEDE - PERSIS SCREENSHOT */}
                   {isTerjual && (
                     <div className="absolute inset-0 z-20">
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="relative">
                           <div className="absolute inset-0 bg-[#D4AF37] blur-[25px] opacity-60 rounded-full scale-125"></div>
-                          <div className="relative w-[175px] h-[175px] rounded-full bg-[#CC0000] border-[6px] border-[#D4AF37] flex flex-col items-center justify-center rotate-[-15deg] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-                            <div className="absolute inset-[8px] rounded-full border border-dashed border-white/60"></div>
+                          <div className="relative w-[175px] h-[175px] rounded-full bg-[#CC0000] border-[6px] border-[#D4AF37] flex-col items-center justify-center rotate-[-15deg] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+                            <div className="absolute inset-[8px] rounded-full border-dashed border-white/60"></div>
                             <div className="text-[#FFEB7F] text-[11px] font-black tracking-[0.2em]">★ TERJUAL ★</div>
                             <div className="text-white text-[28px] font-black tracking-tight leading-none mt-1">TERJUAL</div>
                             <div className="w-[70%] h-[2.5px] bg-[#D4AF37] my-1.5"></div>
@@ -155,7 +194,7 @@ export default function PropertiesPage(){
                   )}
                 </div>
 
-                <div className="p-6 flex flex-col flex-1">
+                <div className="p-6 flex-col flex-1">
                   <h3 className={`font-black text-[18px] leading-tight ${isDark?'text-white':'text-black'}`}>{p.judul}</h3>
                   <p className={`text-[13px] font-medium mt-1 ${isDark?'text-white/60':'text-black/70'}`}>{p.alamat}</p>
 
@@ -211,7 +250,7 @@ export default function PropertiesPage(){
       </a>
 
       {zoomFotos.length>0 && (
-        <div className="fixed inset-0 z-[999] bg-black/95 flex flex-col items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-black/95 flex-col items-center justify-center p-4">
           <button onClick={()=>setZoomFotos([])} className="absolute top-5 right-5 bg-white text-black w-10 h-10 rounded-full font-black">X</button>
           <div className="absolute top-5 left-5 bg-[#D4AF37] text-black px-4 py-1 rounded-full text-[13px] font-black">{zoomIdx+1} / {zoomFotos.length}</div>
           <img src={zoomFotos[zoomIdx]} className="max-h-[70vh] rounded-2xl border-2 border-[#D4AF37] object-contain"/>
@@ -223,4 +262,4 @@ export default function PropertiesPage(){
       )}
     </main>
   )
-    }
+}
