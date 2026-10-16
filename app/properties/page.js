@@ -125,7 +125,7 @@ export default function PropertiesPage(){
         </Link>
         <div className="flex gap-2">
           <button onClick={toggleTheme} className={`w-10 h-10 rounded-full border flex items-center justify-center ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>{isDark?'☀️':'🌙'}</button>
-          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}><span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span></button>
+          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}><span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span><span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span></button>
         </div>
       </nav>
 
@@ -164,7 +164,7 @@ export default function PropertiesPage(){
             const isTerjual = badgeRaw.toLowerCase().includes('terjual') || badgeRaw.toLowerCase().includes('sold') || (p.status_properti||'').toLowerCase().includes('terjual')
             const realMapLink = mapData.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||'')}`
             return (
-              <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
+              <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
                 <div className="h-[260px] relative cursor-pointer" onClick={()=>{if(!isTerjual){setZoomFotos(fotos); setZoomIdx(0)}}}>
                   <img src={fotos[0]} className="w-full h-full object-cover"/>
                   {badgeRaw &&!isTerjual && (
@@ -178,7 +178,7 @@ export default function PropertiesPage(){
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="stamp-terjual relative">
                           <div className="absolute -inset-3 bg-[#D4AF37] rounded-full blur-xl opacity-70 animate-pulse"></div>
-                          <div className="relative w-[150px] h-[150px] md:w-[170px] md:h-[170px] rounded-full bg-[#CC0000] border-4 md:border-[6px] border-[#D4AF37] flex-col items-center justify-center rotate-[-12deg] shadow-[0_15px_50px_rgba(0,0,0,0.6)]">
+                          <div className="relative w-[150px] h-[150px] md:w-[170px] md:h-[170px] rounded-full bg-[#CC0000] border-4 md:border-[6px] border-[#D4AF37] flex flex-col items-center justify-center rotate-[-12deg] shadow-[0_15px_50px_rgba(0,0,0,0.6)]">
                             <div className="absolute inset-[7px] rounded-full border-2 border-dashed border-white/70"></div>
                             <div className="text-[#FFEB7F] text-[10px] md:text-[11px] font-black tracking-[0.2em]">★ TERJUAL ★</div>
                             <div className="text-white text-[24px] md:text-[30px] font-black tracking-tight leading-none mt-1" style={{textShadow:'2px 2px 0 #000'}}>TERJUAL</div>
@@ -193,7 +193,7 @@ export default function PropertiesPage(){
                     </div>
                   )}
                 </div>
-                <div className="p-6 flex-col flex-1">
+                <div className="p-6 flex flex-col flex-1">
                   <h3 className={`font-black text-[18px] leading-tight ${isDark?'text-white':'text-black'}`}>{p.judul}</h3>
                   <p className={`text-[13px] font-medium mt-1 ${isDark?'text-white/60':'text-black/70'}`}>{p.alamat}</p>
                   <div className="grid grid-cols-2 gap-3 mt-5">
@@ -271,7 +271,7 @@ export default function PropertiesPage(){
       </a>
 
       {zoomFotos.length>0 && (
-        <div className="fixed inset-0 z-[999] bg-black/95 flex-col items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-black/95 flex flex-col items-center justify-center p-4">
           <button onClick={()=>setZoomFotos([])} className="absolute top-5 right-5 bg-white text-black w-10 h-10 rounded-full font-black">X</button>
           <div className="absolute top-5 left-5 bg-[#D4AF37] text-black px-4 py-1 rounded-full text-[13px] font-black">{zoomIdx+1} / {zoomFotos.length}</div>
           <img src={zoomFotos[zoomIdx]} className="max-h-[70vh] rounded-2xl border-2 border-[#D4AF37] object-contain"/>
