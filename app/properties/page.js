@@ -21,10 +21,10 @@ export default function PropertiesPage(){
     setTheme(saved)
     setIsLoading(true)
     fetch(`${API}/properties?is_published=true`)
-    .then(r=>r.json())
-    .then(j=>setData(j.data||j||[]))
-    .catch(()=>{})
-    .finally(()=>setIsLoading(false))
+   .then(r=>r.json())
+   .then(j=>setData(j.data||j||[]))
+   .catch(()=>{})
+   .finally(()=>setIsLoading(false))
   },[API])
 
   const toggleTheme = ()=>{
@@ -54,46 +54,34 @@ export default function PropertiesPage(){
 
   const filteredData = useMemo(()=>{
     const getStatus = (p)=> (p.status_properti || p.status || 'Ready').toLowerCase()
-
     if(filterStatus === 'Ready'){
       return data.filter(p=>{
         const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase().trim())
         return matchSearch && getStatus(p).includes('ready') &&!isItemTerjual(p)
       })
     }
-
     if(filterStatus === 'On Progress'){
       return data.filter(p=>{
         const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase().trim())
         return matchSearch && getStatus(p).includes('progress')
       })
     }
-
-    // SEMUA: cuma Ready + Terjual, Terjual di urutan 5,10,15
     const baseSemua = data.filter(p=>{
       const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase().trim())
       if(!matchSearch) return false
       const st = getStatus(p)
       return st.includes('ready') || isItemTerjual(p)
     })
-
     const readyList = baseSemua.filter(p =>!isItemTerjual(p))
     const terjualList = baseSemua.filter(p => isItemTerjual(p))
-
     const hasil = []
     let iR = 0
     let iT = 0
     while(iR < readyList.length){
-      for(let k=0; k<4 && iR < readyList.length; k++){
-        hasil.push(readyList[iR++])
-      }
-      if(iT < terjualList.length){
-        hasil.push(terjualList[iT++])
-      }
+      for(let k=0; k<4 && iR < readyList.length; k++){ hasil.push(readyList[iR++]) }
+      if(iT < terjualList.length){ hasil.push(terjualList[iT++]) }
     }
-    while(iT < terjualList.length){
-      hasil.push(terjualList[iT++])
-    }
+    while(iT < terjualList.length){ hasil.push(terjualList[iT++]) }
     return hasil
   },[data, search, filterStatus])
 
@@ -106,28 +94,31 @@ export default function PropertiesPage(){
 
   if(isLoading){
     return (
-      <main className={`min-h-screen flex-col items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
-        <style>{`
-          @keyframes stampIn { 0%{transform:scale(2.5) rotate(-30deg);opacity:0} 60%{transform:scale(0.9) rotate(5deg);opacity:1} 80%{transform:scale(1.05) rotate(-8deg)} 100%{transform:scale(1) rotate(-12deg);opacity:1} }
-          @keyframes shineMove { 0%,60%{left:-80%} 100%{left:150%} }
-         .stamp-terjual{ animation: stampIn 0.7s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
-         .shine{ position:absolute; top:0; left:-80%; width:50%; height:100%; background:linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent); transform:skewX(-20deg); animation: shineMove 2.8s ease-in-out infinite; }
-        `}</style>
-        <div className="relative w-16 h-16 mb-5">
-          <div className="absolute inset-0 border-4 border-[#F5E6C8] rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[#D4AF37] font-black text-xl">PG</span>
+      <main className={`min-h-screen flex items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
+        <div className="flex flex-col items-center px-6 text-center">
+          <div className="relative w-24 h-24 mb-8">
+            <div className="absolute inset-0 rounded-full border-[3px] border-[#F5E6C8]"></div>
+            <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#D4AF37] border-l-[#D4AF37]/70 animate-spin"></div>
+            <div className="absolute inset-[10px] rounded-full border-[3px] border-[#FDE8E8]"></div>
+            <div className="absolute inset-[10px] rounded-full border-[3px] border-transparent border-t-[#B22222] animate-spin" style={{animationDuration:'1.2s', animationDirection:'reverse'}}></div>
           </div>
+          <p className="text-[13px] tracking-[0.4em] font-black text-[#D4AF37]">PASA GADANG</p>
+          <p className={`text-[12px] tracking-[0.2em] font-bold mt-2 ${isDark?'text-white/50':'text-black/50'}`}>MEMUAT PROPERTI...</p>
         </div>
-        <p className={`text-[13px] tracking-[0.4em] font-black ${isDark?'text-white':'text-[#333]'}`}>PASA GADANG</p>
-        <p className={`text-[11px] mt-2 tracking-widest font-bold opacity-50`}>MEMUAT PROPERTI...</p>
       </main>
     )
   }
 
   return (
-    <main className={`${isDark?'bg-[#0B0B0F] text-white':'bg-[#FFFBF0] text-black'} min-h-screen transition-colors`}>      <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
+    <main className={`${isDark?'bg-[#0B0B0F] text-white':'bg-[#FFFBF0] text-black'} min-h-screen transition-colors`}>
+      <style>{`
+        @keyframes stampIn { 0%{transform:scale(2.5) rotate(-30deg);opacity:0} 60%{transform:scale(0.9) rotate(5deg);opacity:1} 80%{transform:scale(1.05) rotate(-8deg)} 100%{transform:scale(1) rotate(-12deg);opacity:1} }
+        @keyframes shineMove { 0%,60%{left:-80%} 100%{left:150%} }
+      .stamp-terjual{ animation: stampIn 0.7s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+      .shine{ position:absolute; top:0; left:-80%; width:50%; height:100%; background:linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent); transform:skewX(-20deg); animation: shineMove 2.8s ease-in-out infinite; }
+      `}</style>
+
+      <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/" className="flex flex-col leading-none">
           <div className="flex font-black text-[24px] tracking-tight"><span style={{color:COLORS.red}}>PA</span><span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGA</span><span style={{color:COLORS.red}}>DANG</span><span className="text-[10px] ml-1 mt-1 tracking-widest" style={{color:COLORS.red}}>.COM</span></div>
           <div className="relative w-[165px] h-[8px] mt-[2px]"><svg viewBox="0 0 165 10" className="w-full h-full"><path d="M0 6 Q22 0 44 4 T88 4 T132 3 T165 1 Q132 7 88 7 T44 7 T0 6" fill="#D4AF37" opacity="0.9"/><path d="M18 9 Q40 6 62 7.5 T106 7.5 T148 6 Q106 10 62 10.5 T18 9" fill="#D4AF37" opacity="0.8"/></svg></div>
@@ -172,18 +163,15 @@ export default function PropertiesPage(){
             const badgeRaw = (p.badge || '').toString()
             const isTerjual = badgeRaw.toLowerCase().includes('terjual') || badgeRaw.toLowerCase().includes('sold') || (p.status_properti||'').toLowerCase().includes('terjual')
             const realMapLink = mapData.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||'')}`
-
             return (
               <div key={p.id} className={`rounded-[28px] overflow-hidden border-[2px] flex-col transition hover:scale-[1.02] ${isDark?'bg-[#121214] border-[#D4AF37]':'bg-white border-[#D4AF37]'} shadow-[0_10px_40px_rgba(212,175,55,0.18)]`}>
                 <div className="h-[260px] relative cursor-pointer" onClick={()=>{if(!isTerjual){setZoomFotos(fotos); setZoomIdx(0)}}}>
                   <img src={fotos[0]} className="w-full h-full object-cover"/>
-
                   {badgeRaw &&!isTerjual && (
                     <div className="absolute top-4 left-4 z-20">
                       <div className="text-white text-[11px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">🔥 {badgeRaw.toUpperCase()}</div>
                     </div>
                   )}
-
                   {isTerjual && (
                     <div className="absolute inset-0 z-20 overflow-hidden">
                       <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px]"></div>
@@ -205,25 +193,21 @@ export default function PropertiesPage(){
                     </div>
                   )}
                 </div>
-
                 <div className="p-6 flex-col flex-1">
                   <h3 className={`font-black text-[18px] leading-tight ${isDark?'text-white':'text-black'}`}>{p.judul}</h3>
                   <p className={`text-[13px] font-medium mt-1 ${isDark?'text-white/60':'text-black/70'}`}>{p.alamat}</p>
-
                   <div className="grid grid-cols-2 gap-3 mt-5">
                     <div className={`p-3 rounded-2xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}><div className="text-[10px] font-bold tracking-widest opacity-50 uppercase">Luas Tanah</div><div className="text-[15px] font-black mt-1">{p.luas_tanah} m²</div></div>
                     <div className={`p-3 rounded-2xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}><div className="text-[10px] font-bold tracking-widest opacity-50 uppercase">Luas Bangunan</div><div className="text-[15px] font-black mt-1">{p.luas_bangunan} m²</div></div>
                     <div className={`p-3 rounded-2xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}><div className="text-[10px] font-bold tracking-widest opacity-50 uppercase">Kamar Tidur</div><div className="text-[15px] font-black mt-1">{p.kamar_tidur} Kamar</div></div>
                     <div className={`p-3 rounded-2xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}><div className="text-[10px] font-bold tracking-widest opacity-50 uppercase">Kamar Mandi</div><div className="text-[15px] font-black mt-1">{p.kamar_mandi} Kamar</div></div>
                   </div>
-
                   {mapData.fasilitasBersih? (
                     <div className="mt-3 p-3 rounded-2xl bg-black text-white">
                       <div className="text-[10px] font-bold tracking-widest opacity-60 uppercase">Fasilitas</div>
                       <div className="text-[13px] font-bold mt-1 line-clamp-2">{mapData.fasilitasBersih}</div>
                     </div>
                   ) : null}
-
                   {mapData.mapImg && (
                     <div className="mt-3 rounded-[16px] overflow-hidden border-2 border-[#D4AF37]/30">
                       <a href={realMapLink} target="_blank" className="block relative group">
@@ -232,12 +216,10 @@ export default function PropertiesPage(){
                       </a>
                     </div>
                   )}
-
                   <div className="mt-5">
                     <div className="text-[11px] font-black tracking-widest opacity-50 uppercase">Harga Cash</div>
                     <div className="text-[26px] font-black tracking-tight" style={{color:COLORS.gold}}>Rp {Number(p.harga_cash||0).toLocaleString('id-ID')}</div>
                   </div>
-
                   <div className="grid grid-cols-2 gap-3 mt-6">
                     <a href={waLink(p)} target="_blank" className="bg-[#25D366] text-white text-center py-4 rounded-full font-black text-[14px] shadow-lg">Whatsapp</a>
                     <Link href={`/properties/${p.slug}`} className={`${isDark?'bg-white text-black':'bg-black text-white'} text-center py-4 rounded-full font-black text-[14px]`}>DETAIL →</Link>
@@ -301,4 +283,4 @@ export default function PropertiesPage(){
       )}
     </main>
   )
-        }
+      }
