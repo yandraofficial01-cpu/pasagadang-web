@@ -69,7 +69,7 @@ export default function PropertiesPage(){
       })
     }
 
-    // SEMUA: cuma Ready + Terjual. On Progress & Indent gak ikut di sini.
+    // SEMUA: cuma Ready + Terjual, Terjual di urutan 5,10,15
     const baseSemua = data.filter(p=>{
       const matchSearch = `${p.judul} ${p.alamat} ${p.kecamatan} ${p.tipe_properti}`.toLowerCase().includes(search.toLowerCase().trim())
       if(!matchSearch) return false
@@ -107,18 +107,27 @@ export default function PropertiesPage(){
   if(isLoading){
     return (
       <main className={`min-h-screen flex-col items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
-        <div className="relative w-12 h-12 mb-4">
-          <div className="absolute inset-0 border-2 border-[#F5E6C8] rounded-full"></div>
-          <div className="absolute inset-0 border-2 border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+        <style>{`
+          @keyframes stampIn { 0%{transform:scale(2.5) rotate(-30deg);opacity:0} 60%{transform:scale(0.9) rotate(5deg);opacity:1} 80%{transform:scale(1.05) rotate(-8deg)} 100%{transform:scale(1) rotate(-12deg);opacity:1} }
+          @keyframes shineMove { 0%,60%{left:-80%} 100%{left:150%} }
+         .stamp-terjual{ animation: stampIn 0.7s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+         .shine{ position:absolute; top:0; left:-80%; width:50%; height:100%; background:linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent); transform:skewX(-20deg); animation: shineMove 2.8s ease-in-out infinite; }
+        `}</style>
+        <div className="relative w-16 h-16 mb-5">
+          <div className="absolute inset-0 border-4 border-[#F5E6C8] rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[#D4AF37] font-black text-xl">PG</span>
+          </div>
         </div>
-        <p className={`text-[12px] tracking-[0.4em] font-black ${isDark?'text-white':'text-[#333]'}`}>PASA GADANG</p>
+        <p className={`text-[13px] tracking-[0.4em] font-black ${isDark?'text-white':'text-[#333]'}`}>PASA GADANG</p>
+        <p className={`text-[11px] mt-2 tracking-widest font-bold opacity-50`}>MEMUAT PROPERTI...</p>
       </main>
     )
   }
 
   return (
-    <main className={`${isDark?'bg-[#0B0B0F] text-white':'bg-[#FFFBF0] text-black'} min-h-screen transition-colors pb-24`}>
-      <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
+    <main className={`${isDark?'bg-[#0B0B0F] text-white':'bg-[#FFFBF0] text-black'} min-h-screen transition-colors`}>      <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
         <Link href="/" className="flex flex-col leading-none">
           <div className="flex font-black text-[24px] tracking-tight"><span style={{color:COLORS.red}}>PA</span><span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGA</span><span style={{color:COLORS.red}}>DANG</span><span className="text-[10px] ml-1 mt-1 tracking-widest" style={{color:COLORS.red}}>.COM</span></div>
           <div className="relative w-[165px] h-[8px] mt-[2px]"><svg viewBox="0 0 165 10" className="w-full h-full"><path d="M0 6 Q22 0 44 4 T88 4 T132 3 T165 1 Q132 7 88 7 T44 7 T0 6" fill="#D4AF37" opacity="0.9"/><path d="M18 9 Q40 6 62 7.5 T106 7.5 T148 6 Q106 10 62 10.5 T18 9" fill="#D4AF37" opacity="0.8"/></svg></div>
@@ -139,7 +148,7 @@ export default function PropertiesPage(){
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto p-4 md:p-6">
+      <div className="max-w-7xl mx-auto p-4 md:p-6 pb-10">
         <h1 className="text-3xl font-black tracking-tighter mt-2">PROPERTI<span style={{color:COLORS.gold}}> Pasa Gadang </span></h1>
         <p className={`${isDark?'text-white/50':'text-black/50'} text-[13px] mt-1`}>{filteredData.length} dari {data.length} unit ready di Padang</p>
 
@@ -176,17 +185,20 @@ export default function PropertiesPage(){
                   )}
 
                   {isTerjual && (
-                    <div className="absolute inset-0 z-20">
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+                    <div className="absolute inset-0 z-20 overflow-hidden">
+                      <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px]"></div>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-[#D4AF37] blur-[25px] opacity-60 rounded-full scale-125"></div>
-                          <div className="relative w-[175px] h-[175px] rounded-full bg-[#CC0000] border-[6px] border-[#D4AF37] flex-col items-center justify-center rotate-[-15deg] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-                            <div className="absolute inset-[8px] rounded-full border-dashed border-white/60"></div>
-                            <div className="text-[#FFEB7F] text-[11px] font-black tracking-[0.2em]">★ TERJUAL ★</div>
-                            <div className="text-white text-[28px] font-black tracking-tight leading-none mt-1">TERJUAL</div>
-                            <div className="w-[70%] h-[2.5px] bg-[#D4AF37] my-1.5"></div>
-                            <div className="text-[#FFEB7F] text-[9px] font-black tracking-[0.35em]">PASA GADANG</div>
+                        <div className="stamp-terjual relative">
+                          <div className="absolute -inset-3 bg-[#D4AF37] rounded-full blur-xl opacity-70 animate-pulse"></div>
+                          <div className="relative w-[150px] h-[150px] md:w-[170px] md:h-[170px] rounded-full bg-[#CC0000] border-4 md:border-[6px] border-[#D4AF37] flex-col items-center justify-center rotate-[-12deg] shadow-[0_15px_50px_rgba(0,0,0,0.6)]">
+                            <div className="absolute inset-[7px] rounded-full border-2 border-dashed border-white/70"></div>
+                            <div className="text-[#FFEB7F] text-[10px] md:text-[11px] font-black tracking-[0.2em]">★ TERJUAL ★</div>
+                            <div className="text-white text-[24px] md:text-[30px] font-black tracking-tight leading-none mt-1" style={{textShadow:'2px 2px 0 #000'}}>TERJUAL</div>
+                            <div className="w-[70%] h-[2px] bg-[#D4AF37] my-1.5"></div>
+                            <div className="text-[#FFEB7F] text-[8px] md:text-[9px] font-black tracking-[0.3em]">PASA GADANG</div>
+                            <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+                              <div className="shine"></div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -245,6 +257,33 @@ export default function PropertiesPage(){
         )}
       </div>
 
+      <footer className="bg-[#0B0B0F] text-white border-t-4 border-[#D4AF37] mt-10">
+        <div className="max-w-7xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8">
+          <div>
+            <div className="flex font-black text-[22px] tracking-tight"><span className="text-[#B22222]">PA</span><span className="bg-gradient-to-b from-[#FFEB7F] via-[#D4AF37] to-[#8B6914] bg-clip-text text-transparent">SAGADANG</span><span className="text-[#B22222]">.COM</span></div>
+            <p className="text-white/60 text-[13px] mt-3 leading-relaxed">Platform jual beli properti terpercaya di Padang, Sumatera Barat. Rumah ready, on progress, tanah kavling, dan investasi properti amanah.</p>
+          </div>
+          <div>
+            <p className="font-black text-[13px] tracking-widest text-[#D4AF37] mb-4">MENU</p>
+            <div className="flex flex-col gap-2 text-[14px] font-bold">
+              <Link href="/properties" className="hover:text-[#D4AF37]">→ Properti</Link>
+              <Link href="/estetika" className="hover:text-[#D4AF37]">→ Estetika</Link>
+              <Link href="/materials" className="hover:text-[#D4AF37]">→ Material</Link>
+              <Link href="/blogs" className="hover:text-[#D4AF37]">→ Blog</Link>
+            </div>
+          </div>
+          <div>
+            <p className="font-black text-[13px] tracking-widest text-[#D4AF37] mb-4">KONTAK</p>
+            <p className="text-white/70 text-[13px]">Padang, Sumatera Barat</p>
+            <a href="https://wa.me/628979879518" target="_blank" className="text-white/70 text-[13px] hover:text-[#25D366]">WA: 0897-9879-518</a>
+            <p className="text-white/70 text-[13px] mt-1">Email: halo@pasagadang.com</p>
+          </div>
+        </div>
+        <div className="border-t border-white/10 py-4 text-center text-[11px] tracking-widest font-bold text-white/40">
+          © 2026 PASAGADANG.COM - SEMUA HAK DILINDUNGI
+        </div>
+      </footer>
+
       <a href="https://wa.me/628979879518?text=Halo%20Pasa%20Gadang%20saya%20mau%20tanya%20properti" target="_blank" className="fixed bottom-6 right-6 z-[99] w-[62px] h-[62px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.6)] border-[3px] border-white">
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M19.05 4.91A9.93 9.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.14 1.6 5.94L0 24l6.35-1.66A11.9 11.9 0 0 0 12 23.88h.01c6.53 0 11.86-5.33 11.86-11.88 0-3.17-1.24-6.16-3.49-8.4Zm-7.05 14.4a9.3 9.3 0 0 1-4.75-1.3l-.34-.2-3.77.99 1-3.67-.22-.37A9.36 9.36 0 0 1 2.6 12c0-5.14 4.2-9.32 9.38-9.32 2.5 0 4.85.97 6.62 2.74A9.3 9.3 0 0 1 21.33 12c0 5.14-4.2 9.3-9.33 9.3Z"/></svg>
       </a>
@@ -262,4 +301,4 @@ export default function PropertiesPage(){
       )}
     </main>
   )
-}
+        }
