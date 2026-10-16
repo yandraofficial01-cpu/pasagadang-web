@@ -96,14 +96,14 @@ export default function BlogPage(){
         html,body{max-width:100vw;overflow-x:hidden!important}
         *{min-width:0}
         img{max-width:100%}
-       .scrollbar-hide::-webkit-scrollbar{display:none}
-       .scrollbar-hide{scrollbar-width:none}
+      .scrollbar-hide::-webkit-scrollbar{display:none}
+      .scrollbar-hide{scrollbar-width:none}
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-       .anim{animation:fadeUp.5s ease both}
+      .anim{animation:fadeUp.5s ease both}
         @keyframes goldShine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
         @keyframes popTitle{0%{opacity:0;transform:translateY(18px) scale(0.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
-       .title-blog{animation:popTitle.6s cubic-bezier(.2,.8,.2,1) both}
-       .title-gold{
+      .title-blog{animation:popTitle.6s cubic-bezier(.2,.8,.2,1) both}
+      .title-gold{
           background:linear-gradient(90deg,#8B6914,#D4AF37,#FFEB7F,#D4AF37,#8B6914);
           background-size:200% auto;
           -webkit-background-clip:text;
@@ -271,4 +271,4 @@ export default function BlogPage(){
       <a href={`https://wa.me/628979879518?text=${waGlobal}`} target="_blank" className="fixed bottom-6 right-5 z-[90] w-[56px] h-[56px] rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.5)] border-[3px] border-white">W</a>
     </main>
   )
-    }
+}
