@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import Link from 'next/link'
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.app'
@@ -30,6 +30,7 @@ export default function BlogPage(){
   const [open, setOpen] = useState(false)
   const [page, setPage] = useState(1)
   const perPage = 6
+  const listRef = useRef(null)
 
   useEffect(()=>{
     const saved = localStorage.getItem('admin_theme') || localStorage.getItem('theme') || 'light'
@@ -56,7 +57,6 @@ export default function BlogPage(){
 
   const filtered = useMemo(()=> blogs.filter(b=> (kat==='semua' || (b.kategori||'').toLowerCase()===kat.toLowerCase()) && (search==='' || b.judul.toLowerCase().includes(search.toLowerCase()))),[blogs,kat,search])
 
-  // GROUPED - SORT PALING BANYAK + MINIMAL 5
   const groupedByCat = useMemo(()=>{
     const g={};
     blogs.forEach(b=>{ const k=b.kategori||'Lainnya'; if(!g[k]) g[k]=[]; g[k].push(b)})
@@ -67,9 +67,18 @@ export default function BlogPage(){
   const totalPages = Math.ceil(filtered.length / perPage) || 1
   const paginated = filtered.slice((page-1)*perPage, page*perPage)
 
+  const goToPage = (p) => {
+    const target = Math.min(Math.max(1, p), totalPages)
+    setPage(target)
+    setTimeout(()=>{
+      const y = listRef.current?.getBoundingClientRect().top + window.scrollY - 90
+      if (y) window.scrollTo({ top: y, behavior: 'smooth' })
+    }, 60)
+  }
+
   const waGlobal = encodeURIComponent(`Halo Pasa Gadang 👋\nSaya baca blog di pasagadang.com/blogs\nMau tanya soal rumah 300 Jt-an di Padang yang aman & legal, bisa KPR Syariah`)
 
-  if(loading) return <div className="min-h-screen w-screen flex flex-col gap-3 items-center justify-center bg-[#FFFBF0] text-black"><div className="w-10 h-10 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin"></div><p className="text-[10px] tracking-[0.4em] font-black animate-pulse">PASA GADANG</p></div>
+  if(loading) return <div className="min-h-screen w-screen flex-col gap-3 items-center justify-center bg-[#FFFBF0] text-black"><div className="w-10 h-10 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin"></div><p className="text-[10px] tracking-[0.4em] font-black animate-pulse">PASA GADANG</p></div>
 
   const cardBg = isDark? 'bg-[#16161E] border-white/10' : 'bg-white border-black/10'
   const textMain = isDark? 'text-white' : 'text-black'
@@ -82,10 +91,10 @@ export default function BlogPage(){
         html,body{max-width:100vw;overflow-x:hidden!important}
         *{min-width:0}
         img{max-width:100%}
-     .scrollbar-hide::-webkit-scrollbar{display:none}
-     .scrollbar-hide{scrollbar-width:none}
+    .scrollbar-hide::-webkit-scrollbar{display:none}
+    .scrollbar-hide{scrollbar-width:none}
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-     .anim{animation:fadeUp.5s ease both}
+    .anim{animation:fadeUp.5s ease both}
       `}</style>
 
       <nav className={`sticky top-0 z-50 w-full backdrop-blur-xl border-b px-4 md:px-6 py-3 flex justify-between items-center ${isDark?'bg-[#0B0B0F]/90 border-white/10':'bg-[#FFFBF0]/90 border-black/5'}`}>
@@ -123,12 +132,12 @@ export default function BlogPage(){
 
       <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 grid lg:grid-cols-[1.8fr_0.9fr] gap-8 overflow-hidden">
         <div className="w-full min-w-0 overflow-hidden">
-          <h1 className="text-[36px] md:text-[52px] font-black tracking-tighter leading-[0.85] anim">BLOG <span className="text-[#D4AF37]">PASA GADANG</span></h1>
+          <h1 ref={listRef} className="text-[36px] md:text-[52px] font-black tracking-tighter leading-[0.85] anim scroll-mt-24">BLOG <span className="text-[#D4AF37]">PASA GADANG</span></h1>
           <p className="mt-3 text-[11px] font-black tracking-[0.2em] uppercase opacity-50 anim">{filtered.length} dari {blogs.length} artikel • Tips rumah Minang • Padang</p>
 
           <div className="flex gap-2 mt-6 overflow-x-auto scrollbar-hide w-full pb-2">
             {kategoriList.map(k=>(
-              <button key={k} onClick={()=>{setKat(k); setPage(1)}} className={`px-5 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest border shrink-0 transition-all hover:scale-105 ${kat===k?'bg-[#D4AF37] text-black border-[#D4AF37] shadow-[0_8px_20px_rgba(212,175,55,0.3)]': isDark?'bg-[#16161E] border-white/10 text-white/60':'bg-white border-black/10 text-black/60'}`}>{k}</button>
+              <button key={k} onClick={()=>{setKat(k); goToPage(1)}} className={`px-5 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest border shrink-0 transition-all hover:scale-105 ${kat===k?'bg-[#D4AF37] text-black border-[#D4AF37] shadow-[0_8px_20px_rgba(212,175,55,0.3)]': isDark?'bg-[#16161E] border-white/10 text-white/60':'bg-white border-black/10 text-black/60'}`}>{k}</button>
             ))}
           </div>
 
@@ -140,7 +149,7 @@ export default function BlogPage(){
                 </div>
                 <div className="p-4">
                   <div className="flex gap-2 items-center flex-wrap">
-                    <span className={`text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${isDark?'bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/20':'bg-[#FFF3B0] text-[#8B6914]'}`}>{b.kategori||'BLOG'}</span>
+                    <span className={`text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${isDark?'bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/20':'bg-[#FFF3B0] text-[#8B6914]'}`}>{b.kategori||'BLOG'}</span>
                     <span className={`text-[10px] font-bold ${textMuted}`}>{b.created_at? new Date(b.created_at).toLocaleDateString('id-ID'):''} • {b.views||0} views</span>
                   </div>
                   <h3 className={`font-black text-[15px] leading-[1.25] mt-2 line-clamp-2 group-hover:text-[#D4AF37] ${textMain}`}>{b.judul}</h3>
@@ -153,11 +162,12 @@ export default function BlogPage(){
 
           <div className="flex gap-2 mt-10 flex-wrap items-center">
             <div className="w-full h-[1px] bg-gradient-to-r from-[#2563EB]/40 to-transparent mb-4"></div>
+            {page > 1 && <button onClick={()=>goToPage(page-1)} className="px-6 h-11 rounded-xl bg-black text-white font-black text-[11px] tracking-widest hover:bg-[#D4AF37] hover:text-black transition">← PREV</button>}
             {Array.from({length: Math.min(totalPages,4)}).map((_,i)=>{
               const p=i+1
-              return <button key={p} onClick={()=>setPage(p)} className={`w-11 h-11 rounded-xl border font-black text-[13px] transition-all hover:scale-105 ${page===p?'bg-[#2563EB] text-white border-[#2563EB] shadow-lg': isDark?'bg-[#16161E] text-white border-white/10':'bg-white text-[#2563EB] border-black/10'}`}>{p}</button>
+              return <button key={p} onClick={()=>goToPage(p)} className={`w-11 h-11 rounded-xl border font-black text-[13px] transition-all hover:scale-105 ${page===p?'bg-[#2563EB] text-white border-[#2563EB] shadow-lg': isDark?'bg-[#16161E] text-white border-white/10':'bg-white text-[#2563EB] border-black/10'}`}>{p}</button>
             })}
-            <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} className="px-6 h-11 rounded-xl bg-black text-white font-black text-[11px] tracking-widest hover:bg-[#D4AF37] hover:text-black transition">NEXT →</button>
+            {page < totalPages && <button onClick={()=>goToPage(page+1)} className="px-6 h-11 rounded-xl bg-black text-white font-black text-[11px] tracking-widest hover:bg-[#D4AF37] hover:text-black transition">NEXT →</button>}
           </div>
         </div>
 
@@ -179,7 +189,6 @@ export default function BlogPage(){
             </div>
           </div>
 
-          {/* FIX: TADI SLICE 0,2 JADI CUMA 2 - SEKARANG 5 KATEGORI MINIMAL */}
           {Object.entries(groupedByCat).slice(0,5).map(([catName, items])=>(
             <div key={catName} className={`p-5 rounded-[20px] border ${cardBg}`}>
               <h3 className={`font-black text-[12px] tracking-[0.2em] uppercase flex gap-2 items-center ${textMain}`}><span className="w-1 h-4 bg-[#D4AF37] rounded-full"></span>{catName} <span className="opacity-40 text-[10px]">({items.length})</span></h3>
@@ -201,7 +210,7 @@ export default function BlogPage(){
         </div>
       </div>
 
-      <footer className="mt-16 border-t bg-[#111111] border-white/10 text-white">
+      <footer className="mt-16 border-t bg-[#111] border-white/10 text-white">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 grid md:grid-cols-3 gap-10">
           <div>
             <LogoPasagadang />
@@ -232,7 +241,7 @@ export default function BlogPage(){
           </div>
         </div>
         <div className="border-t border-white/10">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 py-5 flex flex-col md:flex-row justify-between items-center gap-2 text-[11px] opacity-40">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-5 flex-col md:flex-row justify-between items-center gap-2 text-[11px] opacity-40">
             <p>© 2026 PasaGadang.com - Hak Cipta Dilindungi.</p>
             <p className="font-black tracking-widest">ESTETIKA MINANG • MODERN • SYARIAH</p>
           </div>
