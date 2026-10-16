@@ -23,14 +23,14 @@ function LogoPasagadang(){
 
 function PremiumLoading({isDark}){
   return (
-    <div className={`min-h-screen flex-col items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
+    <div className={`min-h-screen flex flex-col items-center justify-center ${isDark?'bg-[#0B0B0F]':'bg-[#FFFBF0]'}`}>
       <div className="relative w-20 h-20">
         <div className="absolute inset-0 border-[3px] border-[#D4AF37]/20 rounded-full"></div>
         <div className="absolute inset-0 border-[3px] border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
         <div className="absolute inset-3 border-[3px] border-[#B22222]/20 rounded-full"></div>
         <div className="absolute inset-3 border-[3px] border-t-[#B22222] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin [animation-direction:reverse] [animation-duration:0.8s]"></div>
       </div>
-      <div className="mt-6 flex-col items-center">
+      <div className="mt-6 flex flex-col items-center">
         <p className="font-black text-[11px] tracking-[0.3em]" style={{color:COLORS.gold}}>PASA GADANG</p>
         <p className="text-[10px] font-bold tracking-widest opacity-50 mt-1 animate-pulse">MEMUAT BLOG...</p>
       </div>
