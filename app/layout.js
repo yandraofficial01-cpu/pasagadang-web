@@ -16,6 +16,10 @@ const fraunces = Fraunces({
   display: 'swap',
 })
 
+export const viewport = {
+  themeColor: "#FFFBF0",
+}
+
 export const metadata = {
   metadataBase: new URL("https://pasagadang.com"),
   title: {
@@ -41,9 +45,18 @@ export const metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }],
-    apple: "/icon.png",
-    shortcut: "/icon.png",
+    icon: [
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" }
+    ],
+    apple: "/icon-192.png",
+    shortcut: "/icon-192.png",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Pasagadangkota"
   },
   openGraph: {
     title: "Pasagadang.com | Jual Properti/Rumah dan Material Estetik di Padang, Sumatera Barat",
@@ -70,7 +83,7 @@ export default function RootLayout({ children }) {
               "name": "Pasagadang.com",
               "alternateName": "Pasa Gadang",
               "url": "https://pasagadang.com",
-              "logo": "https://pasagadang.com/icon.png",
+              "logo": "https://pasagadang.com/icon-512.png",
               "image": "https://pasagadang.com/og-image.jpg",
               "description": "Jual properti/rumah dan material estetik di Padang, Sumatera Barat",
               "address": {
@@ -82,6 +95,16 @@ export default function RootLayout({ children }) {
             })
           }}
         />
+        {/* PWA Service Worker */}
+        <Script id="pwa-sw" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js');
+              });
+            }
+          `}
+        </Script>
         {/* Google News - Preferred Source */}
         <Script
           async
@@ -110,4 +133,4 @@ export default function RootLayout({ children }) {
       </body>
     </html>
   );
-            }
+}
