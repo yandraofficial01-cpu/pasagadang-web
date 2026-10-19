@@ -4,11 +4,11 @@ import Link from 'next/link'
 
 function TypewriterText({ isDark }){
   return (
-    <div className="text-center min-h-[200px] flex flex-col items-center" style={{contain:'layout'}}>
-      <h2 className="font-black text-[22px] md:text-[26px] tracking-tighter leading-none">
+    <div className="text-center min-h-[200px] flex-col items-center" style={{contain:'layout'}}>
+      <h2 className="font-black text-[22px] md:text-[30px] tracking-tighter leading-none">
         LENGKAP. <span style={{color:'#D4AF37'}}>ESTETIK.</span> BISA ONLINE.
       </h2>
-      <div className={`mt-4 w-full font-bold text-[14px] leading-relaxed flex flex-col items-center ${isDark?'text-zinc-300':'text-black/70'}`}>
+      <div className={`mt-4 w-full font-bold text-[14px] md:text-[16px] leading-relaxed flex-col items-center ${isDark?'text-zinc-300':'text-black/70'}`}>
         <p className="t-line" style={{"--d":"0s"}}>Pasa Gadang jual 3 hal:</p>
         <p className="t-line" style={{"--d":"0.7s"}}>PROPERTI impianmu,</p>
         <p className="t-line" style={{"--d":"1.4s"}}>BAHAN ESTETIKA biar rumah indah,</p>
@@ -138,7 +138,7 @@ export default function Home(){
         </Link>
         <div className="flex gap-2">
           <button onClick={toggleTheme} className={`w-10 h-10 rounded-full border flex items-center justify-center ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>{isDark?'☀️':'🌙'}</button>
-          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>
+          <button onClick={()=>setOpen(!open)} className={`w-10 h-10 rounded-full border flex-col items-center justify-center gap-1.5 ${isDark?'bg-white border-white':'bg-white border-black/10'}`}>
             <span className={`w-5 h-[2px] bg-black transition-all ${open?'rotate-45 translate-y-[6px]':''}`}></span>
             <span className={`w-5 h-[2px] bg-black transition-all ${open?'opacity-0':''}`}></span>
             <span className={`w-5 h-[2px] bg-black transition-all ${open?'-rotate-45 -translate-y-[6px]':''}`}></span>
@@ -156,16 +156,15 @@ export default function Home(){
         </div>
       )}
 
-      <div className="max-w-[400px] mx-auto px-6 pt-6">
+      <div className="max-w-[400px] lg:max-w-[600px] mx-auto px-6 pt-6">
         <TypewriterText isDark={isDark} />
-        <div className="relative w-full h-[580px] mt-6" style={{contain:'layout'}}>
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
+        <div className="relative w-full h-[580px] mt-6" style={{contain:'layout'}}>          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
             <line x1="170" y1="290" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
             <line x1="170" y1="290" x2="170" y2="495" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.3s'}}/>
             <line x1="170" y1="290" x2="45" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.5s'}}/>
             <line x1="170" y1="290" x2="295" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.7s'}}/>
           </svg>
-          <div className="absolute top-1/2 left-1/2 w-[82px] h-[82px] rounded-full flex flex-col items-center justify-center text-white font-black z-10" style={{background:COLORS.red, transform:'translate(-50%,-50%)', animation:'float 3s ease-in-out infinite', boxShadow: isDark? '0 0 0 8px #0B0B0F, 0 8px 30px rgba(178,34,34,0.5)' : '0 0 0 8px #FFFBF0, 0 8px 24px rgba(178,34,34,0.4)'}}>
+          <div className="absolute top-1/2 left-1/2 w-[82px] h-[82px] rounded-full flex-col items-center justify-center text-white font-black z-10" style={{background:COLORS.red, transform:'translate(-50%,-50%)', animation:'float 3s ease-in-out infinite', boxShadow: isDark? '0 0 0 8px #0B0B0F, 0 8px 30px rgba(178,34,34,0.5)' : '0 0 0 8px #FFFBF0, 0 8px 24px rgba(178,34,34,0.4)'}}>
             <div className="text-[8px] tracking-widest opacity-80">PA</div><div className="text-[13px] text-[#FFD700]">SAGA</div><div className="text-[8px]">DANG</div><div className="text-[6px] tracking-[0.3em] opacity-80">.COM</div>
           </div>
           <Link href="/properties" className="absolute top-[12px] left-1/2 -translate-x-1/2 w-[200px] z-20">
@@ -174,7 +173,7 @@ export default function Home(){
             </div>
           </Link>
           <Link href="/blogs" className="absolute top-1/2 left-0 -translate-y-1/2 w-[140px] z-30">
-            <div className={`p-3.5 rounded-[18px] flex justify-between items-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] ${isDark?'bg-[#1A1A1F] text-white border border-white/10':'bg-black text-white'}`}>
+            <div className={`p-3.5 rounded-[18px] flex justify-between items-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] ${isDark?'bg-[#1A1A1F] text-white border-white/10':'bg-black text-white'}`}>
               <div><div className="text-[10px] font-bold opacity-60">04 • TIPS</div><div className="font-black text-[14px] mt-0.5">BLOG</div></div><div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
@@ -191,23 +190,23 @@ export default function Home(){
         </div>
       </div>
 
-      <div className="max-w-[400px] mx-auto px-6 pb-10 space-y-8 mt-2">
+      <div className="max-w-[400px] lg:max-w-6xl mx-auto px-6 pb-10 space-y-8 lg:space-y-12 mt-2">
         <div>
-          <div className="flex justify-between items-center"><h2 className="font-black text-[16px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2 min-h-[422px]" style={{contain:'layout'}}>
-            {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[270px] max-w-[270px] h-[422px] border rounded-[24px] animate-pulse shrink-0 ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
+          <div className="flex justify-between items-center"><h2 className="font-black text-[16px] lg:text-[22px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2 min-h-[422px] lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible lg:min-h-0" style={{contain:'layout'}}>
+            {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[270px] max-w-[270px] lg:min-w-0 lg:max-w-none lg:w-full h-[422px] border rounded-[24px] animate-pulse shrink-0 ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
             sortedProperties.map((p, idx)=>{
               const imgs = [p.thumbnail, p.foto_1, p.foto_2, p.foto_3, p.foto_4].filter(Boolean)
               const badgeRaw = (p.badge || '').toString()
               const isTerjual = badgeRaw.toLowerCase().includes('terjual') || (p.status_properti||'').toLowerCase().includes('terjual')
               const isLCP = idx===0
               return(
-              <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
+              <div key={p.id} className={`min-w-[270px] max-w-[270px] lg:min-w-0 lg:max-w-none lg:w-full rounded-[24px] overflow-hidden flex-col relative shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
                 <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" style={{aspectRatio:'270/210'}} onClick={()=>openZoom(imgs,0)}>
                   <img src={optimizeCloudinary(imgs[0], isLCP? 540 : 300)} width="270" height="210" loading={isLCP?"eager":"lazy"} fetchPriority={isLCP?"high":"low"} decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
                   {badgeRaw &&!isTerjual && (
                     <div className="absolute top-3 left-3 z-20">
-                      <div className="text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">
+                      <div className="text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">
                         🔥 {badgeRaw.toUpperCase()}
                       </div>
                     </div>
@@ -216,9 +215,9 @@ export default function Home(){
                     <div className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden bg-black/20">
                       <div className="relative w-[125px] h-[125px]" style={{animation:'floatEpic 2.5s ease-in-out infinite'}}>
                         <div className="absolute inset-0 rounded-full" style={{animation:'goldPulse 1.8s ease-in-out infinite'}}></div>
-                        <div className="relative w-full h-full rounded-full bg-[radial-gradient(circle_at_30%_30%,#FF3B3B,#B91C1C)] border-[3px] border-white flex flex-col items-center justify-center overflow-hidden" style={{boxShadow:'0 0 0 3px #D4AF37, inset 0 3px 10px rgba(255,255,255,0.4)', animation:'goldPulse 1.8s ease-in-out infinite'}}>
+                        <div className="relative w-full h-full rounded-full bg-[radial-gradient(circle_at_30%_30%,#FF3B3B,#B91C1C)] border-[3px] border-white flex-col items-center justify-center overflow-hidden" style={{boxShadow:'0 0 0 3px #D4AF37, inset 0 3px 10px rgba(255,255,255,0.4)', animation:'goldPulse 1.8s ease-in-out infinite'}}>
                           <div className="absolute inset-0 w-[40%] h-full bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-60" style={{animation:'shineSweep 2.2s ease-in-out infinite'}}></div>
-                          <div className="absolute inset-[6px] rounded-full border border-dashed border-white/70"></div>
+                          <div className="absolute inset-[6px] rounded-full border-dashed border-white/70"></div>
                           <span className="text-[7px] font-black tracking-[0.35em] text-[#FFEB7F]">★ TERJUAL ★</span>
                           <span className="text-[20px] font-black text-white leading-none mt-1 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">TERJUAL</span>
                           <div className="w-[55%] h-[2px] bg-[#FFEB7F] mt-1 shadow-[0_0_8px_#FFEB7F]"></div>
@@ -228,7 +227,7 @@ export default function Home(){
                     </div>
                   )}
                 </div>
-                <div className="p-4 flex flex-col flex-1">
+                <div className="p-4 flex-col flex-1">
                   <div className="font-bold text-[14px] leading-tight line-clamp-2 min-h-[36px]">{p.judul}</div>
                   <div className="font-black text-[17px] mt-2 min-h-[26px]" style={{color:COLORS.gold}}>Rp {Number(p.harga_cash||0).toLocaleString('id-ID')}</div>
                   <div className={`grid grid-cols-2 gap-2 mt-3 text-[10px] p-2.5 rounded-xl border ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/30'}`}>
@@ -237,7 +236,7 @@ export default function Home(){
                     <div className="bg-white/50 rounded-lg p-2 text-center min-h-[46px]"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Tidur</div><div className="font-black text-[12px] mt-0.5">{p.kamar_tidur||0} Kamar</div></div>
                     <div className="bg-white/50 rounded-lg p-2 text-center min-h-[46px]"><div className="opacity-60 text-[9px] font-bold uppercase tracking-widest">Kamar Mandi</div><div className="font-black text-[12px] mt-0.5">{p.kamar_mandi||0} Kamar</div></div>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-3 grid-cols-2 gap-2">
                     <a href={waLink(p)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
                     <Link href={`/properties/${p.slug||p.id}`} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>DETAIL</Link>
                   </div>
@@ -248,15 +247,15 @@ export default function Home(){
         </div>
 
         <div>
-          <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">ESTETIKA <span style={{color:COLORS.gold}}>ROSTER • GRANIT</span></h2><Link href="/estetika" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px]" style={{contain:'layout'}}>
+          <div className="flex justify-between items-center"><h2 className="font-black text-[14px] lg:text-[20px]">ESTETIKA <span style={{color:COLORS.gold}}>ROSTER • GRANIT</span></h2><Link href="/estetika" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px] lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible lg:min-h-0" style={{contain:'layout'}}>
             {estetikas.map(e=>{
               const bahanImg = e.foto_bahan_1 || e.foto_bahan_2
               const jadiImg = e.foto_jadi_1 || e.foto_jadi_2 || e.foto_bahan_1
               const allImgs = [e.foto_bahan_1, e.foto_bahan_2, e.foto_jadi_1, e.foto_jadi_2, e.foto_jadi_3].filter(Boolean)
               const detailSlug = e.slug && String(e.slug).trim()!==''? e.slug : e.id
               return(
-              <div key={e.id} className={`min-w-[280px] max-w-[280px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
+              <div key={e.id} className={`min-w-[280px] max-w-[280px] lg:min-w-0 lg:max-w-none lg:w-full rounded-[24px] overflow-hidden flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
                 <div className="h-[220px] w-full flex overflow-hidden cursor-zoom-in" style={{aspectRatio:'280/220'}} onClick={()=>openZoom(allImgs,0)}>
                   <div className="w-1/2 h-full relative overflow-hidden bg-[#FAF7F0] border-r border-black/5">
                     <img src={optimizeCloudinary(bahanImg, 280)} width="140" height="220" loading="lazy" decoding="async" alt="bahan" className="w-full h-full object-cover object-center"/>
@@ -268,11 +267,11 @@ export default function Home(){
                     <span className="absolute top-2.5 right-2.5 bg-black/70 text-white text-[8px] px-2 py-1 rounded-full">🔍 {allImgs.length}</span>
                   </div>
                 </div>
-                <div className="p-4 flex flex-col flex-1">
+                <div className="p-4 flex-col flex-1">
                   <Link href={`/estetika/${detailSlug}`}><div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{e.nama}</div></Link>
                   <div className="text-[10px] font-bold opacity-60 mt-1 uppercase min-h-[14px]">{e.kategori} • {e.ukuran}</div>
                   <div className="font-black text-[16px] mt-2 min-h-[24px]" style={{color:COLORS.gold}}>Rp {Number(e.harga||0).toLocaleString('id-ID')} / {e.satuan}</div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-3 grid-cols-2 gap-2">
                     <a href={waEstetika(e)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
                     <button onClick={()=>shareLink(`https://pasagadang-web.vercel.app/estetika/${detailSlug}`, e.nama)} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>↗ BAGIKAN</button>
                   </div>
@@ -283,22 +282,22 @@ export default function Home(){
         </div>
 
         <div>
-          <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">MATERIAL <span style={{color:COLORS.gold}}>BANGUNAN</span></h2><Link href="/materials" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px]" style={{contain:'layout'}}>
+          <div className="flex justify-between items-center"><h2 className="font-black text-[14px] lg:text-[20px]">MATERIAL <span style={{color:COLORS.gold}}>BANGUNAN</span></h2><Link href="/materials" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px] lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible lg:min-h-0" style={{contain:'layout'}}>
             {materials.map(m=>{
               const imgs = [m.foto_1, m.foto_2, m.foto_3].filter(Boolean)
               return(
-              <div key={m.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', contain:'layout'}}>
+              <div key={m.id} className={`min-w-[270px] max-w-[270px] lg:min-w-0 lg:max-w-none lg:w-full rounded-[24px] overflow-hidden flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', contain:'layout'}}>
                 <div className="h-[210px] bg-white relative flex items-center justify-center p-4 cursor-zoom-in" style={{aspectRatio:'270/210'}} onClick={()=>openZoom(imgs,0)}>
                   <img src={optimizeCloudinary(imgs[0], 400)} width="270" height="210" loading="lazy" decoding="async" alt={m.nama} className="w-full h-full object-contain"/>
                   <div className="absolute top-3 left-3 bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full">{m.kategori?.toUpperCase()} • {m.brand?.toUpperCase()}</div>
                   <div className="absolute top-3 right-3 bg-black/60 text-white text-[9px] px-2 py-1 rounded-full">🔍 {imgs.length}</div>
                 </div>
-                <div className="p-4 flex flex-col flex-1">
+                <div className="p-4 flex-col flex-1">
                   <Link href={`/materials/${m.slug||m.id}`}><div className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px]">{m.nama}</div></Link>
                   <div className="text-[10px] font-bold opacity-60 mt-1 min-h-[14px]">{m.brand}</div>
                   <div className="font-black text-[15px] mt-2 min-h-[22px]" style={{color:COLORS.gold}}>Rp {Number(m.harga||0).toLocaleString('id-ID')}</div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-3 grid-cols-2 gap-2">
                     <a href={waMaterial(m)} target="_blank" className="bg-[#25D366] text-white text-[11px] font-black py-2.5 rounded-full flex items-center justify-center gap-1.5">💬 WA</a>
                     <button onClick={()=>shareLink(`https://pasagadang-web.vercel.app/materials/${m.slug||m.id}`, m.nama)} className={`text-[11px] font-black py-2.5 rounded-full flex items-center justify-center border ${isDark?'bg-white text-black':'bg-black text-white'}`}>↗ BAGIKAN</button>
                   </div>
@@ -310,7 +309,7 @@ export default function Home(){
       </div>
 
       <footer className={`${isDark?'bg-[#121214] border-white/10':'bg-black border-black/10'} border-t`}>
-        <div className="max-w-[400px] mx-auto px-6 py-10">
+        <div className="max-w-[400px] lg:max-w-6xl mx-auto px-6 py-10">
           <div className="text-center mb-8">
             <div className="flex font-black text-[22px] tracking-tight justify-center">
               <span style={{color:'#B22222'}}>PA</span>
@@ -352,7 +351,7 @@ export default function Home(){
         <div onClick={closeZoom} className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center p-4">
           <button onClick={closeZoom} className="absolute top-6 right-6 bg-white text-black w-10 h-10 rounded-full font-black z-10">X</button>
           <button onClick={prevZoom} className="absolute left-3 md:left-8 bg-white/20 hover:bg-white text-white hover:text-black w-10 h-10 rounded-full font-black text-[20px] backdrop-blur z-10">‹</button>
-          <div className="relative max-w-full max-h-[85vh] flex flex-col items-center" onClick={e=>e.stopPropagation()}>
+          <div className="relative max-w-full max-h-[85vh] flex-col items-center" onClick={e=>e.stopPropagation()}>
             <img src={zoomList[zoomIdx]} width="800" height="600" className="max-w-full max-h-[75vh] rounded-2xl object-contain border-2 border-[#D4AF37]"/>
             <div className="flex items-center gap-2 mt-4">
               <span className="text-white text-[12px] font-bold tracking-widest">{zoomIdx+1} / {zoomList.length}</span>
@@ -366,4 +365,4 @@ export default function Home(){
       )}
     </main>
   )
-    }
+  }
