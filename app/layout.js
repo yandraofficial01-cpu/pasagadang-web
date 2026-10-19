@@ -4,20 +4,24 @@ import Script from 'next/script'
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['500','600','700','800'],
+  weight: ['600', '700', '800'],
   variable: '--font-jakarta',
   display: 'swap',
+  adjustVw: true,
 })
 
 const fraunces = Fraunces({
   subsets: ['latin'],
-  weight: ['700','800','900'],
+  weight: ['700', '800'],
   variable: '--font-fraunces',
   display: 'swap',
+  adjustVw: true,
 })
 
 export const viewport = {
   themeColor: "#FFFBF0",
+  width: "device-width",
+  initialScale: 1,
 }
 
 export const metadata = {
@@ -69,13 +73,15 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" className={`${jakarta.variable} ${fraunces.variable} antialiased`}>
-      <body className="font-jakarta antialiased bg-[#FFFBF0] text-black [text-rendering:optimizeLegibility] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]">
+      <body className="font-jakarta antialiased bg-[#FFFBF0] text-black">
         {children}
-        <script
+        <Script
+          id="ld-json"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -95,30 +101,22 @@ export default function RootLayout({ children }) {
             })
           }}
         />
-        {/* PWA Service Worker */}
-        <Script id="pwa-sw" strategy="afterInteractive">
+        {/* PWA Service Worker - PENTING: lazyOnload */}
+        <Script id="pwa-sw" strategy="lazyOnload">
           {`
             if ('serviceWorker' in navigator) {
-              window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/service-worker.js');
-              });
+              navigator.serviceWorker.register('/service-worker.js');
             }
           `}
         </Script>
-        {/* Google News - Preferred Source */}
+
+        {/* Google Reader Revenue Manager - Pasa Gadang, PENTING: lazyOnload */}
         <Script
           async
-          src="https://news.google.com/swg/js/v1/publisher.js"
-          strategy="afterInteractive"
-        />
-        {/* Google Reader Revenue Manager - Pasa Gadang */}
-        <Script
-          async
-          type="application/javascript"
           src="https://news.google.com/swg/js/v1/swg-basic.js"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="swg-basic-pasa-gadang" strategy="afterInteractive">
+        <Script id="swg-basic-pasa-gadang" strategy="lazyOnload">
           {`
             (self.SWG_BASIC = self.SWG_BASIC || []).push( basicSubscriptions => {
               basicSubscriptions.init({
