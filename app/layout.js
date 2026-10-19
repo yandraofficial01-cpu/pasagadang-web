@@ -7,7 +7,6 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ['600', '700', '800'],
   variable: '--font-jakarta',
   display: 'swap',
-  adjustVw: true,
 })
 
 const fraunces = Fraunces({
@@ -15,7 +14,6 @@ const fraunces = Fraunces({
   weight: ['700', '800'],
   variable: '--font-fraunces',
   display: 'swap',
-  adjustVw: true,
 })
 
 export const viewport = {
@@ -73,7 +71,7 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }) {
   return (
     <html lang="id" className={`${jakarta.variable} ${fraunces.variable} antialiased`}>
       <body className="font-jakarta antialiased bg-[#FFFBF0] text-black">
@@ -101,7 +99,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             })
           }}
         />
-        {/* PWA Service Worker - PENTING: lazyOnload */}
         <Script id="pwa-sw" strategy="lazyOnload">
           {`
             if ('serviceWorker' in navigator) {
@@ -109,8 +106,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }
           `}
         </Script>
-
-        {/* Google Reader Revenue Manager - Pasa Gadang, PENTING: lazyOnload */}
         <Script
           async
           src="https://news.google.com/swg/js/v1/swg-basic.js"
