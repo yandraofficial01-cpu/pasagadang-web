@@ -29,13 +29,13 @@ function TypewriterText({ isDark }){
   )
 }
 
-export default function Home(){
+export default function Home({ initialProperties = [], initialMaterials = [], initialEstetikas = [], initialBlogs = [] }){
   const [open, setOpen] = useState(false)
   const [theme, setTheme] = useState('light')
-  const [properties, setProperties] = useState([])
-  const [materials, setMaterials] = useState([])
-  const [estetikas, setEstetikas] = useState([])
-  const [blogs, setBlogs] = useState([])
+  const [properties, setProperties] = useState(initialProperties || [])
+  const [materials, setMaterials] = useState(initialMaterials || [])
+  const [estetikas, setEstetikas] = useState(initialEstetikas || [])
+  const [blogs, setBlogs] = useState(initialBlogs || [])
   const [zoomList, setZoomList] = useState([])
   const [zoomIdx, setZoomIdx] = useState(0)
   const API = process.env.NEXT_PUBLIC_API_URL
@@ -52,10 +52,18 @@ export default function Home(){
     const saved = localStorage.getItem('theme') || 'light'
     setTheme(saved)
     if(!API) return
-    fetch(`${API}/properties/?is_published=true&limit=20`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{})
-    fetch(`${API}/materials/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setMaterials(j.data||j.items||j||[])).catch(()=>{})
-    fetch(`${API}/estetikas/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setEstetikas(j.data||j.items||j||[])).catch(()=>{})
-    fetch(`${API}/blogs/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setBlogs(j.data||j.items||j||[])).catch(()=>{})
+    if((initialProperties||[]).length===0){
+      fetch(`${API}/properties/?is_published=true&limit=20`).then(r=>r.json()).then(j=>setProperties(j.data||j.items||j||[])).catch(()=>{})
+    }
+    if((initialMaterials||[]).length===0){
+      fetch(`${API}/materials/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setMaterials(j.data||j.items||j||[])).catch(()=>{})
+    }
+    if((initialEstetikas||[]).length===0){
+      fetch(`${API}/estetikas/?is_active=true&limit=6`).then(r=>r.json()).then(j=>setEstetikas(j.data||j.items||j||[])).catch(()=>{})
+    }
+    if((initialBlogs||[]).length===0){
+      fetch(`${API}/blogs/?is_published=true&limit=6`).then(r=>r.json()).then(j=>setBlogs(j.data||j.items||j||[])).catch(()=>{})
+    }
   },[API])
 
   const toggleTheme = ()=>{
@@ -156,10 +164,10 @@ export default function Home(){
         </div>
       )}
 
-      <div className="max-w-[400px] mx-auto px-6 pt-6">
+      {/* FIX DESKTOP: max-w-[400px] jadi max-w-7xl */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
         <TypewriterText isDark={isDark} />
-        <div className="relative w-full h-[580px] mt-6" style={{contain:'layout'}}>
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
+        <div className="relative w-full max-w-[420px] md:max-w-[600px] mx-auto h-[580px] mt-6" style={{contain:'layout'}}>          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 580">
             <line x1="170" y1="290" x2="170" y2="85" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite'}}/>
             <line x1="170" y1="290" x2="170" y2="495" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.3s'}}/>
             <line x1="170" y1="290" x2="45" y2="290" stroke={isDark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)"} strokeWidth="2" strokeDasharray="6 6" style={{animation:'dash 1s linear infinite 0.5s'}}/>
@@ -174,7 +182,7 @@ export default function Home(){
             </div>
           </Link>
           <Link href="/blogs" className="absolute top-1/2 left-0 -translate-y-1/2 w-[140px] z-30">
-            <div className={`p-3.5 rounded-[18px] flex justify-between items-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] ${isDark?'bg-[#1A1A1F] text-white border border-white/10':'bg-black text-white'}`}>
+            <div className={`p-3.5 rounded-[18px] flex justify-between items-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] ${isDark?'bg-[#1A1A1F] text-white border-white/10':'bg-black text-white'}`}>
               <div><div className="text-[10px] font-bold opacity-60">04 • TIPS</div><div className="font-black text-[14px] mt-0.5">BLOG</div></div><div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-[12px]">→</div>
             </div>
           </Link>
@@ -191,23 +199,24 @@ export default function Home(){
         </div>
       </div>
 
-      <div className="max-w-[400px] mx-auto px-6 pb-10 space-y-8 mt-2">
+      {/* FIX DESKTOP: max-w-[400px] jadi max-w-7xl, list jadi grid di lg */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-10 space-y-8 mt-2">
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[16px]">PROPERTI <span style={{color:COLORS.gold}}>PROMO</span></h2><Link href="/properties" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2 min-h-[422px]" style={{contain:'layout'}}>
-            {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[270px] max-w-[270px] h-[422px] border rounded-[24px] animate-pulse shrink-0 ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-4 pb-2 min-h-[422px] lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:overflow-visible" style={{contain:'layout'}}>
+            {properties.length===0? [1,2,3].map(i=><div key={i} className={`min-w-[270px] max-w-[270px] lg:min-w-0 lg:max-w-none h-[422px] border rounded-[24px] animate-pulse shrink-0 ${isDark?'bg-white/5 border-white/10':'bg-white border-black/5'}`}></div>) :
             sortedProperties.map((p, idx)=>{
               const imgs = [p.thumbnail, p.foto_1, p.foto_2, p.foto_3, p.foto_4].filter(Boolean)
               const badgeRaw = (p.badge || '').toString()
               const isTerjual = badgeRaw.toLowerCase().includes('terjual') || (p.status_properti||'').toLowerCase().includes('terjual')
               const isLCP = idx===0
               return(
-              <div key={p.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col relative shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
+              <div key={p.id} className={`min-w-[270px] max-w-[270px] lg:min-w-0 lg:max-w-none rounded-[24px] overflow-hidden flex flex-col relative shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
                 <div className="h-[210px] bg-zinc-800 relative overflow-hidden cursor-zoom-in group" style={{aspectRatio:'270/210'}} onClick={()=>openZoom(imgs,0)}>
                   <img src={optimizeCloudinary(imgs[0], isLCP? 540 : 300)} width="270" height="210" loading={isLCP?"eager":"lazy"} fetchPriority={isLCP?"high":"low"} decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={p.judul}/>
                   {badgeRaw &&!isTerjual && (
                     <div className="absolute top-3 left-3 z-20">
-                      <div className="text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">
+                      <div className="text-white text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase border-white shadow-lg bg-gradient-to-r from-purple-600 to-violet-600">
                         🔥 {badgeRaw.toUpperCase()}
                       </div>
                     </div>
@@ -218,7 +227,7 @@ export default function Home(){
                         <div className="absolute inset-0 rounded-full" style={{animation:'goldPulse 1.8s ease-in-out infinite'}}></div>
                         <div className="relative w-full h-full rounded-full bg-[radial-gradient(circle_at_30%_30%,#FF3B3B,#B91C1C)] border-[3px] border-white flex flex-col items-center justify-center overflow-hidden" style={{boxShadow:'0 0 0 3px #D4AF37, inset 0 3px 10px rgba(255,255,255,0.4)', animation:'goldPulse 1.8s ease-in-out infinite'}}>
                           <div className="absolute inset-0 w-[40%] h-full bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-60" style={{animation:'shineSweep 2.2s ease-in-out infinite'}}></div>
-                          <div className="absolute inset-[6px] rounded-full border border-dashed border-white/70"></div>
+                          <div className="absolute inset-[6px] rounded-full border-dashed border-white/70"></div>
                           <span className="text-[7px] font-black tracking-[0.35em] text-[#FFEB7F]">★ TERJUAL ★</span>
                           <span className="text-[20px] font-black text-white leading-none mt-1 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">TERJUAL</span>
                           <div className="w-[55%] h-[2px] bg-[#FFEB7F] mt-1 shadow-[0_0_8px_#FFEB7F]"></div>
@@ -249,14 +258,14 @@ export default function Home(){
 
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">ESTETIKA <span style={{color:COLORS.gold}}>ROSTER • GRANIT</span></h2><Link href="/estetika" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px]" style={{contain:'layout'}}>
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px] lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:overflow-visible" style={{contain:'layout'}}>
             {estetikas.map(e=>{
               const bahanImg = e.foto_bahan_1 || e.foto_bahan_2
               const jadiImg = e.foto_jadi_1 || e.foto_jadi_2 || e.foto_bahan_1
               const allImgs = [e.foto_bahan_1, e.foto_bahan_2, e.foto_jadi_1, e.foto_jadi_2, e.foto_jadi_3].filter(Boolean)
               const detailSlug = e.slug && String(e.slug).trim()!==''? e.slug : e.id
               return(
-              <div key={e.id} className={`min-w-[280px] max-w-[280px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
+              <div key={e.id} className={`min-w-[280px] max-w-[280px] lg:min-w-0 lg:max-w-none rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', boxShadow:'0 0 0 1px rgba(212,175,55,0.3), 0 10px 40px rgba(212,175,55,0.18)', contain:'layout'}}>
                 <div className="h-[220px] w-full flex overflow-hidden cursor-zoom-in" style={{aspectRatio:'280/220'}} onClick={()=>openZoom(allImgs,0)}>
                   <div className="w-1/2 h-full relative overflow-hidden bg-[#FAF7F0] border-r border-black/5">
                     <img src={optimizeCloudinary(bahanImg, 280)} width="140" height="220" loading="lazy" decoding="async" alt="bahan" className="w-full h-full object-cover object-center"/>
@@ -284,11 +293,11 @@ export default function Home(){
 
         <div>
           <div className="flex justify-between items-center"><h2 className="font-black text-[14px]">MATERIAL <span style={{color:COLORS.gold}}>BANGUNAN</span></h2><Link href="/materials" className="text-[11px] font-bold">LIHAT SEMUA →</Link></div>
-          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px]" style={{contain:'layout'}}>
+          <div className="flex gap-4 overflow-x-auto scroll-hide mt-3 pb-2 min-h-[380px] lg:grid lg:grid-cols-4 lg:overflow-visible" style={{contain:'layout'}}>
             {materials.map(m=>{
               const imgs = [m.foto_1, m.foto_2, m.foto_3].filter(Boolean)
               return(
-              <div key={m.id} className={`min-w-[270px] max-w-[270px] rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', contain:'layout'}}>
+              <div key={m.id} className={`min-w-[270px] max-w-[270px] lg:min-w-0 lg:max-w-none rounded-[24px] overflow-hidden flex flex-col shrink-0 ${isDark?'bg-[#121214]':'bg-white'}`} style={{border:'2.5px solid #D4AF37', contain:'layout'}}>
                 <div className="h-[210px] bg-white relative flex items-center justify-center p-4 cursor-zoom-in" style={{aspectRatio:'270/210'}} onClick={()=>openZoom(imgs,0)}>
                   <img src={optimizeCloudinary(imgs[0], 400)} width="270" height="210" loading="lazy" decoding="async" alt={m.nama} className="w-full h-full object-contain"/>
                   <div className="absolute top-3 left-3 bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full">{m.kategori?.toUpperCase()} • {m.brand?.toUpperCase()}</div>
@@ -310,7 +319,7 @@ export default function Home(){
       </div>
 
       <footer className={`${isDark?'bg-[#121214] border-white/10':'bg-black border-black/10'} border-t`}>
-        <div className="max-w-[400px] mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="text-center mb-8">
             <div className="flex font-black text-[22px] tracking-tight justify-center">
               <span style={{color:'#B22222'}}>PA</span>
@@ -367,4 +376,3 @@ export default function Home(){
     </main>
   )
     }
-
