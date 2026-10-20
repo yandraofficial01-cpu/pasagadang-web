@@ -63,7 +63,7 @@ export default function PropertyDetailMewah(){
 
   if(isLoading){
     return (
-      <div className="min-h-screen bg-[#FFFBF0] flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#FFFBF0] flex flex-col items-center justify-center">
         <div className="relative w-12 h-12 mb-4">
           <div className="absolute inset-0 border-2 border-[#F5E6C8] rounded-full"></div>
           <div className="absolute inset-0 border-2 border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
@@ -96,7 +96,7 @@ export default function PropertyDetailMewah(){
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto w-full px-4 mt-4 grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
+      <div className="max-w-6xl mx-auto w-full px-4 mt-4 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
         <div className="w-full min-w-0">
           <div className="relative aspect-[4/3] md:aspect-[16/10] w-full rounded-[32px] overflow-hidden border-[3px] border-[#D4AF37] bg-black cursor-zoom-in" onClick={()=>!isTerjual && setZoom(true)}>
             {fotos[active] && <Image src={fotos[active]} alt={p.judul} fill className="object-cover" priority />}
@@ -111,7 +111,7 @@ export default function PropertyDetailMewah(){
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative">
                     <div className="absolute inset-0 bg-[#D4AF37] blur-[30px] opacity-70 rounded-full scale-125"></div>
-                    <div className="relative w-[210px] h-[210px] rounded-full bg-[#CC0000] border-[7px] border-[#D4AF37] flex-col items-center justify-center rotate-[-12deg] shadow-2xl">
+                    <div className="relative w-[210px] h-[210px] rounded-full bg-[#CC0000] border-[7px] border-[#D4AF37] flex flex-col items-center justify-center rotate-[-12deg] shadow-2xl">
                       <div className="absolute inset-[10px] rounded-full border-dashed border-white/60"></div>
                       <div className="text-[#FFEB7F] text-[12px] font-black tracking-[0.2em]">★ TERJUAL ★</div>
                       <div className="text-white text-[34px] font-black tracking-tight leading-none mt-1">TERJUAL</div>
@@ -180,7 +180,7 @@ export default function PropertyDetailMewah(){
               <a href={realMapLink} target="_blank" className="block bg-white border-t-2 border-black text-center py-3.5 font-black text-[13px] text-black">📍 BUKA DI GOOGLE MAPS REAL</a>
             </div>
 
-            <div className="mt-5 grid-cols-2 gap-3">
+            <div className="mt-5 grid grid-cols-2 gap-3">
               <a href={realMapLink} target="_blank" className="bg-white border-2 border-black rounded-full py-3.5 text-center font-black text-[13px] text-black">📍 MAP</a>
               <button onClick={handleShare} className="bg-black text-[#D4AF37] rounded-full py-3.5 text-center font-black text-[13px] border-[#D4AF37]">🔗 SHARE</button>
             </div>
@@ -195,7 +195,7 @@ export default function PropertyDetailMewah(){
       </div>
 
       {zoom &&!isTerjual && (
-        <div className="fixed inset-0 z-[999] bg-black flex-col items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center p-4">
           <button onClick={()=>setZoom(false)} className="absolute top-6 right-6 bg-white text-black w-12 h-12 rounded-full font-black text-xl">✕</button>
           <div className="relative w-[92vw] h-[70vh]"><Image src={fotos[active]} alt="zoom" fill className="object-contain rounded-[20px] border-[3px] border-[#D4AF37]"/></div>
         </div>
