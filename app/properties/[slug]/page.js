@@ -7,7 +7,7 @@ import Image from 'next/image'
 export default function PropertyDetailMewah(){
   const {slug}=useParams()
   const [p,setP]=useState(null)
-  const [isLoading,setIsLoading]=useState(true) // FIX 1
+  const [isLoading,setIsLoading]=useState(true)
   const [active,setActive]=useState(0)
   const [zoom,setZoom]=useState(false)
   const API=process.env.NEXT_PUBLIC_API_URL
@@ -19,7 +19,7 @@ export default function PropertyDetailMewah(){
      .then(r=>r.json())
      .then(j=>setP(j.data||j))
      .catch(()=>{})
-     .finally(()=>setIsLoading(false)) // FIX 2
+     .finally(()=>setIsLoading(false))
   },[slug,API])
 
   useEffect(()=>{
@@ -36,14 +36,17 @@ export default function PropertyDetailMewah(){
     const mapUrl = m? m[1].trim() : null
     const mapImg = mImg? mImg[1].trim() : null
     const bersih = p.fasilitas.replace(/\[MAP:.*?\]/g,'').replace(/\[MAP_IMG:.*?\]/g,'').trim()
-    const list = bersih.split(',').map(s=>s.trim()).filter(Boolean)
+    
+    // FIX FASILITAS: split koma, enter, titik koma dulu
+    const commaParts = bersih.split(/[,;\n]+/).map(s=>s.trim()).filter(Boolean)
+    // lalu split lagi kalau ada pola "Kata :"
+    const labelSplit = /(?<=\S)\s+(?=[A-Z][A-Za-z0-9 \/\-()&]*\s*:)/
+    let list = []
+    for(const part of commaParts){
+      const subs = part.split(labelSplit).map(s=>s.trim()).filter(Boolean)
+      list.push(...subs)
+    }
     return { mapUrl, mapImg, fasilitasBersih: bersih, list }
-  },[p])
-
-  const cicilanAuto = useMemo(()=>{
-    if(!p?.harga_cash ||!p?.dp) return 0
-    const sisa = Number(p.harga_cash) - Number(p.dp)
-    return Math.ceil(sisa / (Number(p.tenor_bulan)||120))
   },[p])
 
   const handleShare = async ()=>{
@@ -58,10 +61,9 @@ export default function PropertyDetailMewah(){
     }
   }
 
-  // LOADING BENERAN - SAMA KAYAK LIST
   if(isLoading){
     return (
-      <div className="min-h-screen bg-[#FFFBF0] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#FFFBF0] flex-col items-center justify-center">
         <div className="relative w-12 h-12 mb-4">
           <div className="absolute inset-0 border-2 border-[#F5E6C8] rounded-full"></div>
           <div className="absolute inset-0 border-2 border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
@@ -76,10 +78,9 @@ export default function PropertyDetailMewah(){
 
   const raw=String(p.wa_number||'08979879518').replace(/[^0-9]/g,'')
   const wa62=raw.startsWith('0')?'62'+raw.slice(1):raw
-  const waMsg=encodeURIComponent(`Halo Pasa Gadang, saya serius mau tanya detail:\n\n${p.judul}\nAlamat: ${p.alamat}\nKecamatan: ${p.kecamatan}\nLT ${p.luas_tanah}m² LB ${p.luas_bangunan}m² KT ${p.kamar_tidur} KM ${p.kamar_mandi}\nHarga: Rp ${Number(p.harga_cash).toLocaleString('id-ID')}\n\nLink: ${typeof window!=='undefined'?window.location.href:''}`)
+  const waMsg=encodeURIComponent(`Halo Pasa Gadang, saya serius mau tanya detail:\n\n${p.judul}\nAlamat: ${p.alamat}\nKecamatan: ${p.kecamatan}\nLuas Tanah ${p.luas_tanah}m² Luas Bangunan ${p.luas_bangunan}m² Kamar Tidur ${p.kamar_tidur} Kamar Mandi ${p.kamar_mandi}\nHarga: Rp ${Number(p.harga_cash).toLocaleString('id-ID')}\n\nLink: ${typeof window!=='undefined'?window.location.href:''}`)
   const realMapLink = mapData.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.alamat||'')}`
 
-  // DETEKSI TERJUAL - SAMA LOGIKA KAYAK LIST
   const isTerjual = (p.badge||'').toLowerCase().includes('terjual') || (p.status_properti||p.status||'').toLowerCase().includes('terjual')
 
   return (
@@ -89,31 +90,29 @@ export default function PropertyDetailMewah(){
           <Link href="/properties" className="bg-black text-white px-5 py-2.5 rounded-full font-black text-[12px]">← KEMBALI</Link>
           <div className="flex gap-2 shrink-0">
             <span className="bg-[#D4AF37] text-black px-4 py-1.5 rounded-full font-black text-[11px]">{p.tipe_transaksi?.toUpperCase()}</span>
-            {p.badge &&!isTerjual && <span className="bg-black text-[#D4AF37] px-4 py-1.5 rounded-full font-black text-[11px] border border-[#D4AF37] animate-bounce">🔥 {p.badge}</span>}
-            {isTerjual && <span className="bg-red-600 text-white px-4 py-1.5 rounded-full font-black text-[11px] border border-white">TERJUAL</span>}
+            {p.badge &&!isTerjual && <span className="bg-black text-[#D4AF37] px-4 py-1.5 rounded-full font-black text-[11px] border-[#D4AF37] animate-bounce">🔥 {p.badge}</span>}
+            {isTerjual && <span className="bg-red-600 text-white px-4 py-1.5 rounded-full font-black text-[11px] border-white">TERJUAL</span>}
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto w-full px-4 mt-4 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
+      <div className="max-w-6xl mx-auto w-full px-4 mt-4 grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
         <div className="w-full min-w-0">
           <div className="relative aspect-[4/3] md:aspect-[16/10] w-full rounded-[32px] overflow-hidden border-[3px] border-[#D4AF37] bg-black cursor-zoom-in" onClick={()=>!isTerjual && setZoom(true)}>
             {fotos[active] && <Image src={fotos[active]} alt={p.judul} fill className="object-cover" priority />}
             <div className="absolute top-5 left-5 bg-black/80 text-white px-4 py-2 rounded-full font-bold text-[12px] border border-white/20 max-w-[70%] truncate">{p.kecamatan} • {p.sertifikat}</div>
             <div className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-full font-black text-[12px]">{active+1} / {fotos.length}</div>
 
-            {/* BADGE KECIL KALO BUKAN TERJUAL */}
-            {p.badge &&!isTerjual && <div className="absolute bottom-5 left-5 bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-full font-black text-[11px] border border-white shadow-lg animate-pulse">🔥 {p.badge}</div>}
+            {p.badge &&!isTerjual && <div className="absolute bottom-5 left-5 bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-full font-black text-[11px] border-white shadow-lg animate-pulse">🔥 {p.badge}</div>}
 
-            {/* BADGE TERJUAL BULAT GEDE - PERSIS SCREENSHOT */}
             {isTerjual && (
               <div className="absolute inset-0 z-20">
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-[3px]"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative">
                     <div className="absolute inset-0 bg-[#D4AF37] blur-[30px] opacity-70 rounded-full scale-125"></div>
-                    <div className="relative w-[210px] h-[210px] rounded-full bg-[#CC0000] border-[7px] border-[#D4AF37] flex flex-col items-center justify-center rotate-[-12deg] shadow-2xl">
-                      <div className="absolute inset-[10px] rounded-full border border-dashed border-white/60"></div>
+                    <div className="relative w-[210px] h-[210px] rounded-full bg-[#CC0000] border-[7px] border-[#D4AF37] flex-col items-center justify-center rotate-[-12deg] shadow-2xl">
+                      <div className="absolute inset-[10px] rounded-full border-dashed border-white/60"></div>
                       <div className="text-[#FFEB7F] text-[12px] font-black tracking-[0.2em]">★ TERJUAL ★</div>
                       <div className="text-white text-[34px] font-black tracking-tight leading-none mt-1">TERJUAL</div>
                       <div className="w-[70%] h-[3px] bg-[#D4AF37] my-2"></div>
@@ -147,23 +146,16 @@ export default function PropertyDetailMewah(){
             <p className="text-[12px] font-black text-[#B8960C] mt-2 uppercase">KEC. {p.kecamatan}</p>
             <div className="text-[30px] font-black text-[#B8960C] mt-4">Rp {Number(p.harga_cash||0).toLocaleString('id-ID')}</div>
 
-            {isTerjual? (
+            {isTerjual && (
               <div className="mt-5 bg-red-50 border-2 border-red-200 text-red-700 rounded-2xl p-4 text-center font-black text-[13px]">⚠️ MAAF, UNIT INI SUDAH TERJUAL. LIHAT UNIT LAIN DI PASA GADANG.</div>
-            ) : (
-              <div className="mt-5 bg-black text-white rounded-2xl p-5">
-                <div className="text-[10px] font-black tracking-[0.2em] opacity-60 uppercase">SIMULASI KPR SYARIAH CEPAT</div>
-                <div className="mt-2 text-[13px] font-bold">
-                  <div>DP: Rp {Number(p.dp||0).toLocaleString('id-ID')}</div>
-                  <div>Cicilan Auto: Rp {cicilanAuto.toLocaleString('id-ID')} /bulan x {p.tenor_bulan||120} bulan</div>
-                </div>
-              </div>
             )}
 
+            {/* FIX: LT jadi Luas Tanah, LB jadi Luas Bangunan, KT jadi Kamar Tidur, KM jadi Kamar Mandi */}
             <div className="grid grid-cols-2 gap-3 mt-6">
-              <div className="bg-[#FFFBF0] border rounded-2xl p-4"><div className="text-[10px] opacity-60">LT</div><div className="font-black">{p.luas_tanah} m²</div></div>
-              <div className="bg-[#FFFBF0] border rounded-2xl p-4"><div className="text-[10px] opacity-60">LB</div><div className="font-black">{p.luas_bangunan} m²</div></div>
-              <div className="bg-[#FFFBF0] border rounded-2xl p-4"><div className="text-[10px] opacity-60">KT</div><div className="font-black">{p.kamar_tidur} Kamar</div></div>
-              <div className="bg-[#FFFBF0] border rounded-2xl p-4"><div className="text-[10px] opacity-60">KM</div><div className="font-black">{p.kamar_mandi} Kamar</div></div>
+              <div className="bg-[#FFFBF0] border rounded-2xl p-4"><div className="text-[10px] opacity-60 font-bold uppercase">Luas Tanah</div><div className="font-black">{p.luas_tanah} m²</div></div>
+              <div className="bg-[#FFFBF0] border rounded-2xl p-4"><div className="text-[10px] opacity-60 font-bold uppercase">Luas Bangunan</div><div className="font-black">{p.luas_bangunan} m²</div></div>
+              <div className="bg-[#FFFBF0] border rounded-2xl p-4"><div className="text-[10px] opacity-60 font-bold uppercase">Kamar Tidur</div><div className="font-black">{p.kamar_tidur} Kamar</div></div>
+              <div className="bg-[#FFFBF0] border rounded-2xl p-4"><div className="text-[10px] opacity-60 font-bold uppercase">Kamar Mandi</div><div className="font-black">{p.kamar_mandi} Kamar</div></div>
             </div>
 
             {mapData.fasilitasBersih && (
@@ -188,9 +180,9 @@ export default function PropertyDetailMewah(){
               <a href={realMapLink} target="_blank" className="block bg-white border-t-2 border-black text-center py-3.5 font-black text-[13px] text-black">📍 BUKA DI GOOGLE MAPS REAL</a>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="mt-5 grid-cols-2 gap-3">
               <a href={realMapLink} target="_blank" className="bg-white border-2 border-black rounded-full py-3.5 text-center font-black text-[13px] text-black">📍 MAP</a>
-              <button onClick={handleShare} className="bg-black text-[#D4AF37] rounded-full py-3.5 text-center font-black text-[13px] border border-[#D4AF37]">🔗 SHARE</button>
+              <button onClick={handleShare} className="bg-black text-[#D4AF37] rounded-full py-3.5 text-center font-black text-[13px] border-[#D4AF37]">🔗 SHARE</button>
             </div>
 
             {!isTerjual? (
@@ -203,11 +195,11 @@ export default function PropertyDetailMewah(){
       </div>
 
       {zoom &&!isTerjual && (
-        <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-black flex-col items-center justify-center p-4">
           <button onClick={()=>setZoom(false)} className="absolute top-6 right-6 bg-white text-black w-12 h-12 rounded-full font-black text-xl">✕</button>
           <div className="relative w-[92vw] h-[70vh]"><Image src={fotos[active]} alt="zoom" fill className="object-contain rounded-[20px] border-[3px] border-[#D4AF37]"/></div>
         </div>
       )}
     </main>
   )
-    }
+}
