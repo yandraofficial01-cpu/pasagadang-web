@@ -191,7 +191,7 @@ export default function Page(){
         <div className="flex justify-between items-center"><p className="text-[11px] font-black tracking-[0.3em] text-[#D4AF37]">{editId?`EDIT #${editId}`:'INPUT BARU'}</p><label className="text-[10px] font-black text-white flex gap-2 cursor-pointer"><input type="checkbox" checked={form.is_active} onChange={e=>setForm({...form,is_active:e.target.checked})}/>AKTIF</label></div>
 
         <div><div className={label}>NAMA *</div><input value={form.nama} onChange={e=>setForm({...form,nama:e.target.value})} className={inp} placeholder="Roster Putih Minimalis"/></div>
-        <div className="grid grid-cols-2 gap-2"><div><div className={label}>KATEGORI *</div><select value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} className={inp}><option>roster</option><option>batu alam</option><option>granit</option><option>keramik</option><option>bata ekspos</option><option>ornamen</option></select></div><div><div className={label}>HARGA *</div><input type="number" value={form.harga} onChange={e=>setForm({...form,harga:e.target.value})} className={inp} placeholder="50000"/></div></div>
+        <div className="grid grid-cols-2 gap-2"><div><div className={label}>KATEGORI *</div><select value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} className={inp}><option>roster</option><option>batu alam</option><option>granit</option><option>keramik</option><option>bata ekspos</option><option>ornamen</option><option>hpl</option></select></div><div><div className={label}>HARGA *</div><input type="number" value={form.harga} onChange={e=>setForm({...form,harga:e.target.value})} className={inp} placeholder="50000"/></div></div>
         <div className="grid grid-cols-2 gap-2"><div><div className={label}>SATUAN</div><input value={form.satuan} onChange={e=>setForm({...form,satuan:e.target.value})} className={inp} placeholder="pcs"/></div><div><div className={label}>BADGE</div><input value={form.badge} onChange={e=>setForm({...form,badge:e.target.value})} className={inp} placeholder="TERLARIS"/></div></div>
 
         <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-3 rounded-xl space-y-3">
@@ -239,4 +239,4 @@ export default function Page(){
       </div>
     </div>
   </AdminLayout>)
-}
+      }
