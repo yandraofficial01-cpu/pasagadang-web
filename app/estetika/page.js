@@ -62,7 +62,7 @@ export default function EstetikaPage(){
     async function getData(){
       setLoading(true)
       try{
-        let url = `${API}/estetikas?limit=20`
+        let url = `${API}/estetikas/?limit=100`
         if(cat!== 'semua'){
           url += `&kategori=${encodeURIComponent(cat)}`
         }
@@ -124,7 +124,7 @@ export default function EstetikaPage(){
     return `https://wa.me/${wa62}?text=${encodeURIComponent(text)}`
   }
 
-  const categories = ['semua','roster','batu alam','granit','keramik','bata ekspos','ornamen']
+  const categories = ['semua','roster','hpl','hpl motif kayu','batu alam','granit','keramik','bata ekspos','ornamen']
   let filtered = estetikas.filter(m=>{
     const matchSearch = search==='' || m.nama.toLowerCase().includes(search.toLowerCase()) || (m.deskripsi||'').toLowerCase().includes(search.toLowerCase())
     return matchSearch
@@ -190,26 +190,28 @@ export default function EstetikaPage(){
           const total = hargaAktif * qty
           const specs = parseSpec(m.spesifikasi)
           return(
-          <div key={m.id} className={`rounded-[28px] overflow-hidden border-[2.5px] flex flex-col hover:scale-[1.02] transition ${isDark?'bg-[#121214]':'bg-white'}`} style={{borderColor:COLORS.gold}}>
-            <Link href={`/estetika/${m.slug||m.id}`} className="h-[260px] relative grid grid-cols-2 cursor-pointer">
-              <div className="relative bg-[#FAF7F0] flex items-center justify-center p-3">
+          <div key={m.id} className={`rounded-[28px] overflow-hidden border-[2.5px] flex flex-col ${isDark?'bg-[#121214]':'bg-white'}`} style={{borderColor:COLORS.gold}}>
+            <Link href={`/estetika/${m.slug||m.id}`} className="h-[260px] shrink-0 relative grid grid-cols-2 cursor-pointer">
+              <div className="relative bg-[#FAF7F0] flex items-center justify-center p-3 overflow-hidden">
                 <img src={m.foto_bahan_1} alt={m.nama} className="w-full h-full object-contain"/>
                 <span className="absolute bottom-2 left-2 bg-black text-white text-[8px] font-black px-2.5 py-1 rounded-full">BAHAN</span>
               </div>
-              <div className="relative bg-black flex items-center justify-center p-1">
+              <div className="relative bg-black flex items-center justify-center p-1 overflow-hidden">
                 <img src={m.foto_jadi_1||m.foto_bahan_1} alt={m.nama} className="w-full h-full object-cover"/>
                 <span className="absolute bottom-2 left-2 bg-[#D4AF37] text-black text-[8px] font-black px-2.5 py-1 rounded-full">TERPASANG</span>
               </div>
               {m.badge && <span className="absolute top-4 left-4 text-[11px] font-black px-4 py-1.5 rounded-full bg-[#D4AF37] text-black">{m.badge.toUpperCase()}</span>}
             </Link>
 
-            <div className="p-6 flex flex-col flex-1">
-              <Link href={`/estetika/${m.slug||m.id}`}><h3 className="font-black text-[18px] leading-tight">{m.nama}</h3></Link>
+            <div className="p-6 pt-5 flex flex-col flex-1 bg-white">
+              <Link href={`/estetika/${m.slug||m.id}`}>
+                <h3 className="font-black text-[20px] leading-[1.2] min-h-[48px] text-black block">{m.nama}</h3>
+              </Link>
 
               {m.deskripsi && (
                 <div className={`mt-3 border p-3 rounded-xl ${isDark?'bg-white/5 border-white/10':'bg-[#FFFBF0] border-[#D4AF37]/20'}`}>
                   <p className="text-[10px] font-black tracking-widest text-[#B8960C]">DESKRIPSI</p>
-                  <p className="text-[13px] font-medium mt-1 leading-relaxed whitespace-pre-wrap break-words">{m.deskripsi}</p>
+                  <p className="text-[13px] font-medium mt-1 leading-relaxed whitespace-pre-wrap break-words text-black">{m.deskripsi}</p>
                 </div>
               )}
 
@@ -247,7 +249,6 @@ export default function EstetikaPage(){
                 <button onClick={()=>setCalc(s=>({...s,[m.id]:(s[m.id]||10)+1}))} className="w-10 h-10 bg-black text-white rounded-full font-black">+</button>
               </div>
 
-              {/* UPDATE: KERANJANG + BAGIKAN */}
               <div className="grid grid-cols-[1fr_48px] gap-2 mt-4">
                 <button onClick={()=>addToCart(m)} className={`${isDark?'bg-white text-black':'bg-black text-white'} py-3 rounded-full font-black text-[13px]`}>+ Keranjang</button>
                 <button onClick={()=>shareItem(m)} className="w-[48px] h-[48px] bg-white border-2 border-[#D4AF37] rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-black transition">↗</button>
@@ -263,4 +264,4 @@ export default function EstetikaPage(){
       <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M19.05 4.91A9.93 9.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.14 1.6 5.94L0 24l6.35-1.66A11.9 11.9 0 0 0 12 23.88h.01c6.53 0 11.86-5.33 11.86-11.88 0-3.17-1.24-6.16-3.49-8.4Z"/></svg>
     </a>
   </main>
-                            }
+}
