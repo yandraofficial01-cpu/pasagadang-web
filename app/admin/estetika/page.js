@@ -2,7 +2,7 @@
 import {useEffect,useState} from 'react'
 import AdminLayout from '../components/AdminLayout'
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.app'
+const API = (process.env.NEXT_PUBLIC_API_URL || 'https://pasagadang-api.vercel.app').replace(/\/$/, '')
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET
 
@@ -22,7 +22,7 @@ export default function Page(){
   const tok=()=>document.cookie.match(/admin_token=([^;]+)/)?.[1]||''
 
   const load=async()=>{
-    const r=await fetch(`${API}/estetikas`,{headers:{Authorization:`Bearer ${tok()}`}, cache:'no-store'})
+    const r=await fetch(`${API}/estetikas/?limit=100`,{headers:{Authorization:`Bearer ${tok()}`}, cache:'no-store'})
     const j=await r.json()
     setData(Array.isArray(j)?j:j.data||[])
   }
@@ -67,7 +67,6 @@ export default function Page(){
       foto_jadi_2: f.foto_jadi_2 || null,
       foto_jadi_3: f.foto_jadi_3 || null,
     }
-    // Jangan kirim placeholder "FOTO JADI 3 URL" / string kosong
     Object.keys(p).forEach(k=>{
       if(typeof p[k]==='string' && (p[k].includes('FOTO JADI') || p[k].includes('Pilih File') || p[k].trim()==='')){
         if(k.includes('foto')) p[k]=null
@@ -82,25 +81,19 @@ export default function Page(){
     if(!form.nama ||!form.foto_bahan_1) return alert('Nama & Foto Bahan 1 wajib!')
     if(!form.foto_jadi_1) return alert('Foto Jadi 1 wajib bro - biar estetik laku!')
     setLoading(true)
-
     const payload = cleanPayload(form)
-
     try {
-      let url = editId? `${API}/estetikas/${editId}` : `${API}/estetikas`
+      let url = editId? `${API}/estetikas/${editId}` : `${API}/estetikas/`
       let method = editId? 'PUT' : 'POST'
-
-      console.log('UPDATE URL:', url, payload)
+      console.log('SUBMIT:', method, url, payload)
       let res = await fetch(url,{
         method,
         headers:{Authorization:`Bearer ${tok()}`, 'Content-Type':'application/json'},
         body:JSON.stringify(payload)
       })
-
       let text = await res.text()
       console.log('Response', res.status, text)
-
       if(!res.ok){
-        // Fallback PATCH kalau PUT 404
         if(res.status===404 && editId){
           console.log('Coba PATCH...')
           res = await fetch(`${API}/estetikas/${editId}`,{
@@ -111,7 +104,6 @@ export default function Page(){
           text = await res.text()
           console.log('PATCH Response', res.status, text)
         }
-
         if(!res.ok){
           try{
             const j = JSON.parse(text)
@@ -121,7 +113,6 @@ export default function Page(){
           }
         }
       }
-
       resetForm();
       await load()
     } catch(err){
@@ -140,7 +131,6 @@ export default function Page(){
   }
 
   const handleEdit = (item) => {
-    // PENTING: pakai id angka, bukan slug!
     console.log('Edit item:', item.id, item.slug)
     setForm({
       nama: item.nama || '',
@@ -162,7 +152,7 @@ export default function Page(){
       is_active: item.is_active?? true,
       slug: item.slug || ''
     })
-    setEditId(item.id) // FIX: id angka!
+    setEditId(item.id)
     window.scrollTo({top:0,behavior:'smooth'})
   }
 
@@ -185,15 +175,12 @@ export default function Page(){
       <a href="/estetika" target="_blank" className="bg-[#D4AF37] text-black px-4 py-2 rounded-full font-black text-[11px]">LIHAT WEB ↗</a>
       {editId && <button onClick={resetForm} className="bg-red-500/20 border border-red-500/30 text-red-400 px-4 py-2 rounded-full font-black text-[11px]">BATAL EDIT (ID:{editId})</button>}
     </div>
-
     <div className="grid lg:grid-cols-[420px_1fr] gap-6">
       <form onSubmit={submit} className="bg-[#16161E] border border-[#D4AF37]/20 p-5 rounded-[24px] space-y-3 h-fit sticky top-6 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center"><p className="text-[11px] font-black tracking-[0.3em] text-[#D4AF37]">{editId?`EDIT #${editId}`:'INPUT BARU'}</p><label className="text-[10px] font-black text-white flex gap-2 cursor-pointer"><input type="checkbox" checked={form.is_active} onChange={e=>setForm({...form,is_active:e.target.checked})}/>AKTIF</label></div>
-
         <div><div className={label}>NAMA *</div><input value={form.nama} onChange={e=>setForm({...form,nama:e.target.value})} className={inp} placeholder="Roster Putih Minimalis"/></div>
-        <div className="grid grid-cols-2 gap-2"><div><div className={label}>KATEGORI *</div><select value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} className={inp}><option>roster</option><option>batu alam</option><option>granit</option><option>keramik</option><option>bata ekspos</option><option>ornamen</option><option>hpl</option></select></div><div><div className={label}>HARGA *</div><input type="number" value={form.harga} onChange={e=>setForm({...form,harga:e.target.value})} className={inp} placeholder="50000"/></div></div>
+        <div className="grid grid-cols-2 gap-2"><div><div className={label}>KATEGORI *</div><select value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})} className={inp}><option>roster</option><option>hpl</option><option>hpl motif kayu</option><option>batu alam</option><option>granit</option><option>keramik</option><option>bata ekspos</option><option>ornamen</option></select></div><div><div className={label}>HARGA *</div><input type="number" value={form.harga} onChange={e=>setForm({...form,harga:e.target.value})} className={inp} placeholder="50000"/></div></div>
         <div className="grid grid-cols-2 gap-2"><div><div className={label}>SATUAN</div><input value={form.satuan} onChange={e=>setForm({...form,satuan:e.target.value})} className={inp} placeholder="pcs"/></div><div><div className={label}>BADGE</div><input value={form.badge} onChange={e=>setForm({...form,badge:e.target.value})} className={inp} placeholder="TERLARIS"/></div></div>
-
         <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-3 rounded-xl space-y-3">
           <p className="text-[11px] font-black text-[#D4AF37] tracking-widest">📦 FOTO BAHAN (foto_bahan_1,2,3)</p>
           <Box field="foto_bahan_1" title="FOTO BAHAN 1 UTAMA" req/><Box field="foto_bahan_2" title="FOTO BAHAN 2"/><Box field="foto_bahan_3" title="FOTO BAHAN 3"/>
@@ -202,20 +189,17 @@ export default function Page(){
           <p className="text-[11px] font-black text-white tracking-widest">🏠 FOTO JADI (foto_jadi_1,2,3) - Contoh Terpasang</p>
           <Box field="foto_jadi_1" title="FOTO JADI 1 UTAMA" req/><Box field="foto_jadi_2" title="FOTO JADI 2"/><Box field="foto_jadi_3" title="FOTO JADI 3"/>
         </div>
-
         <div className="grid grid-cols-2 gap-2">
           <div><div className={label}>UKURAN</div><input value={form.ukuran} onChange={e=>setForm({...form,ukuran:e.target.value})} className={inp} placeholder="20x20"/></div>
           <div><div className={label}>HARGA PROMO</div><input type="number" value={form.harga_promo} onChange={e=>setForm({...form,harga_promo:e.target.value})} className={inp} placeholder="Kosongkan jika tidak promo"/></div>
         </div>
         <div><div className={label}>SPESIFIKASI</div><input value={form.spesifikasi} onChange={e=>setForm({...form,spesifikasi:e.target.value})} className={inp} placeholder="20x20 tebal 8cm, bahan beton"/></div>
         <div><div className={label}>DESKRIPSI</div><textarea value={form.deskripsi} onChange={e=>setForm({...form,deskripsi:e.target.value})} className={`${inp} h-20`} placeholder="Cocok untuk dinding cafe, pagar minimalis..."/></div>
-
         <div className="flex gap-2 pt-2">
           <button disabled={loading} className="flex-1 bg-[#D4AF37] text-black py-3 rounded-xl font-black text-xs hover:bg-[#E5C158]">{loading?'SIMPAN...':editId?`UPDATE ESTETIKA #${editId}`:'SIMPAN ESTETIKA'}</button>
           {editId && <button type="button" onClick={resetForm} className="bg-white/10 text-white px-6 py-3 rounded-xl font-black text-xs">BATAL</button>}
         </div>
       </form>
-
       <div className="bg-[#16161E] border border-white/10 p-5 rounded-[24px] space-y-3">
         <div className="flex justify-between items-center"><p className="text-[11px] font-black tracking-widest text-white/40">DAFTAR ESTETIKA</p><span className="text-[11px] font-bold text-white/30">{data.length} item • API: pasagadang-api.vercel.app</span></div>
         <div className="space-y-2 max-h-[80vh] overflow-y-auto pr-1">
@@ -239,4 +223,4 @@ export default function Page(){
       </div>
     </div>
   </AdminLayout>)
-}
+      }
