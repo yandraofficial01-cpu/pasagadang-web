@@ -94,13 +94,13 @@ export default function Home({ initialProperties = [], initialMaterials = [], in
     const raw = '08979879518'.replace(/[^0-9]/g,'')
     const wa62 = raw.startsWith('0')? '62'+raw.slice(1) : raw
     const slugFix = e.slug && String(e.slug).trim()!==''? e.slug : e.id
-    const text = encodeURIComponent(`Halo Pasa Gadang, saya mau tanya ${e.nama} - ${e.kategori} ${e.ukuran} - Rp ${Number(e.harga||0).toLocaleString('id-ID')} / ${e.satuan}\nLink: https://pasagadang-web.vercel.app/estetika/${slugFix}`)
+    const text = encodeURIComponent(`Halo Pasa Gadang, saya mau tanya ${e.nama} - ${e.kategori} ${e.ukuran} - Rp ${Number(e.harga||0).toLocaleString('id-ID')} / ${e.satuan}\nLink: https://pasagadang.com/estetika/${slugFix}`)
     return `https://wa.me/${wa62}?text=${text}`
   }
   const waMaterial = (m)=>{
     const raw = '08979879518'.replace(/[^0-9]/g,'')
     const wa62 = raw.startsWith('0')? '62'+raw.slice(1) : raw
-    const text = encodeURIComponent(`Halo Pasa Gadang, saya mau tanya ${m.nama} - ${m.brand} - Rp ${Number(m.harga||0).toLocaleString('id-ID')}\nLink: https://pasagadang-web.vercel.app/materials/${m.slug||m.id}`)
+    const text = encodeURIComponent(`Halo Pasa Gadang, saya mau tanya ${m.nama} - ${m.brand} - Rp ${Number(m.harga||0).toLocaleString('id-ID')}\nLink: https://pasagadang.com/materials/${m.slug||m.id}`)
     return `https://wa.me/${wa62}?text=${text}`
   }
   const shareLink = (url, title)=>{
